@@ -1,0 +1,3 @@
+provider: generic
+url: https://xeders.com/auto-updates
+updaterCacheDirName: smarty-updater

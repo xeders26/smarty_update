@@ -1,0 +1,688 @@
+/*================
+  src/renderer/app/rcTab.ts
+=================*/
+
+export function initRcTabUI() {
+  
+  const initAll = () => {
+    const rcArea = document.getElementById('rcArea');
+    const cockpitPanel = document.querySelector('.cockpit-panel') as HTMLElement;
+    
+    if (!rcArea || !cockpitPanel) {
+      setTimeout(initAll, 50);
+      return;
+    }
+
+    // 🚨 탭이 여러 번 열려도 버튼 클릭 이벤트가 2번씩 중복으로 생기는 것을 완벽 차단!
+    if (rcArea.dataset.initialized === 'true') return;
+    rcArea.dataset.initialized = 'true';
+
+    // ==========================================
+    // 🚀 리사이징 로직 (유지)
+    // ==========================================
+    const BASE_WIDTH = 650; 
+    const BASE_HEIGHT = 520;
+
+    const updateRcScale = () => {
+      if (rcArea.style.display === 'none') return;
+      void rcArea.offsetHeight;
+      const currentWidth = rcArea.clientWidth;
+      const currentHeight = rcArea.clientHeight;
+      if (currentWidth === 0 || currentHeight === 0) return;
+
+      const scaleX = (currentWidth * 0.90) / BASE_WIDTH;
+      const scaleY = (currentHeight * 0.90) / BASE_HEIGHT;
+      const scale = Math.min(scaleX, scaleY, 1.3); 
+
+      cockpitPanel.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    };
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const rcObserver = new ResizeObserver(() => { requestAnimationFrame(updateRcScale); });
+      rcObserver.observe(rcArea);
+    }
+    window.addEventListener('resize', () => requestAnimationFrame(updateRcScale));
+    setTimeout(updateRcScale, 100);
+
+    // ==========================================
+    // ⚙️ 1. 스마티 블루투스 설정 모달 & 업로드 (유지)
+    // ==========================================
+    const setupModal = document.getElementById('smartySetupModal');
+    const assignBtn = document.getElementById('smartyAssignBtn');
+    const closeModalBtn = document.getElementById('smartyCloseModalBtn');
+    const numInput = document.getElementById('smartyNumInput') as HTMLInputElement;
+    const pairGuide = document.getElementById('smartyPairGuide');
+    const createdNameSpan = document.getElementById('createdSmartyName');
+
+    if (closeModalBtn && setupModal) {
+      closeModalBtn.addEventListener('click', () => {
+        setupModal.style.display = 'none';
+        loadBluetoothPorts(); 
+      });
+    }
+
+    if (assignBtn && numInput && pairGuide && createdNameSpan) {
+      assignBtn.addEventListener('click', async () => {
+        const num = numInput.value.trim();
+        if (num.length !== 4 || isNaN(Number(num))) {
+          alert("⚠️ 스마티 번호 4자리 숫자를 정확히 입력해주세요! (예: 0001)");
+          return;
+        }
+
+        const smartyCode = `#include "smartyLib.h"\n#include "math.h"\n\nvoid setup() {\n  beginSmarty();\n  setNameBt("Smarty${num}");\n  setPinBt("1234");\n}\n\nvoid loop() {\n\n}\n`;
+
+        assignBtn.textContent = '⏳ 업로드 중...';
+        assignBtn.style.background = '#f39c12';
+        
+        if (typeof (window as any).closeSerialMonitor === 'function') {
+          try { await (window as any).closeSerialMonitor(); } catch(e) {}
+        }
+        if ((window as any).electron) {
+          (window as any).electron.ipcRenderer.send('serial-disconnect');
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+          const wAny = window as any;
+          let resultMsg = '';
+          
+          const boardSelect = document.getElementById('boardSelect') as HTMLSelectElement;
+          const portInput = document.getElementById('portInput') as HTMLInputElement;
+
+          if (wAny.electron && wAny.electron.ipcRenderer) {
+            resultMsg = await wAny.electron.ipcRenderer.invoke('upload-code', smartyCode, boardSelect?.value, portInput?.value);
+          } else if (wAny.api && wAny.api.uploadCode) {
+            resultMsg = await wAny.api.uploadCode(smartyCode, boardSelect?.value, portInput?.value);
+          }
+
+          if (resultMsg && resultMsg.includes('❌')) {
+            alert("🚨 업로드에 실패했습니다.\n" + resultMsg);
+            assignBtn.textContent = '🚀 이름 지정 및 업로드';
+            assignBtn.style.background = '#3498db';
+          } else {
+            assignBtn.textContent = '🚀 이름 지정 완료!';
+            assignBtn.style.background = '#2ecc71';
+            createdNameSpan.textContent = `Smarty${num}`;
+            pairGuide.style.display = 'block';
+          }
+        } catch (error) {
+          alert("🚨 시스템 오류가 발생했습니다:\n" + error);
+          assignBtn.textContent = '🚀 이름 지정 및 업로드';
+          assignBtn.style.background = '#3498db';
+        }
+      });
+    }
+
+    // ==========================================
+    // 🔄 2. 스마티 제어 패널 UI 조립 (유지)
+    // ==========================================
+    const portSelect = document.getElementById('blePortSelect') as HTMLSelectElement;
+    const connectBtn = document.getElementById('bleConnectBtn') as HTMLButtonElement;
+    const settingsBtn = document.getElementById('bleSettingsBtn') as HTMLButtonElement;
+
+    if (!document.getElementById('smartySelectStyleFix')) {
+      const styleFix = document.createElement('style');
+      styleFix.id = 'smartySelectStyleFix';
+      styleFix.innerHTML = `
+        #blePortSelect {
+          font-size: 14px !important;
+        }
+        #blePortSelect option {
+          font-size: 14px !important;
+          font-weight: normal !important;
+        }
+      `;
+      document.head.appendChild(styleFix);
+    }
+    
+    if (!document.getElementById('smartyGuideModalOverlay')) {
+      const overlay = document.createElement('div');
+      overlay.id = 'smartyGuideModalOverlay';
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0'; overlay.style.left = '0';
+      overlay.style.width = '100%'; overlay.style.height = '100%';
+      overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
+      overlay.style.display = 'none'; 
+      overlay.style.zIndex = '9999';
+
+      const modalBox = document.createElement('div');
+      modalBox.style.position = 'absolute';
+      modalBox.style.top = '25%'; modalBox.style.left = 'calc(50% - 200px)'; 
+      modalBox.style.backgroundColor = '#fff';
+      modalBox.style.padding = '30px'; modalBox.style.borderRadius = '15px';
+      modalBox.style.boxShadow = '0 10px 25px rgba(0,0,0,0.5)';
+      modalBox.style.textAlign = 'center'; modalBox.style.width = '400px';
+
+      modalBox.innerHTML = `
+        <h2 id="smartyGuideHeader" style="color: #8e44ad; margin-top: 0; padding-bottom: 10px; cursor: move; user-select: none; border-bottom: 2px dashed #ecf0f1; font-size: 20px;">
+          💡 스마티 포트 번호 찾기
+        </h2>
+        <div style="text-align: left; background: #f1f2f6; padding: 15px; border-radius: 10px; margin-bottom: 25px; font-size: 14px; line-height: 1.6; color: #2f3640;">
+          <b>1.</b> 아래의 [장치 창 열기]를 누르세요.<br>
+          <b>2.</b> <b>Smarty</b> 아이콘에 마우스를 올리고 <b>우클릭</b> 하세요.<br>
+          <b>3.</b> <b>[속성]</b>을 누른 뒤, 위쪽의 <b>[하드웨어]</b> 탭을 누르세요.<br>
+          <b>4.</b> 괄호 안에 적힌 <b>(COM 번호)</b>를 기억해 주세요!
+        </div>
+      `;
+
+      const headerTitle = modalBox.querySelector('#smartyGuideHeader') as HTMLElement;
+      let isDragging = false; let offsetX = 0; let offsetY = 0;
+      headerTitle.addEventListener('mousedown', (e: MouseEvent) => {
+        isDragging = true; const rect = modalBox.getBoundingClientRect();
+        offsetX = e.clientX - rect.left; offsetY = e.clientY - rect.top;
+        const onMouseMove = (moveEvt: MouseEvent) => {
+          if (!isDragging) return;
+          modalBox.style.left = (moveEvt.clientX - offsetX) + 'px';
+          modalBox.style.top = (moveEvt.clientY - offsetY) + 'px';
+        };
+        const onMouseUp = () => {
+          isDragging = false;
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        };
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      });
+
+      const btnWrapper = document.createElement('div');
+      btnWrapper.style.display = 'flex'; btnWrapper.style.justifyContent = 'center'; btnWrapper.style.gap = '15px';
+      const btnBaseStyle = `height: 42px; padding: 0 20px; font-size: 14px; font-weight: bold; color: #fff; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-sizing: border-box;`;
+
+      const openWinBtn = document.createElement('button');
+      openWinBtn.innerHTML = '🚀 장치 창 열기';
+      openWinBtn.style.cssText = btnBaseStyle + 'background-color: #2ecc71; flex: 1;';
+      openWinBtn.addEventListener('click', async () => {
+        if ((window as any).electron) {
+          openWinBtn.textContent = '⏳ 여는 중...';
+          await (window as any).electron.ipcRenderer.invoke('open-devices-printers');
+          openWinBtn.textContent = '🚀 장치 창 다시 열기'; 
+        }
+      });
+
+      const closeBtn = document.createElement('button');
+      closeBtn.innerHTML = '닫기';
+      closeBtn.style.cssText = btnBaseStyle + 'background-color: #95a5a6; flex: 1;';
+      closeBtn.addEventListener('click', () => {
+        overlay.style.display = 'none';
+        modalBox.style.top = '25%'; modalBox.style.left = 'calc(50% - 200px)';
+      });
+
+      btnWrapper.appendChild(openWinBtn); btnWrapper.appendChild(closeBtn);
+      modalBox.appendChild(btnWrapper); overlay.appendChild(modalBox); document.body.appendChild(overlay);
+    }
+
+    let controlWrapper = document.getElementById('smartyControlWrapper');
+    if (portSelect && connectBtn && settingsBtn) {
+      if (!controlWrapper) {
+        controlWrapper = document.createElement('div');
+        controlWrapper.id = 'smartyControlWrapper';
+        controlWrapper.style.display = 'flex';
+        controlWrapper.style.alignItems = 'center'; 
+        controlWrapper.style.justifyContent = 'space-between';
+        controlWrapper.style.gap = '4px'; 
+        controlWrapper.style.width = '100%';
+        controlWrapper.style.boxSizing = 'border-box';
+        controlWrapper.style.marginTop = '15px';
+        controlWrapper.style.marginBottom = '15px';
+        controlWrapper.style.padding = '0 10px';
+        
+        portSelect.parentNode?.insertBefore(controlWrapper, portSelect);
+      }
+
+      const commonBtnStyle = `
+        height: 48px !important; 
+        margin: 0;
+        padding: 0 5px !important; 
+        font-size: 18px !important; /* 버튼 글자는 130% 크게 유지! */
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        box-sizing: border-box;
+        flex: 1 1 auto; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+      `;
+
+      let findBtn = document.getElementById('findSmartyBtn') as HTMLButtonElement;
+      if (!findBtn) {
+        findBtn = document.createElement('button');
+        findBtn.id = 'findSmartyBtn';
+        findBtn.addEventListener('click', () => {
+          const overlay = document.getElementById('smartyGuideModalOverlay');
+          if (overlay) overlay.style.display = 'block';
+        });
+        findBtn.addEventListener('mouseenter', () => findBtn.style.backgroundColor = '#8e44ad');
+        findBtn.addEventListener('mouseleave', () => findBtn.style.backgroundColor = '#9b59b6');
+      }
+      findBtn.style.cssText = commonBtnStyle + 'background-color: #9b59b6; color: white;';
+      findBtn.innerHTML = '🔍 스마티 찾기'; 
+
+      portSelect.style.height = '48px'; 
+      portSelect.style.flex = '2.5 1 auto'; 
+      portSelect.style.minWidth = '160px'; 
+      portSelect.style.width = 'auto';
+      portSelect.style.boxSizing = 'border-box';
+      portSelect.style.borderRadius = '8px';
+      portSelect.style.border = '2px solid #ccc';
+      portSelect.style.fontSize = '14px !important'; 
+      portSelect.style.padding = '0 5px';
+      portSelect.style.margin = '0';
+      portSelect.style.cursor = 'pointer';
+      portSelect.style.textOverflow = 'ellipsis'; 
+
+      connectBtn.style.cssText = commonBtnStyle + 'background-color: #3498db; color: white;';
+      connectBtn.innerHTML = '📡 연결하기'; 
+
+      settingsBtn.style.cssText = commonBtnStyle + 'background-color: #f39c12; color: white;';
+      settingsBtn.innerHTML = '⚙️ 이름 설정하기'; 
+      
+      settingsBtn.addEventListener('click', () => {
+        const setupModal = document.getElementById('smartySetupModal');
+        const pairGuide = document.getElementById('smartyPairGuide');
+        const numInput = document.getElementById('smartyNumInput') as HTMLInputElement;
+        
+        if(setupModal) setupModal.style.display = 'flex';
+        if (pairGuide) pairGuide.style.display = 'none';
+        if (numInput) numInput.value = '';
+      });
+
+      controlWrapper.appendChild(findBtn);
+      controlWrapper.appendChild(portSelect);
+      controlWrapper.appendChild(connectBtn);
+      controlWrapper.appendChild(settingsBtn);
+    }
+    
+    // ==========================================
+    // 🌟 3. 포트 목록 즉시 로딩 (유지)
+    // ==========================================
+    let isFetching = false;
+    const loadBluetoothPorts = async () => {
+      if (!portSelect || !(window as any).electron || isFetching) return;
+      if (document.activeElement === portSelect) return; 
+      
+      isFetching = true;
+      try {
+        const ports = await (window as any).electron.ipcRenderer.invoke('get-serial-ports');
+        
+        let newHTML = '<option value="" disabled selected hidden style="font-size: 14px;">▼ 내 스마티 선택하기</option>';
+        const savedSmartyPort = localStorage.getItem('last_smarty_port');
+        let found = false;
+
+        ports.forEach((port: any) => {
+          const fName = (port.friendlyName || '').toLowerCase();
+          const pnpId = (port.pnpId || '').toUpperCase();
+
+          if (fName.includes('bluetooth') || fName.includes('블루투스') || pnpId.includes('BTHENUM') || fName.includes('smarty')) {
+            if (savedSmartyPort && savedSmartyPort === port.path) {
+              newHTML += '<option value="' + port.path + '" style="font-size: 14px; font-weight:bold; color:#2ecc71;" selected>🤖 내 스마티 (' + port.path + ')</option>';
+            } else {
+              newHTML += '<option value="' + port.path + '" style="font-size: 14px;">🔷 일반 블루투스 (' + port.path + ')</option>';
+            }
+            found = true;
+          }
+        });
+
+        if (!found) {
+          newHTML = '<option value="" disabled selected hidden style="font-size: 14px;">❌ 블루투스 포트가 없습니다</option>';
+        }
+
+        if (portSelect.innerHTML !== newHTML) {
+          portSelect.innerHTML = newHTML;
+        }
+      } catch (e) {
+        console.error("포트 검색 에러", e);
+      }
+      isFetching = false;
+    };
+    
+    loadBluetoothPorts();
+    if (controlWrapper) {
+      controlWrapper.addEventListener('mouseenter', loadBluetoothPorts);
+    }
+
+    // ==========================================
+    // 📡 4. Electron IPC 연결 및 끊김 처리 완벽 개선 (Req 6)
+    // ==========================================
+    const statusText = document.getElementById('bleStatus') as HTMLElement;
+    const lever = document.getElementById('speedLever') as HTMLInputElement;
+    const display = document.getElementById('speedValueDisplay') as HTMLElement;
+
+    let isConnected = false;
+    let currentDirection = 10; // 현재 방향 상태 (10 = 정지)
+    const activeKeys = new Set<string>();
+
+    const send2Bytes = async (byte1: number, byte2: number) => {
+      if (isConnected && (window as any).electron) {
+        const data = new Uint8Array([byte1, byte2]);
+        (window as any).electron.ipcRenderer.send('serial-write', data);
+      }
+    };
+
+    // 🚨 연결 해제 시 UI 및 조종 상태를 완벽하게 초기화하는 함수
+    const forceDisconnectUI = () => {
+      isConnected = false;
+      if (statusText) {
+        statusText.innerHTML = '🔴 연결 끊김';
+        statusText.style.color = '#ff4757';
+      }
+      if (connectBtn) {
+        connectBtn.innerHTML = '📡 연결하기';
+      }
+      currentDirection = 10;
+      activeKeys.clear();
+    };
+
+    if (connectBtn && statusText && portSelect) {
+      connectBtn.addEventListener('click', async () => {
+        if (isConnected) {
+          (window as any).electron.ipcRenderer.send('serial-disconnect');
+          forceDisconnectUI();
+          return;
+        }
+
+        const selectedPort = portSelect.value;
+        if (!selectedPort) {
+          alert("⚠️ 목록에서 내 스마티를 선택해주세요!");
+          return;
+        }
+
+        if (typeof (window as any).closeSerialMonitor === 'function') {
+          try { await (window as any).closeSerialMonitor(); } catch(e) {}
+        }
+
+        try {
+          connectBtn.innerHTML = '⏳ 연결 중...'; 
+          const success = await (window as any).electron.ipcRenderer.invoke('serial-connect', { path: selectedPort, baudRate: 9600 });
+          
+          if (success === true) {
+            isConnected = true;
+            statusText.innerHTML = '🟢 연결됨';
+            statusText.style.color = '#2ecc71';
+            connectBtn.innerHTML = '🔌 연결 해제'; 
+            localStorage.setItem('last_smarty_port', selectedPort);
+          } else {
+            throw new Error("포트가 사용 중이거나 응답이 없습니다.");
+          }
+        } catch (error: any) {
+          forceDisconnectUI();
+          alert("🚨 연결 실패!\n사유: " + error.message);
+        }
+      });
+    }
+
+    // 🚨 자동 끊김(물리적 해제 등) 완벽 감지 및 동기화
+    if ((window as any).electron) {
+      (window as any).electron.ipcRenderer.removeAllListeners('serial-disconnected');
+      (window as any).electron.ipcRenderer.on('serial-disconnected', () => {
+        forceDisconnectUI();
+        console.log("⚠️ 자동 감지: 스마티 블루투스 연결이 해제되었습니다!");
+      });
+    }
+    
+        // ==========================================
+    // 🎚️ 5. 완벽하게 재설계된 조종 로직 및 UI 연동 (Req 1~8 총망라)
+    // ==========================================
+
+    // 🚀 방향 상태 업데이트 및 전송 함수 (변화가 있을 때만 1회 전송)
+    const updateDirectionCommand = () => {
+      const up = activeKeys.has('ArrowUp');
+      const down = activeKeys.has('ArrowDown');
+      const left = activeKeys.has('ArrowLeft');
+      const right = activeKeys.has('ArrowRight');
+      const q = activeKeys.has('q') || activeKeys.has('Q');
+      const w = activeKeys.has('w') || activeKeys.has('W');
+
+      let newDir = 10; // 기본은 정지(10) 상태
+      if (up && right) newDir = 1;
+      else if (right && down) newDir = 3;
+      else if (down && left) newDir = 5;
+      else if (left && up) newDir = 7;
+      else if (up) newDir = 0;
+      else if (right) newDir = 2;
+      else if (down) newDir = 4;
+      else if (left) newDir = 6;
+      else if (q) newDir = 8;
+      else if (w) newDir = 9;
+
+      if (newDir !== currentDirection) {
+        currentDirection = newDir;
+        send2Bytes(68, currentDirection);
+      }
+    };
+
+    // ==========================================
+    // 💡 누르고 있을 때 연속 증감하는 오토 스로틀 로직!
+    // ==========================================
+    let powerInterval: any = null;
+
+    const changePower = (delta: number) => {
+      if (lever) {
+        const currentVal = parseInt(lever.value, 10);
+        // 값이 100을 넘거나 -100보다 작아지지 않게 가두기
+        const newVal = Math.max(-100, Math.min(100, currentVal + delta));
+        
+        // 🚨 값이 진짜로 변했을 때만 80번 통신을 날림! (끝까지 갔는데 계속 누르고 있을 때의 블루투스 폭주 방지)
+        if (currentVal !== newVal) {
+          lever.value = newVal.toString();
+          lever.dispatchEvent(new Event('input'));
+        }
+      }
+    };
+
+    const startPowerChange = (delta: number) => {
+      if (powerInterval) clearInterval(powerInterval);
+      changePower(delta); // 누르는 즉시 1번 변화
+      powerInterval = setInterval(() => {
+        changePower(delta);
+      }, 25); // ⏳ 25ms마다 1씩 촤르르륵 오르내림! (숫자를 키우면 느려지고, 줄이면 빨라집니다)
+    };
+
+    const stopPowerChange = () => {
+      if (powerInterval) {
+        clearInterval(powerInterval);
+        powerInterval = null;
+      }
+    };
+
+    // 🚀 통합 키 누름 처리 (키보드 & 마우스 버튼 공통)
+    const handleKeyDown = (key: string) => {
+      if (activeKeys.has(key)) return; 
+      activeKeys.add(key);
+
+      const nKey = key.toLowerCase(); 
+
+      // 1. 액션 키 (누르는 즉시 1회 발사)
+      if (nKey === 'a') send2Bytes(70, 97);
+      else if (nKey === 's') send2Bytes(70, 115);
+      else if (nKey === 'z') send2Bytes(70, 122);
+      else if (nKey === 'x') send2Bytes(70, 120);
+      
+      // 2. 💡 파워업/다운 (꾹~ 누르고 있으면 연속으로 증감 엔진 가동!)
+      else if (nKey === '.' || nKey === 'pageup' || nKey === 'pgup') {
+        startPowerChange(1);
+      }
+      else if (nKey === ',' || nKey === 'pagedown' || nKey === 'pgdn') {
+        startPowerChange(-1);
+      }
+      
+      // 3. 그 외 방향키, q, w 등
+      else {
+        updateDirectionCommand();
+      }
+    };
+
+    // 🚀 통합 키 뗌 처리 
+    const handleKeyUp = (key: string) => {
+      if (!activeKeys.has(key)) return;
+      activeKeys.delete(key);
+
+      const nKey = key.toLowerCase();
+      
+      // 💡 파워업/다운 키를 떼면 연속 증감 엔진 즉시 정지!
+      if (['.', ',', 'pageup', 'pagedown', 'pgup', 'pgdn'].includes(nKey)) {
+        stopPowerChange();
+        return; // 정지 명령(68, 10)을 보내지 않고 여기서 종료
+      }
+
+      // 액션키는 뗄 때 아무 일도 안 함
+      if (['a', 's', 'z', 'x'].includes(nKey)) return;
+
+      updateDirectionCommand();
+    };
+
+    // 🚀 속도 레버 동작 (UI 업데이트 및 80번 통신)
+    const updateSpeed = () => {
+      if (!lever || !display) return;
+      const val = parseInt(lever.value, 10);
+      display.textContent = val.toString();
+      const percentage = ((val + 100) / 200) * 100;
+      
+      if (val === 0) {
+        display.style.color = '#2ecc71'; display.style.textShadow = '0 0 10px #2ecc71';
+        lever.style.background = `linear-gradient(to right, #111 48%, #2ecc71 50%, #111 52%)`;
+      } else if (val > 0) {
+        display.style.color = '#00d2d3'; display.style.textShadow = '0 0 10px #00d2d3';
+        lever.style.background = `linear-gradient(to right, #111 50%, #0984e3 50%, #00d2d3 ${percentage}%, #111 ${percentage}%)`;
+      } else {
+        display.style.color = '#ff4757'; display.style.textShadow = '0 0 10px #ff4757';
+        lever.style.background = `linear-gradient(to right, #111 ${percentage}%, #ff4757 ${percentage}%, #d63031 50%, #111 50%)`;
+      }
+    };
+
+    if (lever) {
+      lever.addEventListener('input', () => { 
+        updateSpeed(); 
+        const val = parseInt(lever.value, 10);
+        send2Bytes(80, val + 100); 
+      });
+    }
+
+    // 💡 [핵심 추가] 키보드를 누를 때 화면 버튼의 파란 불빛을 켜고 끄는 마법!
+    const toggleButtonHighlight = (key: string, isActive: boolean) => {
+      let cmdList = [key]; // 기본적으로 누른 키의 이름
+      
+      // 특수 키들의 경우 화면에 있는 data-cmd 이름과 매칭시켜줌
+      if (key === 'ArrowUp') cmdList = ['Up', 'up'];
+      else if (key === 'ArrowDown') cmdList = ['Down', 'down'];
+      else if (key === 'ArrowLeft') cmdList = ['Left', 'left'];
+      else if (key === 'ArrowRight') cmdList =['Right', 'right'];
+      else if (key === 'PageUp' || key === '.') cmdList =['PgUp', 'pgup', 'PowerUp', 'powerup', '.'];
+      else if (key === 'PageDown' || key === ',') cmdList = ['PgDn', 'pgdn', 'PowerDown', 'powerdown', ','];
+      
+      for (const cmd of cmdList) {
+        // 'i' 속성을 써서 화면 버튼의 data-cmd가 대문자든 소문자든 완벽하게 찾아냄!
+        const btnEl = document.querySelector(`[data-cmd="${cmd}" i]`) as HTMLElement;
+        if (btnEl) {
+          if (isActive) btnEl.classList.add('active-sim');
+          else btnEl.classList.remove('active-sim');
+        }
+      }
+    };
+
+    // 마우스/터치 버튼 리스너 연동 (화면 클릭 시 진짜 키보드를 누른 것처럼 변환)
+    const mapCmdToKey = (cmd: string | null) => {
+      if (!cmd) return '';
+      const lCmd = cmd.toLowerCase();
+      if (lCmd === 'up') return 'ArrowUp';
+      if (lCmd === 'down') return 'ArrowDown';
+      if (lCmd === 'left') return 'ArrowLeft';
+      if (lCmd === 'right') return 'ArrowRight';
+      if (lCmd === 'pgup' || lCmd === 'powerup') return 'PageUp';
+      if (lCmd === 'pgdn' || lCmd === 'powerdown') return 'PageDown';
+      return cmd; 
+    };
+
+    const buttons = document.querySelectorAll('[data-cmd]');
+    buttons.forEach(btn => {
+      const rawCmd = btn.getAttribute('data-cmd');
+      const key = mapCmdToKey(rawCmd);
+      
+      const onPress = (e: Event) => {
+        e.preventDefault();
+        (btn as HTMLElement).setPointerCapture((e as PointerEvent).pointerId); 
+        (btn as HTMLElement).classList.add('active-sim');
+        if (key) handleKeyDown(key); // 진짜 키보드를 누른 것처럼 로직 실행!
+      };
+
+      const onRelease = (e: Event) => {
+        e.preventDefault();
+        if((btn as HTMLElement).hasPointerCapture((e as PointerEvent).pointerId)) {
+           (btn as HTMLElement).releasePointerCapture((e as PointerEvent).pointerId);
+        }
+        (btn as HTMLElement).classList.remove('active-sim');
+        if (key) handleKeyUp(key); // 진짜 키보드를 뗀 것처럼 로직 실행!
+      };
+      
+      btn.addEventListener('pointerdown', onPress); 
+      btn.addEventListener('pointerup', onRelease); 
+      btn.addEventListener('pointercancel', onRelease);
+    });
+
+    // ==========================================
+    // 💡 6. 키보드 후킹(Hooking) 방지 및 포커스(Focus) 로직 완벽 적용
+    // ==========================================
+    let isRcFocused = false; // 무선조종 영역이 활성화(클릭)되었는지 추적
+
+    // 🚨 rcArea에 부드러운 포커스 효과를 위한 트랜지션 추가
+    rcArea.style.transition = 'opacity 0.3s ease';
+
+    // 화면 아무 곳이나 클릭할 때 포커스 판별
+    document.addEventListener('pointerdown', (e: PointerEvent) => {
+      if (rcArea.style.display === 'none') return;
+      
+      // 클릭한 곳이 무선조종 영역(rcArea) 내부인지 확인
+      if (rcArea.contains(e.target as Node)) {
+        isRcFocused = true;
+        rcArea.style.opacity = '1'; // 조종 활성화 상태 (밝음)
+      } else {
+        isRcFocused = false;
+        rcArea.style.opacity = '0.6'; // 조종 비활성화 상태 (약간 흐려짐 - 사용자가 직관적으로 알 수 있음!)
+        
+        // 🚨 [핵심 안전장치] 주행 중 바깥을 클릭하면 로봇이 폭주하지 않도록 모든 키를 강제로 뗌!
+        if (activeKeys.size > 0) {
+          activeKeys.forEach(key => {
+            handleKeyUp(key);
+            toggleButtonHighlight(key, false);
+          });
+          activeKeys.clear();
+        }
+      }
+    });
+
+    // 키보드 리스너 연동 (포커스가 있을 때만 동작)
+    window.addEventListener('keydown', (e: KeyboardEvent) => {
+      // 1. 무선조종 탭이 숨겨져 있거나, 조종 영역 바깥을 클릭한 상태면 즉시 무시! (도화지 편집 완벽 보호)
+      if (rcArea.style.display === 'none' || !isRcFocused || e.repeat) return;
+      
+      const target = e.target as HTMLElement;
+      // 2. 조종 영역 안이라도 input, textarea, 혹은 Blockly 숨김 입력창이면 무시
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable || target.classList.contains('blocklyHtmlInput')) return;
+      
+      // 3. 조종 키(방향키, 스페이스바 등)를 누를 때 브라우저 화면이 덜컹거리며 스크롤되는 것 완벽 차단
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+        e.preventDefault();
+      }
+
+      handleKeyDown(e.key);
+      toggleButtonHighlight(e.key, true);
+    });
+
+    window.addEventListener('keyup', (e: KeyboardEvent) => {
+      // 뗼 때도 포커스가 없으면 무시
+      if (rcArea.style.display === 'none' || !isRcFocused) return;
+      
+      handleKeyUp(e.key);
+      toggleButtonHighlight(e.key, false);
+    });
+
+    updateSpeed();
+  };
+
+  initAll();
+}

@@ -1,0 +1,135 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "arduino_main",
+        "id": "I^V@We[.WOaXFL2h!GTz",
+        "x": 50,
+        "y": 50,
+        "deletable": false,
+        "inputs": {
+          "SETUP": {
+            "block": {
+              "type": "smarty_begin",
+              "id": "S;ghS6Bh(C%r2_67[dBb",
+              "next": {
+                "block": {
+                  "type": "turnBt",
+                  "id": "Yr,uPTg[=BBW}Hf*sYh`",
+                  "fields": {
+                    "STATE": "1"
+                  }
+                }
+              }
+            }
+          },
+          "LOOP": {
+            "block": {
+              "type": "smarty_variables_set",
+              "id": "spb[={?x`|NtI3kQ1FH)",
+              "fields": {
+                "VAR": {
+                  "id": "PzA1.-!YKJ|oV2d|LY@I"
+                }
+              },
+              "inputs": {
+                "VALUE": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "N^VR%5_74MCL?94w8gQ?",
+                    "fields": {
+                      "NUM": 0
+                    }
+                  },
+                  "block": {
+                    "type": "smarty_bt_send_string",
+                    "id": "%tCqY+qsHcREDX}k-4|Z",
+                    "inputs": {
+                      "TEXT": {
+                        "shadow": {
+                          "type": "text",
+                          "id": "_y05,8^GegEf)SD[U|~[",
+                          "fields": {
+                            "TEXT": "PING"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "next": {
+                "block": {
+                  "type": "turnBumpLED",
+                  "id": "cELA6QPhG7@Nf$wCJ9L3",
+                  "fields": {
+                    "DIR": "2",
+                    "COLOR": "0",
+                    "STATE": "1"
+                  },
+                  "next": {
+                    "block": {
+                      "type": "arduino_delay",
+                      "id": "MXh1N=n=w`)/}2SH_LGC",
+                      "inputs": {
+                        "MS": {
+                          "shadow": {
+                            "type": "math_number",
+                            "id": "EqxUfj;x?u4mA5~IXH9[",
+                            "fields": {
+                              "NUM": 1000
+                            }
+                          }
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "turnBumpLED",
+                          "id": "uQxWrz5M/AAFg}We2f^v",
+                          "fields": {
+                            "DIR": "2",
+                            "COLOR": "0",
+                            "STATE": "0"
+                          },
+                          "next": {
+                            "block": {
+                              "type": "arduino_delay",
+                              "id": "*${LD`V,}3~K]YilxF+x",
+                              "inputs": {
+                                "MS": {
+                                  "shadow": {
+                                    "type": "math_number",
+                                    "id": "[$,kuN/(sp,ww{=5bE0p",
+                                    "fields": {
+                                      "NUM": 1000
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "variables": [
+    {
+      "name": "sByte",
+      "id": "PzA1.-!YKJ|oV2d|LY@I",
+      "type": "int"
+    },
+    {
+      "name": "정보",
+      "id": "a=}cLMfn^Tm)amW^P^(_"
+    }
+  ]
+}

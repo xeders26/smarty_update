@@ -1,0 +1,159 @@
+#######################################
+# Syntax Coloring Map Servo
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+onTimer1	KEYWORD1
+onTimer2	KEYWORD1
+onConnectedBt	KEYWORD1
+onDisconnectedBt	KEYWORD1
+smartyLib	KEYWORD1
+
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+beginSmarty	KEYWORD2
+driveMecanum	KEYWORD2
+waitWhite	KEYWORD2
+waitSW	KEYWORD2
+openHand	KEYWORD2
+closeHand	KEYWORD2
+getBall	KEYWORD2
+putBall	KEYWORD2
+runTimer	KEYWORD2
+stopTimer	KEYWORD2
+getBattery	KEYWORD2
+runMotor	KEYWORD2
+accDecMotor	KEYWORD2
+stopMotor	KEYWORD2
+reverseMotor	KEYWORD2
+waitAccDecMotor	KEYWORD2
+getMotor	KEYWORD2
+setupServo	KEYWORD2
+runServo	KEYWORD2
+slowServo	KEYWORD2
+offServo	KEYWORD2
+turnLed	KEYWORD2
+toggleLed	KEYWORD2
+blinkLed	KEYWORD2
+blinkCntLed	KEYWORD2
+clearLed	KEYWORD2
+readSw	KEYWORD2
+readSwState	KEYWORD2
+getSw	KEYWORD2
+waitUntilSw	KEYWORD2
+turnBt	KEYWORD2
+setNameBt	KEYWORD2
+setPinBt	KEYWORD2
+getStateBt	KEYWORD2
+getByteBt	KEYWORD2
+getBytesBt	KEYWORD2
+readAdc	KEYWORD2
+writeDIO	KEYWORD2
+readDIO	KEYWORD2
+waitUntilAdc	KEYWORD2
+writeByteMem	KEYWORD2
+readByteMem	KEYWORD2
+write2ByteMem	KEYWORD2
+read2ByteMem	KEYWORD2
+write4ByteMem	KEYWORD2
+read4ByteMem	KEYWORD2
+writeFloatMem	KEYWORD2
+readFloatMem	KEYWORD2
+getI2C	KEYWORD2
+changeI2C	KEYWORD2
+changeI2Cserial	KEYWORD2
+beginI2C	KEYWORD2
+startI2C	KEYWORD2
+writeI2C	KEYWORD2
+stopI2C	KEYWORD2
+equestFromI2C	KEYWORD2
+readI2C	KEYWORD2
+beginColorSensor	KEYWORD2
+getColorNumber	KEYWORD2
+getColorRed	KEYWORD2
+getColorBlue	KEYWORD2
+getColorGreen	KEYWORD2
+beginRangeSensor	KEYWORD2
+getRangeUltrasonic	KEYWORD2
+getRangeOptical	KEYWORD2
+beginGyroSensor	KEYWORD2
+saveGyroInit	KEYWORD2
+setGyroInit	KEYWORD2
+getGyroDgree	KEYWORD2
+getGyroAbsolute	KEYWORD2
+getGyroAxisX	KEYWORD2
+getGyroAxisY	KEYWORD2
+getGyroAxisZ	KEYWORD2
+setGyroScale	KEYWORD2
+runDuringMotor	KEYWORD2
+runSteer	KEYWORD2
+initSteer	KEYWORD2
+waitUntilBumperLine	KEYWORD2
+getBumperLeftPrx	KEYWORD2
+getBumperRightPrx	KEYWORD2
+getBumperLeftLine	KEYWORD2
+getBumperRightLine	KEYWORD2
+getBumperRightPrxAnalog	KEYWORD2
+getBumperLeftPrxAnalog	KEYWORD2
+getBumperRightLineAnalog	KEYWORD2
+getBumperLeftLineAnalog	KEYWORD2
+beginBumperSensor	KEYWORD2
+setBumperBlinkY	KEYWORD2
+setBumperBlinkR	KEYWORD2
+setBumperBlinkW	KEYWORD2
+setBumperPrx	KEYWORD2
+setBumperLine	KEYWORD2
+turnBumperLeftY	KEYWORD2
+turnBumperRightY	KEYWORD2
+turnBumperR	KEYWORD2
+turnBumperW	KEYWORD2
+turnBumperBlinkLeftY	KEYWORD2
+turnBumperBlinkRightY	KEYWORD2
+turnBumperBlinkR	KEYWORD2
+turnBumperBlinkW	KEYWORD2
+turnBumperAllOff	KEYWORD2
+
+
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+BRAKE_ON	LITERAL1
+BRAKE_OFF	LITERAL1
+T1	LITERAL1
+T2	LITERAL1
+M1	LITERAL1
+M2	LITERAL1
+M3	LITERAL1
+M4	LITERAL1
+S1	LITERAL1
+S2	LITERAL1				
+S3	LITERAL1				
+S4	LITERAL1
+D1	LITERAL1
+D2	LITERAL1
+D3	LITERAL1
+D4	LITERAL1
+D5	LITERAL1
+D6	LITERAL1
+D7	LITERAL1
+D8	LITERAL1
+A1	LITERAL1
+A2	LITERAL1
+A3	LITERAL1
+A4	LITERAL1
+A5	LITERAL1
+A6	LITERAL1
+A7	LITERAL1
+A8	LITERAL1
+LED1	LITERAL1
+LED2	LITERAL1
+SW1	LITERAL1
+SW2	LITERAL1
+RIGHT	LITERAL1
+LEFT	LITERAL1

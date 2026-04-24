@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>스마티 로봇 에디터</title>
+    
+    <link rel="icon" href="./smarty-logo.png" type="image/png">
+
+    <!-- 🚨 [정공법 1] 화면을 그리기 전에 테마부터 확인하는 방어 스크립트 -->
+    <script>
+      (function() {
+        var savedTheme = localStorage.getItem('smarty_theme');
+        // 'dark'로 저장되어 있으면 html과 body 모두에 dark-mode를 적용합니다.
+        if (savedTheme === 'dark') {
+          document.documentElement.classList.add('dark-mode');
+        }
+      })();
+    </script>
+
+    <style>
+      /* 🌟 [핵심 변경 1] 로컬 Jua 폰트 대신 프리텐다드 웹 폰트 최상단 호출! */
+      @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css");
+
+      /* 🚨 [정공법 2] 도화지 가장 밑바닥(html, body) 색상을 1순위로 고정 */
+      html, body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: #FFFDF7;
+      }
+
+      /* 🔥 [핵심 다크모드 CSS] html.dark-mode 뿐만 아니라 자식 요소들까지 모두 적용되도록 세팅! */
+      html.dark-mode, html.dark-mode body {
+        background-color: #1e272e !important;
+        color: #f5f6fa !important;
+      }
+
+      /* 🌟 1. 아이콘 전용 버튼 스타일 */
+      .icon-btn {
+        width: 45px !important;
+        height: 45px !important;
+        padding: 0 !important;
+        border-radius: 50% !important; 
+        display: inline-flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        font-size: 1.5rem !important; 
+        position: relative !important; 
+      }
+
+      /* 🌟 2. 반투명 플로팅 툴팁 (말풍선) */
+      .icon-btn::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        top: 110%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(30, 39, 46, 0.85); 
+        backdrop-filter: blur(4px); 
+        color: #fff;
+        /* 🌟 [핵심 변경 2] 툴팁 폰트 프리텐다드로 변경 및 굵기 조절(500) */
+        font-family: 'Pretendard Variable', Pretendard, sans-serif;
+        font-size: 14px;
+        font-weight: 500; 
+        padding: 6px 12px;
+        border-radius: 8px;
+        white-space: nowrap; 
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        pointer-events: none; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      }
+
+      .icon-btn:hover::after {
+        opacity: 1;
+        visibility: visible;
+        top: 125%; 
+      }
+
+      #header { height: 51px; background-color: #BDE0FE; color: #2C3E50; display: flex; align-items: center; padding: 0 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); z-index: 999999 !important; position: relative; overflow: visible !important; white-space: nowrap; border-bottom: 4px solid #82CCDD; }
+
+      /* ✅ [핵심 변경 3] 앱 전체 요소에 프리텐다드 강제 주입 */
+      body, button, input, select, textarea, #tab-header, .tab-btn {
+        font-family: 'Pretendard Variable', Pretendard, sans-serif !important;
+        /* 프리텐다드는 기본 글씨가 약간 얇을 수 있으므로 500(Medium)으로 단단하게 잡아줍니다 */
+        font-weight: 500;
+        letter-spacing: -0.3px; /* 자간을 살짝 좁히면 가독성이 극대화됩니다! */
+      }
+
+      /* ✅ [핵심 변경 4] 블록리가 사용하는 글로벌 CSS 변수 교체 */
+      :root {
+        --font-family: 'Pretendard Variable', Pretendard, sans-serif !important;
+      }
+
+      /* ✅ [핵심 변경 5] 왼쪽 카테고리(툴박스) 글씨체 및 굵기 수정 */
+      html body div.blocklyWidgetDiv .blocklyToolboxDiv .blocklyTreeLabel,
+      html body div.blocklyWidgetDiv .blocklyToolboxDiv .blocklyTreeText,
+      html body div.blocklyWidgetDiv .blocklyToolboxDiv span {
+        font-family: 'Pretendard Variable', Pretendard, sans-serif !important;
+        /* 🌟 기존 Jua 시절의 'normal' 꼼수를 버리고 당당하게 600(SemiBold) 적용! */
+        font-weight: 600 !important; 
+        font-style: normal !important;
+        font-size: 15px !important; /* 프리텐다드에 맞게 크기 살짝 조정 */
+        letter-spacing: -0.3px !important;
+      }
+      
+      /* 카테고리 줄 간격 넉넉하게 */
+      html body div.blocklyWidgetDiv .blocklyTreeRow {
+        height: 38px !important;
+        line-height: 38px !important;
+        margin-bottom: 2px !important;
+      }
+      
+      html body .blocklyTreeRow {
+        height: 38px !important;
+        line-height: 38px !important;
+        margin-bottom: 2px !important;
+      }
+
+      .blocklyTreeRoot {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        padding: 0 !important;
+      }
+      .blocklyTreeRow {
+        border-radius: 24px !important;
+        margin: 4px 0 !important;
+        padding: 10px 14px !important;
+        min-height: 50px !important;
+        line-height: 1.3 !important;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease !important;
+        background: rgba(255,255,255,0.90) !important;
+        background-image: none !important;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.72) !important;
+        position: relative;
+        overflow: visible !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+      }
+      .blocklyTreeRow:hover {
+        transform: translateY(-1px) !important;
+        box-shadow: 0 14px 28px rgba(0,0,0,0.12) !important;
+        background: rgba(255,255,255,0.98) !important;
+      }
+      .blocklyTreeRow.custom-category-row {
+        background: rgba(255, 255, 255, 0.92) !important;
+        border: 1px solid rgba(255, 255, 255, 0.82) !important;
+        border-radius: 22px !important;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.72), 0 14px 30px rgba(0,0,0,0.08) !important;
+        padding: 10px 14px !important;
+        backdrop-filter: blur(10px) !important;
+      }
+      .blocklyTreeRow.custom-category-row::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        top: 50%;
+        left: calc(100% + 10px);
+        transform: translateY(-50%);
+        background: rgba(35, 45, 55, 0.92);
+        color: #ffffff;
+        padding: 8px 14px;
+        border-radius: 14px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        box-shadow: 0 10px 28px rgba(0,0,0,0.18);
+        z-index: 9999;
+      }
+      .blocklyTreeRow.custom-category-row:hover::after {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(-50%) translateX(6px);
+      }
+      .blocklyTreeRow.blocklyTreeSelected {
+        background-image: linear-gradient(135deg, rgba(255,255,255,1), rgba(238, 245, 255, 0.95)) !important;
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.98) !important;
+        filter: saturate(1.08) brightness(1.03) !important;
+      }
+      .blocklyTreeRow .blocklyTreeLabel {
+        /* 프리텐다드는 Bold 지원! */
+        font-weight: 700 !important; 
+      }
+      .blocklyTreeRow .blocklyTreeChildren,
+      .blocklyTreeRow .blocklyTreeItems,
+      .blocklyTreeRow .blocklyTreeItem {
+        display: block !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+
+      /* 🌟 1. 앱 전체 도화지와 블록리 내부 글씨체 프리텐다드로 완벽 교체 */
+      html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #FFFDF7; font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 500; letter-spacing: -0.3px; }
+      
+      /* 블록 안의 하얀 글씨들 (도톰하고 또렷하게 600) */
+      .blocklyText { font-family: 'Pretendard Variable', Pretendard, sans-serif !important; font-weight: 600 !important; font-size: 12pt !important; }
+      
+      /* 카테고리 메뉴 글씨 (가장 두껍게 700) */
+      .blocklyTreeLabel { font-family: 'Pretendard Variable', Pretendard, sans-serif !important; font-weight: 700 !important; font-size: 1.1rem !important; }
+
+      /* 🌟 2. 헤더 및 타이틀 글꼴 세팅 */
+      #header { height: 51px; background-color: #BDE0FE; color: #2C3E50; display: flex; align-items: center; padding: 0 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); z-index: 999999 !important; position: relative; overflow: visible !important; white-space: nowrap; border-bottom: 4px solid #82CCDD; }
+      #header h1 { margin: 0; font-size: 1.5rem; font-weight: 700; text-shadow: 1px 1px 2px rgba(255,255,255,0.8); }
+      #header > * { flex-shrink: 0; } 
+
+      /* 🌟 3. 상단 메뉴 버튼들 (업로드, 연결 등) */
+      .menu-btn { padding: 8px 16px; background: #FFFFFF; color: #333; border: 2px solid #EEEEEE; border-radius: 20px; cursor: pointer; font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 600; font-size: 1.05rem; box-shadow: 0 4px 0px rgba(0,0,0,0.1); margin-left: 8px; white-space: nowrap; transition: all 0.1s ease; }
+      .menu-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0px rgba(0,0,0,0.1); }
+      .menu-btn:active { transform: translateY(4px); box-shadow: 0 0px 0px rgba(0,0,0,0.1); } 
+
+      #uploadBtn { position: relative; overflow: hidden; background-color: #FFB7B2; border-color: #FF9E99; z-index: 1; transition: background-color 0.3s ease; }
+      /* 업로드 진행률 바 (파스텔 블루 색상 유지) */
+      #uploadBtn::before { 
+        content: ''; 
+        position: absolute; 
+        top: 0; left: 0; 
+        height: 100%; 
+        background-color: #A0E7E5; 
+        width: var(--progress, 0%); 
+        z-index: -1; 
+        transition: width 0.3s ease-out; 
+      }
+      #connectBtn { background-color: #F8EFBA; border-color: #F8C291; }
+      #themeToggleBtn { background-color: #C7CEEA; border-color: #A29BFE; }
+
+      /* 🌟 4. 입력창 및 셀렉트 박스 */
+      input[type="text"], select { font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 500; font-size: 1.05rem; border-radius: 15px; border: 2px solid #BDC3C7; padding: 6px 12px; outline: none; margin-left: 5px; margin-right: 5px; }
+
+      /* 💡 수정됨: 헤더(70px) + 탭메뉴(42px) = 112px를 제외한 나머지 공간 사용 */
+      #main-container { display: flex; gap: 2px; height: calc(100% - 105px); position: relative; }
+      #category-sidebar {
+        width: 118px;
+        min-width: 118px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 18px 12px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,248,252,0.94));
+        border: 1px solid rgba(255,255,255,0.92);
+        box-shadow: 0 28px 60px rgba(14, 34, 80, 0.12), inset 0 0 0 1px rgba(255,255,255,0.35);
+        border-radius: 34px;
+        box-sizing: border-box;
+        align-items: center;
+        backdrop-filter: blur(10px);
+        position: relative;
+      }
+      #category-sidebar::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 34px;
+        background: radial-gradient(circle at top center, rgba(255,255,255,0.55), transparent 40%);
+        pointer-events: none;
+      }
+      body.dark-mode #category-sidebar {
+        background: linear-gradient(180deg, rgba(16,22,38,0.95), rgba(10,14,28,0.92));
+        border-color: rgba(255,255,255,0.08);
+        box-shadow: 0 28px 60px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.06);
+      }
+      body.dark-mode #category-sidebar::before {
+        background: radial-gradient(circle at top center, rgba(255,255,255,0.12), transparent 36%);
+      }
+      #category-sidebar .category-chip {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 18px;
+        position: relative;
+        cursor: pointer;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease, border-color 0.18s ease;
+        box-shadow: 0 18px 30px rgba(20, 45, 85, 0.12);
+        border: 1px solid rgba(255,255,255,0.24);
+        overflow: visible;
+      }
+      body.dark-mode #category-sidebar .category-chip {
+        box-shadow: 0 16px 28px rgba(0,0,0,0.28);
+        border: 1px solid rgba(255,255,255,0.12);
+      }
+      #category-sidebar .category-chip::before {
+        content: '';
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 36px;
+        height: 36px;
+        border-radius: 18px;
+        background: rgba(255,255,255,0.72);
+        filter: blur(6px);
+        opacity: 0.85;
+      }
+
+      /* ========================================================
+         🌟[핵심 다크모드 마법] 모달 창 & 설정 창 다크모드 완벽 지원 CSS
+         ======================================================== */
+      html.dark-mode .modal-content, 
+      body.dark-mode .modal-content { 
+        background-color: #282c34 !important; 
+        color: #ecf0f1 !important; 
+        border: 1px solid #3e4451 !important; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.8) !important; 
+      }
+      
+      html.dark-mode .modal-content h2, 
+      body.dark-mode .modal-content h2,
+      html.dark-mode .modal-content h3, 
+      body.dark-mode .modal-content h3 { 
+        color: #ffffff !important; 
+        border-bottom: 2px dashed #4b5363 !important; 
+      }
+      
+      html.dark-mode .modal-content label, 
+      body.dark-mode .modal-content label,
+      html.dark-mode .modal-content p, 
+      body.dark-mode .modal-content p,
+      html.dark-mode .modal-content span, 
+      body.dark-mode .modal-content span { 
+        color: #abb2bf !important; 
+      }
+      
+      /* 다크모드일 때 모달 안의 라디오 버튼이나 체크박스 텍스트도 밝게 */
+      html.dark-mode .radio-group, 
+      body.dark-mode .radio-group { 
+        color: #abb2bf !important; 
+      }
+
+      /* 제더스 브랜드 및 버전 로고 영역 다크모드 지원 */
+      html.dark-mode #smartyBrandSettingsFooter,
+      body.dark-mode #smartyBrandSettingsFooter {
+        border-top: 2px dashed #4b5363 !important;
+      }
+      
+      html.dark-mode .smarty-brand-text, 
+      body.dark-mode .smarty-brand-text {
+        color: #61afef !important;
+      }
+      
+      html.dark-mode .smarty-version-badge, 
+      body.dark-mode .smarty-version-badge {
+        background-color: #3e4451 !important;
+        color: #98c379 !important;
+      }
+      
+      html.dark-mode #smartyBrandSettingsFooter img,
+      body.dark-mode #smartyBrandSettingsFooter img {
+        background-color: rgba(255, 255, 255, 0.85) !important;
+        padding: 5px 10px !important;
+        border-radius: 8px !important;
+      }
+
+      #category-sidebar .category-chip::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translate(10px, -50%) scale(0.95);
+        background: rgba(255,255,255,0.97);
+        color: #22304b;
+        padding: 8px 14px;
+        border-radius: 16px;
+        box-shadow: 0 18px 40px rgba(23, 47, 90, 0.14);
+        opacity: 0;
+        visibility: hidden;
+        white-space: nowrap;
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        font-family: 'Pretendard Variable', Pretendard, sans-serif; /* 🌟 툴팁 폰트도 추가 */
+        font-weight: 600; /* 🌟 툴팁 글씨 또렷하게 */
+        font-size: 0.88rem;
+        z-index: 10;
+      }
+      #category-sidebar .category-chip:hover::after {
+        opacity: 1;
+        visibility: visible;
+        transform: translate(12px, -50%) scale(1);
+      }
+      body.dark-mode #category-sidebar .category-chip::after {
+        background: rgba(15, 24, 45, 0.98);
+        color: #f6f7fb;
+        box-shadow: 0 18px 40px rgba(0,0,0,0.3);
+      }
+      #category-sidebar .category-chip:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 26px 48px rgba(20, 45, 85, 0.18);
+      }
+      #category-sidebar .category-chip:hover::after {
+        opacity: 1;
+        visibility: visible;
+        transform: translate(-50%, -120%) scale(1);
+      }
+      #category-sidebar .category-chip.selected {
+        border-color: rgba(255,255,255,0.95);
+        box-shadow: 0 26px 48px rgba(20, 45, 85, 0.26), inset 0 0 15px rgba(255,255,255,0.22);
+        transform: translateY(-1px);
+      }
+      #category-sidebar .category-chip .chip-icon {
+        font-size: 2rem;
+        line-height: 1;
+        filter: drop-shadow(0 0 12px rgba(255,255,255,0.32));
+        text-shadow: 0 2px 6px rgba(0,0,0,0.18);
+      }
+      #blocklyDiv { flex: 1; height: 100%; }
+      
+/* ==========================================================
+   🚨 1. 찌그러짐 & 테두리 파먹힘 완벽 방어 (가장 중요)
+   Flexbox가 자바스크립트 명령을 무시하고 강제로 크기를 버티는 현상 강제 해제
+========================================================== */
+#rightPanel, #codeContainer, #serialMonitor {
+  box-sizing: border-box !important;
+  min-height: 0 !important; 
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+/* ==========================================================
+   ✅ 2. 수직 리사이징 바 (좌우 분할) - 완벽한 2px
+========================================================== */
+#v-resizer { 
+  position: relative;
+  width: 2px !important;            
+  min-width: 2px !important;
+  flex: 0 0 2px !important;         
+  background-color: #E2E8F0 !important; 
+  cursor: col-resize !important; 
+  transition: background-color 0.2s ease, box-shadow 0.2s ease !important; 
+  z-index: 50 !important; 
+  border: none !important; 
+  margin: 2px !important; 
+  padding: 0 !important;
+}
+#v-resizer::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  left: -4px; right: -4px; 
+  cursor: col-resize;
+  z-index: 51;
+}
+
+/* ==========================================================
+   ✅ 3. 수평 리사이징 바 (상하 분할) - 완벽한 2px
+========================================================== */
+#h-resizer { 
+  position: relative;
+  height: 2px !important;           
+  min-height: 2px !important; 
+  flex: 0 0 2px !important;         
+  background-color: #E2E8F0 !important; 
+  cursor: row-resize !important; 
+  transition: background-color 0.2s ease, box-shadow 0.2s ease !important; 
+  z-index: 50 !important;
+  border: none !important;
+  margin: 2px !important;          
+  padding: 0 !important;
+}
+#h-resizer::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  top: -4px; bottom: -4px; 
+  cursor: row-resize;
+  z-index: 51;
+}
+
+/* ==========================================================
+   🌙 4. 다크 모드 & Hover (스마티 발광 효과)
+========================================================== */
+body.dark-mode #v-resizer, 
+body.dark-mode #h-resizer {
+  background-color: #485460 !important;
+}
+
+#v-resizer:hover, #v-resizer:active,
+#h-resizer:hover, #h-resizer:active,
+body.dark-mode #v-resizer:hover, body.dark-mode #h-resizer:hover { 
+  background-color: #00d2d3 !important; 
+  box-shadow: 0 0 8px #00d2d3 !important;
+}
+
+      #rightPanel { width: 20%; min-width: 250px; display: flex; flex-direction: column; padding: 10px; background-color: #F0F8FF; box-sizing: border-box; flex-shrink: 0; border-left: 0px solid #E1E8ED; }
+      #codeContainer { flex: 1; display: flex; flex-direction: column; min-height: 100px; min-height: 0; background: #FFF; border-radius: 15px; padding: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); margin-bottom: 5px; border: 2px solid #E1E8ED; }
+      
+      /* 💡 코드가 적히는 곳은 코딩 전용 고정폭 폰트(monospace)를 그대로 유지합니다! (가독성 최우선) */
+      #codeArea { flex: 1; min-height: 0; margin: 0; background-color: #282c34; color: #abb2bf; padding: 15px; border-radius: 10px; overflow: auto; font-family: 'Consolas', 'Courier New', Courier, monospace; font-size: 15px; white-space: pre; }
+      
+      /* 🌟 [핵심 변경 1] 에러/도움말 표시 영역 폰트를 프리텐다드로 변경! */
+      #helpArea { flex: 1; min-height: 0; margin: 0; background-color: #FFF; color: #333; padding: 15px; border-radius: 10px; overflow: auto; font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 500; font-size: 1.05rem; line-height: 1.6; }
+      
+      /* 🌟 [핵심 변경 2] 무선조종(RC) 영역 폰트를 프리텐다드로 변경! */
+      #rcArea { flex: 1; min-height: 0; margin: 0; background-color: #1e272e; border-radius: 10px; overflow: hidden; font-family: 'Pretendard Variable', Pretendard, sans-serif; }
+
+      #serialMonitor { flex: 1; display: flex; flex-direction: column; min-height: 150px; min-height: 0; padding: 10px; background: #FFF; border-radius: 15px; border: 2px solid #E1E8ED; box-shadow: 0 4px 8px rgba(0,0,0,0.05); margin-top: 5px; }
+      
+      /* 💡 시리얼 모니터도 숫자/데이터 구분을 위해 코딩용 고정폭 폰트 유지! */
+      #serialOutput { flex: 1; min-height: 0; background: #2F3640; color: #4CD137; padding: 10px; overflow: auto; font-family: 'Consolas', 'Courier New', Courier, monospace; font-size: 15px; border-radius: 10px; white-space: pre; margin-bottom: 10px; }
+
+      @keyframes errorBlink { 0% { border-color: transparent; box-shadow: none; } 50% { border-color: #e74c3c; box-shadow: 0 0 15px rgba(231, 76, 60, 0.8); } 100% { border-color: transparent; box-shadow: none; } }
+      .error-state { animation: errorBlink 1.5s infinite !important; border: 2px solid #e74c3c !important; }
+      
+      body.dark-mode { background-color: #1e272e !important; color: #f5f6fa !important; }
+      body.dark-mode #header { background-color: #2d3436 !important; border-bottom: 4px solid #485460 !important; }
+      body.dark-mode #header h1 { color: #f5f6fa !important; text-shadow: none !important; }
+      body.dark-mode input[type="text"], body.dark-mode select { background-color: #353b48 !important; color: #f5f6fa !important; border: 2px solid #485460 !important; }
+      body.dark-mode .menu-btn { background-color: #4b6584 !important; color: #ffffff !important; border-color: #778ca3 !important; box-shadow: 0 4px 0px rgba(0,0,0,0.3) !important; }
+      body.dark-mode .menu-btn:hover { background-color: #778ca3 !important; }
+
+      body.dark-mode .blocklyToolboxDiv, body.dark-mode .blocklyToolbox, body.dark-mode td.blocklyToolbox, body.dark-mode .blocklyToolboxContents, body.dark-mode .blocklyTreeRoot, body.dark-mode .blocklyTreeBackground { background-color: #1e272e !important; background: #1e272e !important; border: none !important; }
+      body.dark-mode rect.blocklyToolboxBackground, body.dark-mode rect.blocklyTreeBackground, body.dark-mode .blocklyToolboxDiv rect, body.dark-mode .blocklyToolbox rect { fill: #1e272e !important; }
+      body.dark-mode .blocklyTreeRow { background: rgba(45, 54, 66, 0.92) !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.14) !important; outline: none !important; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08) !important; }
+      body.dark-mode .blocklyTreeRow:hover { background: rgba(66, 76, 90, 0.96) !important; }
+      .blocklyTreeRow.blocklyTreeSelected,
+      .blocklyTreeRow.blocklyTreeSelected * {
+        background-color: inherit !important;
+        background-image: none !important;
+        color: inherit !important;
+        fill: inherit !important;
+        border-color: inherit !important;
+        outline: none !important;
+      }
+      .blocklyTreeRow.blocklyTreeSelected:hover,
+      .blocklyTreeRow.blocklyTreeSelected:hover * {
+        background-color: inherit !important;
+      }
+      .blocklyTreeRow.blocklyTreeSelected .blocklyTreeLabel { color: inherit !important; }
+      body.dark-mode .blocklyTreeRow.blocklyTreeSelected { background-color: #1e272e !important; }
+      body.dark-mode .blocklyTreeSeparator { background-color: transparent !important; border: none !important; }
+
+      /* 선택된 블록이 원래 색상을 유지하도록 강력하게 고정 */
+      .blocklySelected > .blocklyPath.blocklyPathSelected {
+        fill: none !important;
+        filter: var(--blocklySelectedGlowFilter) !important;
+      }
+      .blocklySelected .blocklyPath {
+        mix-blend-mode: normal !important;
+      }
+      .blocklySelected .blocklyPathLight {
+        display: none !important;
+      }
+      body.dark-mode .blocklyToolboxDiv line, body.dark-mode .blocklyToolbox line { display: none !important; }
+      
+      /* 🌟 [핵심 변경 3] 다크모드일 때 왼쪽 카테고리 글씨 폰트 변경! */
+      body.dark-mode .blocklyTreeLabel { color: #ffffff !important; font-family: 'Pretendard Variable', Pretendard, sans-serif !important; font-weight: 600 !important; }
+      
+      body.dark-mode .blocklyToolboxDiv::-webkit-scrollbar { width: 8px; background: #1e272e !important; }
+      body.dark-mode .blocklyToolboxDiv::-webkit-scrollbar-thumb { background: #485460 !important; border-radius: 4px; }
+      body.dark-mode .blocklyFlyout { background-color: #2d3436 !important; }
+      body.dark-mode .blocklyFlyoutBackground { fill: #2d3436 !important; fill-opacity: 0.95 !important; }
+      body.dark-mode .blocklyScrollbarHandle { fill: #718093 !important; }
+
+      body.dark-mode #rightPanel { border-left: 3px solid #485460 !important; background-color: #2f3640 !important; }
+      body.dark-mode #codeContainer, body.dark-mode #serialMonitor { border-color: #485460 !important; background-color: #2f3640 !important; }
+      body.dark-mode #codeArea, body.dark-mode #serialOutput { background-color: #1e272e !important; color: #dcdde1 !important; border: none !important; }
+      body.dark-mode #rightPanel button { background-color: #353b48 !important; color: #f5f6fa !important; border: 1px solid #485460 !important; border-radius: 10px; }
+      body.dark-mode #rightPanel button:hover { background-color: #4b6584 !important; }
+      body.dark-mode #v-resizer, body.dark-mode #h-resizer { background-color: #485460 !important; }
+      body.dark-mode #v-resizer:hover, body.dark-mode #h-resizer:hover { background-color: #0984e3 !important; }
+      
+      body.dark-mode #helpArea { background-color: #1e272e !important; color: #dcdde1 !important; }
+      body.dark-mode #helpArea h2, body.dark-mode #helpArea h3 { color: #0984e3 !important; }
+      body.dark-mode #helpArea p, body.dark-mode #helpArea li { color: #f5f6fa !important; }
+      body.dark-mode #helpArea div[style*="background"] { background-color: #2f3640 !important; color: #e1b12c !important; border-left-color: #fbc531 !important; }
+
+      /* 🌟 [핵심 변경 4] 무선조종 패널 내부 버튼 폰트 변경! */
+      #rcArea { flex: 1; margin: 0; background-color: #111; border-radius: 15px; overflow: hidden; font-family: 'Pretendard Variable', Pretendard, sans-serif; border: 4px solid #2f3640; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+      .cockpit-panel { display: flex; flex-direction: column; height: 100%; padding: 20px; background: radial-gradient(circle at center, #353b48 0%, #192a56 100%); border-radius: 10px; position: relative; box-shadow: inset 0 0 40px rgba(0,0,0,0.9); }
+      .hud-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: linear-gradient(180deg, #0d1117 0%, #000000 100%); padding: 12px 25px; border-radius: 12px; border: 2px solid #00d2d3; box-shadow: inset 0 0 15px rgba(0, 210, 211, 0.4), 0 0 10px rgba(0, 210, 211, 0.2); }
+      .-disconnected { color: #ff4757; font-size: 1.2rem; font-weight: 700; text-shadow: 0 0 10px #ff4757; letter-spacing: 0.5px; }
+      .status-connected { color: #10ac84; font-size: 1.2rem; font-weight: 700; text-shadow: 0 0 10px #10ac84; letter-spacing: 0.5px; }
+      .cyber-btn { background: #000; color: #00d2d3; border: 2px solid #00d2d3; padding: 10px 20px; border-radius: 8px; font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 600; font-size: 1.1rem; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 0 10px rgba(0, 210, 211, 0.3); }
+      .cyber-btn:hover, .cyber-btn:active { background: #00d2d3; color: #000; box-shadow: 0 0 20px rgba(0, 210, 211, 0.8); }
+      .control-board { display: flex; justify-content: space-between; align-items: center; flex: 1; background: linear-gradient(145deg, #2d3436, #1e272e); border: 3px solid #111; border-radius: 20px; padding: 20px; box-shadow: inset 0 5px 10px rgba(255,255,255,0.1), 0 15px 25px rgba(0,0,0,0.7); }
+      .rc-btn { position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.1s; user-select: none; font-weight: 700; }
+      .key-hint { font-size: 0.85rem; position: absolute; top: 6px; left: 10px; opacity: 0.7; font-family: 'Courier New', monospace; color: #fff;}
+      .d-pad { display: grid; grid-template-columns: 65px 65px 65px; grid-template-rows: 65px 65px 65px; gap: 3px; background: #111; padding: 15px; border-radius: 50%; box-shadow: inset 0 0 20px #000, 0 10px 20px rgba(0,0,0,0.6); border: 2px solid #353b48; }
+      .dir-btn { background: linear-gradient(180deg, #485460, #1e272e); border: 2px solid #111; color: #00d2d3; font-size: 1.8rem; text-shadow: 0 0 5px #00d2d3; border-radius: 10px; box-shadow: 0 6px 0 #0a0a0a, inset 0 2px 2px rgba(255,255,255,0.2); }
+      .dir-btn:active, .dir-btn.active-key { transform: translateY(6px); box-shadow: 0 0px 0 #0a0a0a; background: #00d2d3; color: #000; text-shadow: none; border-color: #000; }
+      .center-core { background: radial-gradient(circle, #00d2d3 10%, #1e272e 70%); border-radius: 50%; box-shadow: inset 0 0 15px #000, 0 0 15px rgba(0, 210, 211, 0.4); border: 2px solid #111; }
+      .side-controls { display: flex; flex-direction: column; gap: 20px; }
+      .side-controls .rc-btn { width: 80px; height: 80px; font-size: 1.1rem; border-radius: 15px; background: linear-gradient(180deg, #feca57, #ff9f43); color: #222; border: 2px solid #111; box-shadow: 0 8px 0 #d35400, 0 15px 15px rgba(0,0,0,0.5); }
+      .side-controls .rc-btn:active, .side-controls .rc-btn.active-key { transform: translateY(8px); box-shadow: 0 0px 0 #d35400; background: #ff9f43; color: #fff; text-shadow: 0 0 5px #fff; }
+      .func-keys { display: grid; grid-template-columns: 70px 70px; gap: 20px; }
+      .func-keys .rc-btn { width: 70px; height: 70px; font-size: 1.2rem; border-radius: 50%; color: white; border: 3px solid #111; }
+      #btnA { background: radial-gradient(circle at 30% 30%, #ff6b6b, #ee5253); box-shadow: 0 8px 0 #b33939, 0 10px 10px rgba(0,0,0,0.5); }
+      #btnA:active, #btnA.active-key { transform: translateY(8px); box-shadow: 0 0px 0 #b33939, 0 0 20px #ff6b6b; }
+      #btnS { background: radial-gradient(circle at 30% 30%, #48dbfb, #0abde3); box-shadow: 0 8px 0 #01a3a4, 0 10px 10px rgba(0,0,0,0.5); }
+      #btnS:active, #btnS.active-key { transform: translateY(8px); box-shadow: 0 0px 0 #01a3a4, 0 0 20px #48dbfb; }
+      #btnD { background: radial-gradient(circle at 30% 30%, #1dd1a1, #10ac84); box-shadow: 0 8px 0 #006266, 0 10px 10px rgba(0,0,0,0.5); }
+      #btnD:active, #btnD.active-key { transform: translateY(8px); box-shadow: 0 0px 0 #006266, 0 0 20px #1dd1a1; }
+      #btnF { background: radial-gradient(circle at 30% 30%, #feca57, #ff9f43); box-shadow: 0 8px 0 #d35400, 0 10px 10px rgba(0,0,0,0.5); }
+      #btnF:active, #btnF.active-key { transform: translateY(8px); box-shadow: 0 0px 0 #d35400, 0 0 20px #feca57; }
+
+      /* 🚨 pointer-events를 지우고, opacity 애니메이션을 추가했습니다! */
+      #smarty-mascot { position: absolute; left: 350px; bottom: 10px; width: 110px; height: 110px; z-index: 100; background-size: contain; background-repeat: no-repeat; background-position: bottom center; filter: drop-shadow(0px 5px 5px rgba(0,0,0,0.3)); transition: transform 0.2s, opacity 0.3s ease-in-out; }
+      
+      /* 💡 마우스가 올라가면 투명해지는 마법! (숫자를 0에 가깝게 할수록 더 안보입니다) */
+      #smarty-mascot:hover { opacity: 0.1; }
+
+      .smarty-idle { background-image: url('./smarty-thinking1.png'); transform: translateY(0); }
+      .smarty-thinking { animation: smartyThink 0.8s infinite; }
+      @keyframes smartyThink { 0%, 49% { background-image: url('./smarty-thinking1.png'); transform: translateY(0); } 50%, 100% { background-image: url('./smarty-thinking2.png'); transform: translateY(-4px); } }
+      .smarty-done { background-image: url('./smarty-done.png'); animation: smartyJump 0.5s ease; }
+      @keyframes smartyJump { 0% { transform: translateY(0) scale(1); } 50% { transform: translateY(-20px) scale(1.1); } 100% { transform: translateY(0) scale(1); } }
+      .smarty-sleeping { background-image: url('./smarty-sleeping.png'); animation: smartyBreathe 2.5s infinite ease-in-out; }
+      @keyframes smartyBreathe { 0%, 100% { transform: scale(1) translateY(0); } 50% { transform: scale(1.05) translateY(-3px); } }
+
+      /* 🚨 스마티 등 뒤에서 나타나는 데스크톱 앱 스타일 팝업 애니메이션 */
+      @keyframes smartyBoardOpen {
+        0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+        100% { opacity: 1; transform: scale(1) translateY(0); }
+      }
+
+      #my-custom-explorer {
+        display: none; 
+        position: absolute; 
+        left: 110px;        
+        bottom: 30px;       
+        width: 700px; 
+        height: 500px; 
+        background: rgba(30, 30, 30, 0.85); 
+        backdrop-filter: blur(12px);        
+        border: 1px solid #4cc71a; 
+        border-radius: 12px; 
+        box-shadow: 0 20px 50px rgba(0,0,0,0.8); 
+        z-index: 99;        
+        overflow: hidden;
+        transform-origin: bottom left; 
+      }
+      /* ==========================================
+        📂 멀티 탭 & 타이틀 색상 (라이트/다크 완벽 대응)
+      ========================================== */
+      
+      #tab-header { background-color: #E8ECEF !important; border-bottom: 2px solid #BDC3C7 !important; }
+      #toolbox-title-box { background-color: #E4E4E4 !important; color: #2C3E50 !important; border-right: 2px solid #BDC3C7 !important; }
+
+      /* 🌟 [핵심 변경 5] 탭 메뉴(Tab)의 글씨체 프리텐다드로 변경! */
+      .tab-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        height: 32px !important;
+        font-family: 'Pretendard Variable', Pretendard, sans-serif !important;
+        font-weight: 500 !important; /* 🌟 비활성화된 탭은 500 굵기 */
+        font-size: 1.1rem !important;
+        padding: 0 20px !important;
+        background-color: #E8ECEF !important;
+        color: #7f8c8d !important;
+        border: 1px solid #BDC3C7 !important;
+        border-bottom: none !important;
+        border-radius: 8px 8px 0 0 !important;
+        cursor: pointer !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+      }
+      .tab-btn:hover { background-color: #D5DBDB !important; }
+
+      .tab-btn.active {
+        background-color: #FFFFFF !important; 
+        color: #D35400 !important;
+        font-weight: 700 !important; /* 🌟 활성화된 탭은 도톰하게 700 굵기로 강조! */
+        border: 2px solid #BDC3C7 !important;
+        border-bottom: 2px solid #FFFFFF !important; 
+        height: 34px !important;
+        margin-bottom: -2px !important;
+        z-index: 10 !important;
+      }
+
+      .close-tab-btn {
+        margin-left: 10px !important;
+        font-size: 12px !important;
+        font-family: sans-serif !important;
+        color: #95a5a6 !important;
+        width: 18px !important;
+        height: 18px !important;
+        border-radius: 50% !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: all 0.2s ease !important;
+      }
+
+      .close-tab-btn:hover { background-color: #E74C3C !important; color: white !important; }
+
+      body.dark-mode .close-tab-btn { color: #718093 !important; }
+      body.dark-mode .close-tab-btn:hover { background-color: #E74C3C !important; color: white !important; }
+
+      body.dark-mode #tab-header { background-color: #1E272E !important; border-bottom: 2px solid #485460 !important; }
+      body.dark-mode #toolbox-title-box { background-color: #1C272D !important; color: #F5F6FA !important; border-right: 2px solid #485460 !important; }
+
+      body.dark-mode .tab-btn {
+        background-color: transparent !important; 
+        color: #808e9b !important;                
+        border: 2px solid #37414a !important; 
+      }
+
+      body.dark-mode .tab-btn:hover { background-color: #2f3640 !important; }
+      
+      body.dark-mode .tab-btn.active {
+        background-color: #2F3640 !important;
+        color: #00D2D3 !important; 
+        border: 2px solid #485460 !important;
+        border-bottom: 2px solid #2F3640 !important;
+      }
+
+      #header::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        height: 100%;
+        width: var(--header-progress, 0%); 
+        background: linear-gradient(90deg, rgba(46, 204, 113, 0.2), rgba(0, 210, 211, 0.5)); 
+        z-index: 0; 
+        transition: width 0.3s ease-out, background 0.3s;
+        pointer-events: none; 
+      }
+
+      #header > * { z-index: 2; position: relative; }
+      /* 🌟 전광판(헤더) 글자색 또렷하게 만들기 (그림자 마법) */
+      #header span, 
+      #header div, 
+      #headerTitle {
+        color: #FFFFFF !important; 
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.8) !important; 
+        /* 🌟 [수정] 900은 폰트가 깨질 수 있으므로, 프리텐다드에 가장 예쁜 800(ExtraBold)으로 변경 */
+        font-family: 'Pretendard Variable', Pretendard, sans-serif !important;
+        font-weight: 800 !important; 
+      }
+     
+      /* 🟢 보드 연결 시 켜지는 초록 불빛 (연결 버튼용) */
+      button#connectBtn.connected-glow,
+      html body #connectBtn.connected-glow {
+        background-color: #2ecc71 !important; 
+        color: #ffffff !important;
+        box-shadow: 0 0 15px #2ecc71, 0 0 30px #2ecc71 !important; 
+        border: 2px solid #2ecc71 !important;
+        transition: all 0.3s ease !important;
+      }
+
+      /* ========================================================
+         🚨 [철벽 방어막] JS가 업로드(▶) 버튼 모양을 부수는 현상 차단
+      ======================================================== */
+      
+      button#uploadBtn,
+      html body button#uploadBtn {
+        background-color: #2ecc71 !important;
+        border: 2px solid #27ae60 !important;
+        border-radius: 50% !important;        
+      }
+
+      html body.dark-mode button#uploadBtn {
+        background-color: #4b6584 !important;    
+        border: 2px solid #778ca3 !important;
+      }
+      html body.dark-mode button#uploadBtn:hover {
+        background-color: #778ca3 !important;
+      }
+
+      html body #uploadBtn::before {
+        z-index: 0 !important; 
+      }
+
+      /* 🔵 4. 업로드 완료 시 빛나는 파란색 네온사인 효과 */
+      button#uploadBtn.uploaded-glow,
+      html body button#uploadBtn.uploaded-glow,
+      html body.dark-mode button#uploadBtn.uploaded-glow {
+        background-color: #3498db !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 15px #3498db, 0 0 30px #3498db !important;
+        border: 2px solid #3498db !important;
+        transition: all 0.3s ease !important;
+      }
+
+      /* 🎮 무선조종 버튼 (또는 글자가 있는 버튼) 방어막 */
+      .tab-btn {
+        font-family: 'Pretendard Variable', Pretendard, sans-serif !important; /* 🌟 폰트 방어 */
+        font-size: clamp(10px, 1.5vw, 14px) !important; 
+        word-break: keep-all !important; 
+        white-space: normal !important; 
+        line-height: 1.3 !important; 
+        text-align: center !important;
+        padding: 6px 8px !important; 
+        height: auto !important; 
+        min-height: 35px !important; 
+      }
+
+      /* 🧩 블록리 툴박스 최종 덮어쓰기 */
+      .blocklyToolboxDiv .blocklyTreeRoot .blocklyTreeRow,
+      .blocklyToolboxDiv .blocklyTreeRoot .blocklyTreeRow.blocklyTreeSelected {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 0px !important;
+        padding: 10px 14px !important;
+        margin: 4px 0 !important;
+        min-height: 52px !important;
+        line-height: 1.3 !important;
+        background: rgba(255,255,255,0.92) !important;
+        background-image: none !important;
+        border: 1px solid rgba(255,255,255,0.8) !important;
+        border-radius: 22px !important;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.85), 0 10px 26px rgba(0,0,0,0.06) !important;
+        color: inherit !important;
+        overflow: visible !important;
+        position: relative !important;
+      }
+      .blocklyToolboxDiv .blocklyTreeRow .blocklyTreeLabel {
+        flex: 1 1 auto !important;
+      }
+      .blocklyToolboxDiv .blocklyTreeRow.custom-category-row {
+        background: rgba(255,255,255,0.94) !important;
+        border: 1px solid rgba(255,255,255,0.86) !important;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.78), 0 12px 28px rgba(0,0,0,0.08) !important;
+      }
+      .blocklyToolboxDiv .blocklyTreeRow.custom-category-row:hover {
+        transform: translateY(-1px) !important;
+      }
+      .blocklyToolboxDiv .blocklyTreeRow.custom-category-row::after {
+        z-index: 100000 !important;
+      }
+
+/* ------------------------------------
+   1. 블록 플로팅(Floating) 및 스크롤바 반투명화
+------------------------------------ */
+.blocklyFlyout, 
+.blocklyFlyout svg {
+  overflow: visible !important;
+}
+
+.blocklyFlyout .blocklyDraggable:hover {
+  filter: drop-shadow(0px 8px 20px rgba(0, 0, 0, 0.8)) brightness(1.1) !important;
+  cursor: pointer !important;
+}
+
+.blocklyFlyoutScrollbar {
+  opacity: 0.15 !important;
+  transition: opacity 0.3s ease !important;
+}
+
+.blocklyFlyoutScrollbar:hover {
+  opacity: 0.8 !important; 
+}
+
+
+      /* =======================================================
+         🚨 [긴급 복구] 도화지(Blockly) 우클릭 메뉴 부활 및 테마 적용
+      ======================================================= */
+      
+      .blocklyMainBackground {
+        pointer-events: all !important;
+      }
+
+      /* ☀️ 라이트 모드 우클릭 메뉴 디자인 */
+      .blocklyWidgetDiv .blocklyMenu {
+        background-color: #ffffff !important;
+        border: 1px solid #bdc3c7 !important;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        border-radius: 12px !important;
+        padding: 5px !important;
+        font-family: 'Pretendard Variable', Pretendard, sans-serif !important; /* 🌟 폰트 주입 */
+      }
+      .blocklyWidgetDiv .blocklyMenuItemContent {
+        color: #2c3e50 !important; 
+        font-family: 'Pretendard Variable', Pretendard, sans-serif !important;
+        font-weight: 600 !important; /* 🌟 우클릭 메뉴 글씨 도톰하게 */
+        font-size: 14px !important;
+      }
+      .blocklyWidgetDiv .blocklyMenuItem:hover {
+        background-color: #ecf0f1 !important;
+        border-radius: 6px !important;
+      }
+
+      /* 🌙 다크 모드 우클릭 메뉴 디자인 */
+      body.dark-mode .blocklyWidgetDiv .blocklyMenu {
+        background-color: #2f3640 !important;
+        border: 1px solid #485460 !important;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.6) !important;
+      }
+      body.dark-mode .blocklyWidgetDiv .blocklyMenuItemContent {
+        color: #ecf0f1 !important; 
+      }
+      body.dark-mode .blocklyWidgetDiv .blocklyMenuItem:hover {
+        background-color: #404a55 !important;
+      }
+
+/* =================================================================
+   🚀[완벽 정공법] 플로팅 카드형 툴박스 & 플라이아웃 여백 자동 배치
+================================================================= */
+
+.blocklyToolboxDiv {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 280px !important;
+  overflow: auto !important;
+  padding: 16px 10px 20px !important;
+  background: radial-gradient(circle at top left, rgba(240, 249, 255, 0.98), rgba(250, 244, 236, 0.92)) !important;
+  border: 2px solid rgba(255,255,255,0.85) !important;
+  box-shadow: inset 0 0 40px rgba(255,255,255,0.6), 0 16px 50px rgba(0, 0, 0, 0.08) !important;
+  border-radius: 28px !important;
+  box-sizing: border-box !important;
+  z-index: 0 !important;
+
+  margin-left: 0px !important;
+  margin-top: 12px !important;
+  margin-bottom: 12px !important;
+  height: calc(100% - 24px) !important; 
+}
+
+
+.blocklyFlyoutBackground {
+  stroke: none !important;        
+  stroke-width: 0 !important;
+  fill-opacity: 0.95 !important;
+}
+
+/* =================================================================
+   🌟 2. 도화지(SVG) 설정 통합: 이중선 원인 완벽 제거
+================================================================= */
+.blocklySvg {
+  margin-left: 0 !important;      
+  border: none !important;
+  box-shadow: none !important;    
+  background-color: transparent !important; 
+  outline: none !important;
+}
+
+body.dark-mode .blocklySvg {
+  background-color: transparent !important; 
+  box-shadow: none !important; 
+}
+
+body.dark-mode .blocklyMainBackground {
+  fill: #2f3640 !important;       
+  stroke: none !important;        
+}
+
+body.dark-mode .blocklyFlyoutBackground {
+  stroke: none !important;
+}
+      /* =================================================================
+         🚀 [패널 통합 테마] 인라인 스타일을 대체하는 정공법 CSS
+      ================================================================= */
+      
+      /* ☀️ 라이트 모드 (기본) */
+      #rightPanel { background-color: #F8F9FA !important; border-left: 2px solid #E1E8ED !important; }
+      .panel-box { background: #FFFFFF; border: 2px solid #E1E8ED; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+      .panel-tab-bar { display: flex; background: #E8ECEF; border-bottom: 2px solid #BDC3C7; flex-shrink: 0; width: 100%; }
+      /* 🌟 [수정] 탭 버튼 굵기 세련되게 600 적용 */
+      .panel-tab-btn { flex: 1; padding: 10px 0; text-align: center; cursor: pointer; color: #7f8c8d; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+      .panel-tab-btn.active-tab { background: #FFFFFF; color: #2C3E50; border-bottom: 3px solid #3498db; font-weight: 700; }
+      .panel-tab-btn:hover:not(.active-tab) { background: #D5DBDB; }
+      .panel-content-area { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; background: #FFFFFF; color: #333; }
+      
+      /* C++ / 도움말 / 시리얼 모니터 라이트 모드 */
+      #codeToolbar { background: #ecf0f1; border-bottom: 1px solid #bdc3c7; }
+      #codeArea { background: #f8f9fa !important; color: #2c3e50 !important; }
+      .cockpit-panel { background: radial-gradient(circle at center, #ecf0f1 0%, #bdc3c7 100%); box-shadow: inset 0 0 20px rgba(0,0,0,0.1); }
+      #minimapArea { background: #fdfdfd !important; border: 1px solid #e1e8ed; }
+      .panel-header-bar { background: #ecf0f1; border-radius: 4px; border: 1px solid #bdc3c7; }
+      #serialOutput { background: #ffffff !important; color: #2c3e50 !important; border: 1px solid #bdc3c7 !important; }
+      .serial-input-box { background: #ffffff !important; color: #333 !important; border: 1px solid #bdc3c7 !important; }
+
+      /* 🌙 다크 모드 (완벽 대응) */
+      body.dark-mode #rightPanel { background-color: #2f3640 !important; border-left: 2px solid #485460 !important; }
+      body.dark-mode .panel-box { background: #1e272e; border-color: #485460; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+      body.dark-mode .panel-tab-bar { background: #21252b; border-bottom: 2px solid #3498db; }
+      body.dark-mode .panel-tab-btn { color: #bdc3c7; border-left: 1px solid #2c313a; }
+      body.dark-mode .panel-tab-btn.active-tab { background: #3498db; color: #ffffff; border-bottom: none; }
+      body.dark-mode .panel-tab-btn:hover:not(.active-tab) { background: #2c313a; }
+      body.dark-mode .panel-content-area { background: #1a252f; color: #ecf0f1; }
+      
+      body.dark-mode #codeToolbar { background: #2c3e50; border-bottom: 1px solid #1a252f; }
+      body.dark-mode #codeArea { background: #1a252f !important; color: #ecf0f1 !important; }
+      body.dark-mode .cockpit-panel { background: radial-gradient(circle at center, #353b48 0%, #192a56 100%); box-shadow: inset 0 0 40px rgba(0,0,0,0.9); }
+      body.dark-mode #minimapArea { background: #11151a !important; border-color: #2c313a; }
+      body.dark-mode .panel-header-bar { background: #2c3e50; border-color: transparent; }
+      body.dark-mode #serialOutput { background: #000000 !important; color: #00ff00 !important; border: 1px solid #2c313a !important; }
+      body.dark-mode .serial-input-box { background: #21252b !important; color: white !important; border-color: #455a64 !important; }
+
+
+            /* ========================================================
+         🚀 [초강력 다크모드 마법] 설정 창 하얀 배경 강제 격파!!!
+         ======================================================== */
+      html.dark-mode #settingsModal > div, 
+      body.dark-mode #settingsModal > div,
+      html.dark-mode .modal-content, 
+      body.dark-mode .modal-content { 
+        background-color: #282c34 !important; /* 까만 바탕 강제 주입 */
+        color: #ecf0f1 !important; 
+        border: 1px solid #3e4451 !important; 
+        box-shadow: 0 15px 30px rgba(0,0,0,0.9) !important; 
+      }
+      
+      /* 설정 창 안의 글씨들 (환경설정, C++ 뷰어 등등) 하얗게 만들기 */
+      html.dark-mode #settingsModal h2, 
+      body.dark-mode #settingsModal h2,
+      html.dark-mode #settingsModal h3, 
+      body.dark-mode #settingsModal h3,
+      html.dark-mode #settingsModal strong,
+      body.dark-mode #settingsModal strong,
+      html.dark-mode #settingsModal b,
+      body.dark-mode #settingsModal b { 
+        color: #ffffff !important; 
+      }
+      
+      /* 설정 창 안의 구분선(점선) 색상 어둡게 */
+      html.dark-mode #settingsModal hr,
+      body.dark-mode #settingsModal hr {
+        border-color: #4b5363 !important;
+      }
+
+      /* 제더스 로고 영역 다크모드 대응 */
+      html.dark-mode #smartyBrandSettingsFooter,
+      body.dark-mode #smartyBrandSettingsFooter {
+        border-top: 2px dashed #4b5363 !important;
+      }
+      html.dark-mode .smarty-brand-text, 
+      body.dark-mode .smarty-brand-text {
+        color: #61afef !important;
+      }
+      html.dark-mode .smarty-version-badge, 
+      body.dark-mode .smarty-version-badge {
+        background-color: #3e4451 !important;
+        color: #98c379 !important;
+      }
+      /* 다크모드일 때 로고 이미지 배경에 흰색 뽀샤시 처리하여 선명하게 보이게 함 */
+      html.dark-mode #smartyBrandSettingsFooter img,
+      body.dark-mode #smartyBrandSettingsFooter img {
+        background-color: rgba(255, 255, 255, 0.9) !important;
+        padding: 6px 12px !important;
+        border-radius: 10px !important;
+      }
+      /* ========================================================
+         🚀 [마지막 터치] C++ 코드 뷰어 등 보호색 띠는 부제목 글씨 구출!
+         ======================================================== */
+      
+      /* 1. 모달창 전체의 기본 글씨색을 밝은 회색으로 세팅합니다. */
+      html.dark-mode #settingsModal,
+      body.dark-mode #settingsModal {
+        color: #ecf0f1 !important;
+      }
+      
+      /* 2. 부제목이 제목(h)이나 강조(b) 태그로 만들어졌을 경우 강제로 하얗게 칠합니다! */
+      html.dark-mode #settingsModal h1, html.dark-mode #settingsModal h2, 
+      html.dark-mode #settingsModal h3, html.dark-mode #settingsModal h4, 
+      html.dark-mode #settingsModal h5, html.dark-mode #settingsModal h6,
+      html.dark-mode #settingsModal p,  html.dark-mode #settingsModal b, 
+      html.dark-mode #settingsModal strong {
+        color: #ffffff !important;
+      }
+
+      /* 3. 만약 부제목이 일반 div나 span에 고정된 색상으로 들어가 있다면 그것도 파괴합니다!
+         (단, 배경이 하얀색인 '숨기기', '봄', '여름' 같은 버튼 속 글씨는 보호해야 하므로 label 태그 등은 제외합니다) */
+      html.dark-mode #settingsModal .modal-content > div > span,
+      html.dark-mode #settingsModal .modal-content > div > div > span,
+      html.dark-mode #settingsModal .modal-content > div > div > div:not(.radio-group) {
+        color: #ecf0f1;
+      }
+
+      
+      /* ========================================================
+         🚀 [눈부심 제거] 너무 밝은 하얀색 버튼 & 로고 배경 다크화!
+         ======================================================== */
+         
+      /* 1. 로고 배경의 하얀색을 빼버리고 투명하게(까만 바탕에 자연스럽게 스며들게) 만듭니다! */
+      html.dark-mode #smartyBrandSettingsFooter img,
+      body.dark-mode #smartyBrandSettingsFooter img {
+        background-color: transparent !important; 
+        padding: 0 !important;
+      }
+
+      /* 2. [정공법 해결!] '선택되지 않은' 하얀색 버튼 타격
+         주의: 껍데기(label)에 선을 그으면 이중 박스가 생깁니다. 
+         따라서 실제 디자인된 버튼 알맹이(.color-btn)에만 색상을 바꿉니다! */
+      html.dark-mode #settingsModal input[type="radio"]:not(:checked) + .color-btn,
+      body.dark-mode #settingsModal input[type="radio"]:not(:checked) + .color-btn {
+        background-color: #3e4451 !important; /* 차분한 다크 그레이 */
+        color: #abb2bf !important;            /* 눈이 편안한 연회색 글씨 */
+        border-color: #5c6370 !important;     /* 테두리 색상만 어둡게 변경 (기존 두께 유지) */
+      }
+      
+      /* 3. 혹시라도 껍데기(label)에 박스 선이 그어지지 않도록 원천 차단 */
+      html.dark-mode #settingsModal label,
+      body.dark-mode #settingsModal label {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+
+      html.dark-mode #settingsModal .update-text-dark, 
+      body.dark-mode #settingsModal div > span { 
+        color: #abb2bf !important; 
+      }
+
+
+   </style>
+  </head>
+  
+  <body>   
+    <!-- 🌟 1. 상단 헤더 메뉴바 (맨 위에 고정!) -->
+    <div id="header" style="position: relative; display: flex; align-items: center;">
+      <!-- 배경 프로그레스 바가 들어갈 자리 (CSS에서 채워줌) -->
+
+      <img src="./smarty-logo.png" alt="스마티 로고" style="height: 55px; margin-right: 20px; border-radius: 12px;">
+      
+      <!-- 기존 메뉴 버튼들 (왼쪽에 모여 있음) -->
+      <button id="newFileBtn" class="menu-btn icon-btn" data-tooltip="새 프로그램">📄</button>
+      <button id="saveBtn" class="menu-btn icon-btn" data-tooltip="저장">💾</button>
+      <button id="saveAsBtn" class="menu-btn icon-btn" data-tooltip="다른 이름으로 저장">📑</button>
+      <button id="saveImgBtn" class="menu-btn icon-btn" data-tooltip="그림으로 저장">📸</button>
+      <button id="loadBtn" class="menu-btn icon-btn" data-tooltip="불러오기">📂</button>
+      <button id="themeToggleBtn" class="menu-btn icon-btn" data-tooltip="다크 모드" style="background: #2c3e50; color: white;">🌙</button>
+      
+      <input type="file" id="fileInput" accept=".json" style="display: none;">
+      
+      <div style="width: 2px; height: 30px; background-color: rgba(255,255,255,0.3); margin-left: 15px; margin-right: 5px;"></div>
+      
+      <!-- 🌟[수정] 보드 선택 박스 폰트 프리텐다드 적용 -->
+      <select id="boardSelect" style="margin-left: 5px; margin-right: 5px; padding: 6px; border-radius: 4px; font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 600; color: #2C3E50;">
+        <option value="arduino:avr:mega" selected>🤖 스마티</option>
+        <option value="arduino:avr:uno">Arduino Uno</option>
+      </select>
+      <input type="text" id="portInput" value="대기 중" placeholder="포트" style="margin-right: 5px; width: 70px; padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-weight: 600; text-align: center;">
+
+      <!-- 🔗 연결 버튼 -->
+      <button id="connectBtn" class="menu-btn icon-btn" data-tooltip="보드 연결하기" style="background-color: #f1c40f; color: #333;">🔗</button>
+      <!-- 🟢 업로드 버튼 -->
+      <button id="uploadBtn" class="menu-btn icon-btn" data-tooltip="실행" style="background-color: #2ecc71; color: white; border-color: #27ae60;">▶</button>
+      <!-- 🔴 정지 버튼 -->
+      <button id="stopBtn" class="menu-btn icon-btn" data-tooltip="정지" style="background-color: #e74c3c; color: white; border-color: #c0392b;">■</button>
+
+      <div style="width: 2px; height: 30px; background-color: rgba(255,255,255,0.3); margin-left: 15px; margin-right: 5px;"></div>
+      <button id="settingsBtn" class="menu-btn icon-btn" data-tooltip="설정">⚙️</button>
+
+      <!-- 🌟 [수정] 우측 상단 상태 텍스트 폰트 프리텐다드 적용 -->
+      <span id="header-status" style="margin-left: auto; margin-right: 15px; font-family: 'Pretendard Variable', Pretendard, sans-serif; font-size: 1.15rem; font-weight: 700; color: #2C3E50; z-index: 2; transition: color 0.3s; text-shadow: 1px 1px 2px rgba(255,255,255,0.8);"></span>
+    </div>
+
+    <!-- ==========================================
+         📍 멀티탭 바
+         ========================================== -->
+    <div id="tab-header" style="display: flex !important; flex-direction: row !important; align-items: flex-end !important; width: 100% !important; height: 42px !important; box-sizing: border-box !important; margin: 0 !important; padding: 0 !important; overflow: visible !important;">
+      
+      <!-- 🌟 [수정] 툴박스 타이틀 박스 폰트 프리텐다드 적용 -->
+    <div id="toolbox-title-box" style="display: flex !important; align-items: center !important; justify-content: center !important; width: 360px !important; height: 100% !important; flex-shrink: 0 !important; font-family: 'Pretendard Variable', Pretendard, sans-serif !important; font-size: 1.15rem !important; font-weight: 700 !important; margin: 0 !important; padding: 0 !important; box-sizing: border-box !important;">
+      🧩 스마티 블록들
+    </div>
+
+      <!-- 📂 탭 리스트 -->
+      <div id="tab-list" style="display: flex !important; flex-direction: row !important; align-items: flex-end !important; flex: 1 !important; height: 100% !important; gap: 4px !important; padding: 0 0 0 10px !important; margin: 0 !important; overflow-x: auto !important; overflow-y: hidden !important; box-sizing: border-box !important;"></div>
+
+    </div>
+
+    <!-- 🌟 3. 메인 작업 컨테이너 (도화지 + 패널들) -->
+    <div id="main-container">
+      <div id="category-sidebar"></div>
+      <div id="blocklyDiv"></div>
+
+      <!-- 🤖 왼쪽 하단 스마티 상태 마스코트 -->
+      <div id="smarty-mascot" class="smarty-idle"></div>
+
+      <!-- 🚨 스마티 등 뒤에서 열릴 데스크톱 팝업창 -->
+      <div id="my-custom-explorer"></div>
+      
+      <div id="v-resizer"></div>
+      
+      <!-- 🚀 [오른쪽 통합 패널] -->
+      <div id="rightPanel">
+        
+        <!-- 🚀 [상단 패널] 도움말 / 무선 조종 / C++ 코드 통합 탭 -->
+        <div id="codeContainer" class="panel-box" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+          
+          <!-- 1. 탭 버튼 구역 -->
+          <div class="panel-tab-bar">
+            <div id="tabHelpBtn" class="panel-tab-btn active-tab">📖 도움말</div>
+            <div id="tabRcBtn" class="panel-tab-btn">🎮 무선 조종</div>
+            <div id="tabCppBtn" class="panel-tab-btn">💻 C++ 코드</div>
+          </div>
+          
+          <!-- 2. 상단 탭 내용 구역 -->
+          <div class="panel-content-area">
+            
+            <!-- C++ 툴바 -->
+            <div id="codeToolbar" style="display: none; justify-content: flex-end; padding: 5px 10px; flex-shrink: 0;">
+              <button id="fontIncreaseBtn" style="cursor: pointer; padding: 4px 8px; margin-right: 2px; border-radius: 4px; border: 1px solid #455a64; background: #34495e; color: white;"><b>A+</b></button>
+              <button id="fontDecreaseBtn" style="cursor: pointer; padding: 4px 8px; margin-right: 15px; border-radius: 4px; border: 1px solid #455a64; background: #34495e; color: white;"><b>A-</b></button>
+              <button id="copyCodeBtn" style="cursor: pointer; padding: 4px 8px; margin-right: 5px; border-radius: 4px; border: 1px solid #455a64; background: #34495e; color: white;">📋 복사</button>
+              <button id="saveCodeBtn" style="cursor: pointer; padding: 4px 8px; border-radius: 4px; border: none; background-color: #3498db; color: white;">💾 .ino 저장</button>
+            </div>
+
+            <!-- 🌟 [1] 도움말 -->
+            <div id="helpArea" style="display: block; width: 100%; height: 100%; overflow-y: auto;">
+              <div style="text-align: center; margin-top: 50px;">
+                <h2>💡 블록 도움말</h2>
+                <p>블록을 <b>클릭</b>하거나 <b>마우스를 올리면</b><br>여기에 사용법이 자동으로 표시됩니다.</p>
+              </div>
+            </div>
+
+        <!-- 무선 조종 탭 영역 -->
+            <div id="rcArea" style="display: none; width: 100%; height: 100%; position: relative; overflow: hidden;">
+              
+              <style>
+                #rcArea .metal-btn {
+                  width: 100% !important; height: 100% !important; border-radius: 50% !important; padding: 0 !important;
+                  display: flex !important; align-items: center !important; justify-content: center !important;
+                  background: radial-gradient(circle at 35% 25%, #6e7278, #3a3d42 40%, #15171a 80%, #000) !important;
+                  border: 2px solid #0a0a0a !important;
+                  box-shadow: inset 0 2px 5px rgba(255,255,255,0.2), inset 0 -4px 6px rgba(0,0,0,0.6), 0 5px 0 #0a0a0a, 0 8px 10px rgba(0,0,0,0.8) !important;
+                  cursor: pointer; transition: transform 0.05s, box-shadow 0.05s; user-select: none; -webkit-user-select: none;
+                }
+                #rcArea .metal-btn:active, #rcArea .metal-btn.active-sim {
+                  transform: translateY(4px) !important;
+                  box-shadow: inset 0 2px 5px rgba(255,255,255,0.2), inset 0 -2px 3px rgba(0,0,0,0.6), 0 1px 0 #0a0a0a, 0 0 20px var(--glow-color) !important;
+                }
+                /* 🌟 [수정] 조종기 메탈 텍스트 굵기(900 -> 800) 조절 */
+                #rcArea .metal-text {
+                  font-size: 28px !important; font-weight: 800 !important; color: var(--glow-color) !important;
+                  text-shadow: 1px 1px 1px rgba(255,255,255,0.1), -1px -1px 3px rgba(0,0,0,0.9) !important;
+                  margin: 0 !important; line-height: 1 !important;
+                }
+                #rcArea .dir-wrapper {
+                  width: 100%; height: 100%; filter: drop-shadow(0 4px 3px rgba(0,0,0,0.8));
+                  transition: transform 0.05s, filter 0.05s; cursor: pointer; user-select: none; -webkit-user-select: none;
+                }
+                #rcArea .dir-wrapper:active, #rcArea .dir-wrapper.active-sim {
+                  transform: translateY(3px); filter: drop-shadow(0 0 15px #00d2d3); 
+                }
+                #rcArea .dir-shape {
+                  width: 100% !important; height: 100% !important; border: none !important; padding: 0 !important;
+                  background: linear-gradient(135deg, #a4b0be, #57606f 50%, #2f3542) !important;
+                }
+                #speedLever {
+                  -webkit-appearance: none; appearance: none; height: 12px; width: 280px; background: #111;
+                  border-radius: 10px; outline: none; cursor: pointer; transform: rotate(-90deg); box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+                }
+                #speedLever::-webkit-slider-thumb {
+                  -webkit-appearance: none; appearance: none; width: 24px; height: 8px; 
+                  background: linear-gradient(180deg, #fff, #bdc3c7); border: 2px solid #7f8fa6; border-radius: 3px;
+                  box-shadow: 0 0 8px rgba(0,0,0,0.8); cursor: pointer;
+                }
+                
+                #blePortSelect {
+                  background-color: #1e2124; color: #00d2d3; border: 2px solid #2f3640; border-radius: 8px;
+                  padding: 5px 10px; font-weight: 600; outline: none; cursor: pointer;
+                  box-shadow: inset 0 0 10px rgba(0,0,0,0.8); transition: border-color 0.3s;
+                }
+                #blePortSelect:focus { border-color: #00d2d3; }
+              </style>
+
+              <!-- 🌟 조종기 메인 패널 -->
+              <div class="cockpit-panel" style="position: absolute; left: 50%; top: 50%; width: 650px; height: 570px; transform-origin: center center; box-sizing: border-box; display: flex; flex-direction: column; padding: 15px; z-index: 10;">
+                
+                <!-- 🚀 1. 상단 컨트롤 바 -->
+                <div class="hud-header" style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 15px; flex-shrink: 0;">
+                  <button id="bleSettingsBtn" class="cyber-btn" style="padding: 8px 12px; font-size: 14px; background: #34495e; color: white; border: 1px solid #7f8fa6; border-radius: 6px; cursor: pointer; font-weight: 600;">⚙️ 스마티 설정</button>
+                  <select id="blePortSelect" style="min-width: 180px; font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold;">
+                    <option value="">🔄 스마티 찾는 중...</option>
+                  </select>
+                  <button id="bleConnectBtn" class="cyber-btn" style="padding: 10px 20px; font-size: 16px; background: #2ecc71; color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer;">📡 연결</button>
+                </div>
+                
+                <div class="control-board" style="display: flex; flex-direction: column; flex: 1; width: 100%; box-sizing: border-box; padding: 20px 0; border-radius: 20px; background: #1e2124; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+                  
+                  <div class="single-monitor" style="width: 95%; margin: 0 auto; height: 60px; background: #050505; border: 2px solid #2f3640; border-radius: 12px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: inset 0 0 15px rgba(0,0,0,0.8); box-sizing: border-box;">
+                    <div style="display: flex; align-items: center; gap: 10px; white-space: nowrap;">
+                      <span style="color: #7f8fa6; font-size: 14px; font-weight: 700; letter-spacing: 1px;">LINK STATUS</span>
+                      <span id="bleStatus" class="status-disconnected" style="margin: 0; font-size: 20px; font-weight: 700; color: #ff4757;">🔴 연결 끊김</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; white-space: nowrap;">
+                      <span style="color: #7f8fa6; font-size: 14px; font-weight: 700; letter-spacing: 1px;">POWER</span>
+                      <div style="min-width: 4.5em; text-align: right; display: inline-block; font-family: 'Courier New', monospace; font-size: 28px; font-weight: 900; color: #00d2d3; text-shadow: 0 0 10px #00d2d3; letter-spacing: 1px;">
+                        <span id="speedValueDisplay">0</span><span style="font-size: 16px;">%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style="height: 20px;"></div>
+                    <div class="bottom-controls" style="flex: 1; width: 100%; display: flex; justify-content: space-evenly; align-items: center; box-sizing: border-box; padding: 0 10px;">
+                      
+                      <div class="func-keys" style="height: 280px; width: 175px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; gap: 15px;">
+                        <!-- 🚨 !important 를 넣어서 무조건 얇고 크게 나오게 강제 적용! -->
+                        <div class="rc-btn act-btn metal-btn" id="btnQ" data-cmd="q" style="--glow-color: #e67e22;"><span class="metal-text" style="font-weight: normal !important; font-size: 30px !important;">↺</span></div>
+                        <div class="rc-btn act-btn metal-btn" id="btnW" data-cmd="w" style="--glow-color: #e67e22;"><span class="metal-text" style="font-weight: normal !important; font-size: 30px !important;">↻</span></div>
+                        <div class="rc-btn act-btn metal-btn" id="btnA" data-cmd="a" style="--glow-color: #e74c3c;"><span class="metal-text" style="font-weight: normal !important; font-size: 30px !important;">a</span></div>
+                        <div class="rc-btn act-btn metal-btn" id="btnS" data-cmd="s" style="--glow-color: #3498db;"><span class="metal-text" style="font-weight: normal !important; font-size: 30px !important;">s</span></div>
+                        <div class="rc-btn act-btn metal-btn" id="btnZ" data-cmd="z" style="--glow-color: #2ecc71;"><span class="metal-text" style="font-weight: normal !important; font-size: 30px !important;">z</span></div>
+                        <div class="rc-btn act-btn metal-btn" id="btnX" data-cmd="x" style="--glow-color: #f1c40f;"><span class="metal-text" style="font-weight: normal !important; font-size: 30px !important;">x</span></div>
+                      </div>
+
+                      <div class="d-pad" style="height: 280px; width: 280px; background: #111418; border-radius: 50%; padding: 10px; box-sizing: border-box; box-shadow: inset 0 0 20px rgba(0,0,0,1); display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; gap: 5px;">
+                        <div></div>
+                        <div class="dir-wrapper" id="btnUp" data-cmd="Up"><div class="rc-btn dir-btn dir-shape" style="clip-path: polygon(50% 10%, 15% 90%, 85% 90%); pointer-events: none;"></div></div>
+                        <div></div>
+                        <div class="dir-wrapper" id="btnLeft" data-cmd="Left"><div class="rc-btn dir-btn dir-shape" style="clip-path: polygon(10% 50%, 90% 15%, 90% 85%); pointer-events: none;"></div></div>
+                        <div class="center-core" style="width: 100%; height: 100%; background: radial-gradient(circle, #00d2d3, #003333); border-radius: 50%; box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 0 15px rgba(0,210,211,0.5);"></div>
+                        <div class="dir-wrapper" id="btnRight" data-cmd="Right"><div class="rc-btn dir-btn dir-shape" style="clip-path: polygon(90% 50%, 10% 15%, 10% 85%); pointer-events: none;"></div></div>
+                        <div></div>
+                        <div class="dir-wrapper" id="btnDown" data-cmd="Down"><div class="rc-btn dir-btn dir-shape" style="clip-path: polygon(50% 90%, 15% 10%, 85% 10%); pointer-events: none;"></div></div>
+                        <div></div>
+                      </div>
+                      
+                      <div class="lever-panel" style="height: 280px; width: 80px; background: linear-gradient(180deg, #2d3436, #1e272e); border: 3px solid #111; border-radius: 15px; box-shadow: inset 0 5px 15px rgba(0,0,0,0.8), 0 5px 10px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 15px 0; box-sizing: border-box;">
+                        <span style="color: #00d2d3; font-size: 14px; font-weight: 800; text-shadow: 0 0 5px #00d2d3;">FWD</span>
+                        <div style="flex: 1; width: 100%; position: relative; display: flex; align-items: center; justify-content: center;">
+                          <!-- 🚨 슬라이더 길이 무조건 늘어나게 width: 200px !important 적용 -->
+                          <input type="range" id="speedLever" min="-100" max="100" value="0" step="1" style="width: 200px !important; transform: rotate(-90deg) !important; position: absolute !important;">
+                        </div>
+                        <span style="color: #ff4757; font-size: 14px; font-weight: 800; text-shadow: 0 0 5px #ff4757;">REV</span>
+                      </div>
+
+                    </div>
+
+                </div>
+              </div>
+
+              <!-- ⚙️ 2. 스마티 블루투스 설정 팝업창 -->
+              <!-- ⚙️ 2. 스마티 블루투스 설정 팝업창 -->
+              <div id="smartySetupModal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
+                <!-- 전체 창 크기 및 안쪽 여백 유지 -->
+                <div style="background: #1e2124; padding: 25px; border-radius: 15px; border: 2px solid #2f3640; width: 360px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.9);">
+                  
+                  <!-- 1. 제목 글자 크기 축소 (18px -> 16px) -->
+                  <h3 style="margin-top: 0; margin-bottom: 15px; color: #00d2d3; font-size: 16px; font-weight: 700; text-shadow: 0 0 10px rgba(0,210,211,0.5);">⚙️ 스마티 이름 지정</h3>
+                  
+                  <p style="color: #a4b0be; font-size: 13px; text-align: left; font-weight: 500; margin-bottom: 15px;">
+                    스마티 번호 4자리를 입력하세요.<br>(예: 0001)
+                  </p>
+                  
+                  <!-- 2. Smarty 및 숫자 4개 글자 크기 축소 (18px -> 15px) -->
+                  <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px;">
+                    <span style="font-size: 15px; font-weight: 700; color: white;">Smarty</span>
+                    <input type="text" id="smartyNumInput" maxlength="4" placeholder="0001" style="background: #050505; color: #00d2d3; font-size: 15px; font-weight: 700; padding: 6px; width: 70px; text-align: center; border: 2px solid #00d2d3; border-radius: 6px; outline: none; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);">
+                  </div>
+                  
+                  <!-- 3. 메인 버튼: 글자 bold 제거 (normal) & 위아래 세로 길이(padding) 축소 -->
+                  <button id="smartyAssignBtn" style="width: 100%; padding: 6px 10px; background: #3498db; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: normal; cursor: pointer; margin-bottom: 15px; transition: background 0.3s;">🚀 이름 지정 및 업로드</button>
+                  
+                  <div id="smartyPairGuide" style="display: none; background: rgba(46, 204, 113, 0.1); padding: 15px; border-radius: 6px; border-left: 5px solid #2ecc71; text-align: left; margin-bottom: 20px;">
+                    <h4 style="margin: 0 0 10px 0; color: #2ecc71; font-weight: 700; font-size: 14px;">✅ 업로드 완료!</h4>
+                    <p style="margin: 0; font-size: 12px; line-height: 1.5; color: #ecf0f1;">
+                      이제 PC의 <b>블루투스 설정</b>으로 이동하여<br>
+                      <b id="createdSmartyName" style="color: #ff4757; font-size: 14px;">Smarty####</b> 장치를 찾아 연결하세요.<br>
+                      비밀번호(PIN)는 <b style="color: #ff4757; font-size: 14px;">1234</b> 입니다.
+                    </p>
+                  </div>
+                  
+                  <!-- 3. 닫기 버튼: 글자 bold 제거 (normal) & 위아래 세로 길이(padding) 축소 -->
+                  <button id="smartyCloseModalBtn" style="padding: 5px 20px; background: #57606f; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: normal; cursor: pointer; transition: background 0.3s;">닫기</button>
+                </div>
+              </div>
+              
+            </div>
+
+           <pre id="codeArea" style="display: none; width: 100%; height: 100%; box-sizing: border-box;"></pre>
+        </div>
+        </div>
+        <!-- 구분선 (크기 조절 바) -->
+        <div id="h-resizer"></div>
+        
+        <!-- 🚀 [하단 패널] 도화지 지도 & 시리얼 모니터 통합 -->
+        <div id="serialMonitor" class="panel-box" style="display: flex; flex-direction: column; flex: 1; min-height: 0; margin-top: 5px;">
+          
+          <!-- 하단 탭 버튼 구역 -->
+          <div class="panel-tab-bar">
+            <div id="mapTabBtn" class="panel-tab-btn active-tab">🗺️ 도화지 지도</div>
+            <div id="serialTabBtn" class="panel-tab-btn">🖥️ 시리얼 모니터</div>
+          </div>
+
+          <!-- 하단 내용 구역 -->
+          <div class="panel-content-area">
+            
+            <div id="minimapArea" style="display: block; width: 100%; height: 100%; cursor: crosshair;">
+              <canvas id="minimapCanvas" style="width: 100%; height: 100%; display: block;"></canvas>
+            </div>
+
+            <!-- 시리얼 모니터 -->
+            <div id="serialMonitorContent" style="display: none; flex-direction: column; width: 100%; height: 100%; padding: 10px; box-sizing: border-box;">
+              
+              <div class="panel-header-bar" style="display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; margin-bottom: 10px;">
+                <span style="font-weight: 700; font-size: 14px;">시리얼 모니터</span>
+                <div>
+                  <!-- 폰트 굵기를 500으로 줄이고, 폰트 사이즈를 13px로 고정했습니다! -->
+                  <select id="baudRateSelect" style="margin-right: 10px; padding: 2px 4px; border-radius: 4px; font-weight: 500; font-size: 13px;">
+                    <option value="9600">9600 bps</option>
+                    <option value="115200">115200 bps</option>
+                  </select>
+                  <!-- 버튼들도 모두 사이즈를 13px로 통일했습니다 -->
+                  <button id="toggleSerialBtn" style="cursor: pointer; padding: 4px 8px; margin-right: 5px; border-radius: 4px; font-weight: 600; font-size: 13px;">▶️ 켜기</button>
+                  <button id="clearSerialBtn" style="cursor: pointer; padding: 4px 8px; margin-right: 15px; border-radius: 4px; background-color: #e74c3c; color: white; border: none; font-weight: 600; font-size: 13px;">🗑️ 지우기</button>
+                  <button id="copyLogBtn" style="cursor: pointer; padding: 4px 8px; margin-right: 5px; border-radius: 4px; font-weight: 600; font-size: 13px;">📋 복사</button>
+                  <button id="saveLogBtn" style="cursor: pointer; padding: 4px 8px; border-radius: 4px; border: none; background-color: #2ecc71; color: white; font-weight: 600; font-size: 13px;">💾 저장</button>
+                </div>
+              </div> <!-- 🚨 여기에 닫는 태그(</div>)가 빠져있어서 추가했습니다!! 🚨 -->
+              
+              <div id="serialOutput" style="flex: 1; overflow-y: auto; margin-bottom: 10px; padding: 10px; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 13px; white-space: pre;">[안내] 모니터를 열면 여기에 데이터가 표시됩니다...</div>
+              
+              <div style="display: flex; gap: 10px; flex-shrink: 0;">
+                <!-- 입력창 위아래 높이 축소 -->
+                <input type="text" id="serialInput" class="serial-input-box" placeholder="명령어 입력..." style="flex: 1; padding: 5px 8px; border-radius: 4px; font-weight: 500; font-size: 13px;">
+                
+                <!-- 전송 버튼 위아래 높이 축소 -->
+                <button id="serialSendBtn" style="padding: 5px 15px; background: #f39c12; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 13px;">전송</button>
+              </div>
+            </div>
+
+        </div>
+
+    </div>
+  
+  <!-- 🌟 [수정] 환경 설정 모달창 폰트 굵기 조절 (bold -> 700/600) -->
+  <div id="settingsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 30px; border-radius: 12px; width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+      <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; font-weight: 700;">⚙️ 환경 설정</h2>
+
+      <style>
+        .hidden-radio { display: none; } 
+        .color-btn {
+          display: inline-flex; align-items: center; justify-content: center;
+          padding: 8px 16px; margin-right: 6px; margin-bottom: 8px;
+          border: 2px solid #ddd; border-radius: 8px;
+          background-color: #f8f9fa; color: #7f8c8d;
+          cursor: pointer; font-weight: 600; font-size: 15px;
+          transition: all 0.2s ease-in-out;
+        }
+        .color-btn:hover { background-color: #e2e6ea; color: #333; }
+        
+        .hidden-radio[value="show"]:checked + .color-btn { background-color: #4CAF50; border-color: #4CAF50; color: white; }
+        .hidden-radio[value="hide"]:checked + .color-btn { background-color: #E53935; border-color: #E53935; color: white; }
+        .hidden-radio[name="themeToggle"]:checked + .color-btn { background-color: #2196F3; border-color: #2196F3; color: white; }
+      </style>
+
+      <div style="margin-bottom: 20px;">
+        <p style="margin: 0 0 10px 0; font-size: 17px; font-weight: 700; color: #34495e;">📄 C++ 코드 뷰어</p>
+        <label><input type="radio" name="codeToggle" value="show" class="hidden-radio"><span class="color-btn">👀 보이기</span></label>
+        <label><input type="radio" name="codeToggle" value="hide" class="hidden-radio"><span class="color-btn">🙈 숨기기</span></label>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <p style="margin: 0 0 10px 0; font-size: 17px; font-weight: 700; color: #34495e;">🖥️ 시리얼 모니터</p>
+        <label><input type="radio" name="monitorToggle" value="show" class="hidden-radio"><span class="color-btn">👀 보이기</span></label>
+        <label><input type="radio" name="monitorToggle" value="hide" class="hidden-radio"><span class="color-btn">🙈 숨기기</span></label>
+      </div>
+
+      <div style="margin-bottom: 30px;">
+        <p style="margin: 0 0 10px 0; font-size: 17px; font-weight: 700; color: #34495e;">🎨 블록 테마 색상</p>
+        <div style="display: flex; flex-wrap: wrap;">
+          <label><input type="radio" name="themeToggle" value="spring" class="hidden-radio"><span class="color-btn">🌸 봄</span></label>
+          <label><input type="radio" name="themeToggle" value="summer" class="hidden-radio"><span class="color-btn">🏖️ 여름</span></label>
+          <label><input type="radio" name="themeToggle" value="autumn" class="hidden-radio"><span class="color-btn">🍁 가을</span></label>
+          <label><input type="radio" name="themeToggle" value="winter" class="hidden-radio"><span class="color-btn">🎄 겨울</span></label>
+          <label><input type="radio" name="themeToggle" value="auto" class="hidden-radio"><span class="color-btn">🔄 자동</span></label>
+        </div>
+      </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.05); padding: 10px 15px; border-radius: 12px; margin-bottom: 20px;">
+          <span style="font-weight: 600; color: #555;">업데이트 확인</span>
+          <button id="manualUpdateBtn" style="padding: 8px 16px; background: #3498db; color: white; border: none; border-radius: 8px; font-family: 'Pretendard Variable', sans-serif; font-weight: 700; cursor: pointer; transition: 0.2s;">
+            업데이트 확인
+          </button>
+        </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button id="cancelSettingsBtn" style="padding: 10px 20px; border: none; border-radius: 5px; background: #e74c3c; color: white; cursor: pointer; font-weight: 700; font-size: 15px;">❌ 취소</button>
+        <button id="saveSettingsBtn" style="padding: 10px 20px; border: none; border-radius: 5px; background: #2ecc71; color: white; cursor: pointer; font-weight: 700; font-size: 15px;">✅ 확인</button>
+      </div>
+    </div>
+  </div>    
+
+    <script>
+      window.Blockly = window.Blockly || {};
+      window.Blockly.Msg = window.Blockly.Msg || {};
+    </script>
+    
+    <script type="module" src="./app/main.ts"></script>
+    <script>
+      function appendSystemMessage(message) {
+        const serialOutput = document.getElementById('serialOutput');
+        if (serialOutput) {
+          serialOutput.innerText += `\n---[시스템] ${message} ---\n`;
+          serialOutput.scrollTop = serialOutput.scrollHeight;
+        }
+      }
+      if (navigator.serial) {
+        navigator.serial.addEventListener('connect', () => {
+          console.log("USB 연결됨"); appendSystemMessage("USB 케이블 연결됨 (포트 확인 필요)");
+        });
+        navigator.serial.addEventListener('disconnect', () => {
+          console.log("USB 끊김"); appendSystemMessage("USB 케이블 끊김 (연결 해제됨)");
+        });
+      }
+
+      function setBoardConnected(isConnected) {
+        const connectBtn = document.getElementById('connectBtn');
+        if (!connectBtn) return;
+
+        if (isConnected) {
+          connectBtn.classList.add('connected-glow');
+          connectBtn.style.setProperty('background-color', '#2ecc71', 'important');
+          connectBtn.style.setProperty('color', '#ffffff', 'important');
+          connectBtn.style.setProperty('box-shadow', '0 0 15px #2ecc71, 0 0 30px #2ecc71', 'important');
+          connectBtn.style.setProperty('border', '2px solid #2ecc71', 'important');
+        } else {
+          connectBtn.classList.remove('connected-glow');
+          connectBtn.style.removeProperty('background-color');
+          connectBtn.style.removeProperty('color');
+          connectBtn.style.removeProperty('box-shadow');
+          connectBtn.style.removeProperty('border');
+        }
+      }
+
+      window.electron?.ipcRenderer?.on?.('board-connected', (event, isConnected) => {
+        const connectBtn = document.getElementById('connectBtn');
+        if (!connectBtn) return;
+
+        if (isConnected) {
+          connectBtn.classList.add('connected-glow'); 
+        } else {
+          connectBtn.classList.remove('connected-glow'); 
+        }
+      });
+
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          window.dispatchEvent(new Event('resize'));
+        }, 500); 
+      });
+
+        // 🌟 수동 업데이트 확인 버튼 클릭 이벤트
+    document.addEventListener('DOMContentLoaded', () => {
+      const updateBtn = document.getElementById('manualUpdateBtn');
+      if (updateBtn) {
+        updateBtn.addEventListener('click', async () => {
+          // 버튼 누르면 '확인 중...'으로 글씨 변경 및 연타 방지
+          updateBtn.innerText = '🔄 확인 중...';
+          updateBtn.disabled = true;
+          updateBtn.style.background = '#95a5a6';
+
+          try {
+            // 메인 프로세스에 업데이트 확인 요청
+            await window.electron.ipcRenderer.invoke('check-for-updates');
+          } catch (error) {
+            console.error('업데이트 확인 실패:', error);
+          } finally {
+            // 3초 뒤에 버튼 원래대로 복구
+            setTimeout(() => {
+              updateBtn.innerText = '업데이트 확인';
+              updateBtn.disabled = false;
+              updateBtn.style.background = '#3498db';
+            }, 3000);
+          }
+        });
+      }
+    });
+    </script>
+
+  </body>
+</html>

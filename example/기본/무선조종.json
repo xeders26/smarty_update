@@ -1,0 +1,360 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "arduino_main",
+        "id": "#T)zjH8q}kPj[qg[dr|7",
+        "x": 89,
+        "y": 18,
+        "deletable": false,
+        "inputs": {
+          "SETUP": {
+            "block": {
+              "type": "smarty_begin",
+              "id": "w7/@^DL=RJWwOlb+%tc3"
+            }
+          },
+          "LOOP": {
+            "block": {
+              "type": "controls_if",
+              "id": "pc_fy|oS{$lo^N3K-f],",
+              "inputs": {
+                "IF0": {
+                  "block": {
+                    "type": "availableBt",
+                    "id": "3e(LNTxI+DZ7C}_[:ict"
+                  }
+                },
+                "DO0": {
+                  "block": {
+                    "type": "variables_set",
+                    "id": "sSFn+zIZlkLgJ4Kp{*de",
+                    "fields": {
+                      "VAR": {
+                        "id": "jUki;-y%l!$8lI!W)069"
+                      }
+                    },
+                    "inputs": {
+                      "VALUE": {
+                        "block": {
+                          "type": "getByteBt",
+                          "id": "luqP`D/tC5iPu1AH{Kb{"
+                        }
+                      }
+                    },
+                    "next": {
+                      "block": {
+                        "type": "controls_if",
+                        "id": "Pv+xN!Ar}m%:Yj/4)S?(",
+                        "inputs": {
+                          "IF0": {
+                            "block": {
+                              "type": "availableBt",
+                              "id": "9@Od[eYty@Nc1/HfM%=7"
+                            }
+                          },
+                          "DO0": {
+                            "block": {
+                              "type": "variables_set",
+                              "id": "w5U+wCYpsS*E:0PQNP,U",
+                              "fields": {
+                                "VAR": {
+                                  "id": "-/3Xn_7V[E=0NB1;(9yz"
+                                }
+                              },
+                              "inputs": {
+                                "VALUE": {
+                                  "block": {
+                                    "type": "getByteBt",
+                                    "id": "pGniW#)8YqO|}mP=1Z7W"
+                                  }
+                                }
+                              },
+                              "next": {
+                                "block": {
+                                  "type": "controls_if",
+                                  "id": "#``Ps,ey#Q)aDh7WjyrE",
+                                  "extraState": {
+                                    "elseIfCount": 1,
+                                    "hasElse": true
+                                  },
+                                  "inputs": {
+                                    "IF0": {
+                                      "block": {
+                                        "type": "logic_operation",
+                                        "id": "$2`JuAh:g#j~e3d`)X`k",
+                                        "fields": {
+                                          "OP": "AND"
+                                        },
+                                        "inputs": {
+                                          "A": {
+                                            "block": {
+                                              "type": "text_is_same",
+                                              "id": "zsPc^puH:DJ|AkTJ5;In",
+                                              "inputs": {
+                                                "TEXT_A": {
+                                                  "shadow": {
+                                                    "type": "text",
+                                                    "id": "xznd+}p(QB`9=VPr^JT^",
+                                                    "fields": {
+                                                      "TEXT": "스마티"
+                                                    }
+                                                  },
+                                                  "block": {
+                                                    "type": "variables_get",
+                                                    "id": "O9vi$l0}yb91BIm@m@P;",
+                                                    "fields": {
+                                                      "VAR": {
+                                                        "id": "jUki;-y%l!$8lI!W)069"
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                "TEXT_B": {
+                                                  "shadow": {
+                                                    "type": "text",
+                                                    "id": "E9pR22CF!4;~Tk707xQf",
+                                                    "fields": {
+                                                      "TEXT": "F"
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          },
+                                          "B": {
+                                            "block": {
+                                              "type": "text_is_same",
+                                              "id": "4*Zzcb23N8qd%tv{.7FP",
+                                              "inputs": {
+                                                "TEXT_A": {
+                                                  "shadow": {
+                                                    "type": "text",
+                                                    "id": "xznd+}p(QB`9=VPr^JT^",
+                                                    "fields": {
+                                                      "TEXT": "스마티"
+                                                    }
+                                                  },
+                                                  "block": {
+                                                    "type": "variables_get",
+                                                    "id": "|7#g70lHanSZeXJ49xIH",
+                                                    "fields": {
+                                                      "VAR": {
+                                                        "id": "-/3Xn_7V[E=0NB1;(9yz"
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                "TEXT_B": {
+                                                  "shadow": {
+                                                    "type": "text",
+                                                    "id": "V@ZzEoprjUL/VU55,^,/",
+                                                    "fields": {
+                                                      "TEXT": "a"
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "DO0": {
+                                      "block": {
+                                        "type": "smarty_led",
+                                        "id": "oOS][luf(xLvP?~^+%PO",
+                                        "fields": {
+                                          "ID": "LED1",
+                                          "ACT": "ON"
+                                        },
+                                        "next": {
+                                          "block": {
+                                            "type": "smarty_led",
+                                            "id": "2GVU9z[/f:jcQ1R6ac*p",
+                                            "fields": {
+                                              "ID": "LED2",
+                                              "ACT": "OFF"
+                                            },
+                                            "next": {
+                                              "block": {
+                                                "type": "turnBumpLED",
+                                                "id": "m}$`VO=a_|`RPQDRh$If",
+                                                "fields": {
+                                                  "DIR": "2",
+                                                  "COLOR": "2",
+                                                  "STATE": "0"
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "IF1": {
+                                      "block": {
+                                        "type": "logic_operation",
+                                        "id": "2B)KLxaglhCNT.M:2f$`",
+                                        "fields": {
+                                          "OP": "AND"
+                                        },
+                                        "inputs": {
+                                          "A": {
+                                            "block": {
+                                              "type": "text_is_same",
+                                              "id": "f2zq:KF46sA)Vr(mU*`H",
+                                              "inputs": {
+                                                "TEXT_A": {
+                                                  "shadow": {
+                                                    "type": "text",
+                                                    "id": "xznd+}p(QB`9=VPr^JT^",
+                                                    "fields": {
+                                                      "TEXT": "스마티"
+                                                    }
+                                                  },
+                                                  "block": {
+                                                    "type": "variables_get",
+                                                    "id": "IkH61wHn#Fx}GhGsYQtg",
+                                                    "fields": {
+                                                      "VAR": {
+                                                        "id": "jUki;-y%l!$8lI!W)069"
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                "TEXT_B": {
+                                                  "shadow": {
+                                                    "type": "text",
+                                                    "id": "zI+}A7z%ekWJSB;J:iNu",
+                                                    "fields": {
+                                                      "TEXT": "F"
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          },
+                                          "B": {
+                                            "block": {
+                                              "type": "text_is_same",
+                                              "id": "}ec]YCCOx!l.WQ8==VD|",
+                                              "inputs": {
+                                                "TEXT_A": {
+                                                  "shadow": {
+                                                    "type": "text",
+                                                    "id": "xznd+}p(QB`9=VPr^JT^",
+                                                    "fields": {
+                                                      "TEXT": "스마티"
+                                                    }
+                                                  },
+                                                  "block": {
+                                                    "type": "variables_get",
+                                                    "id": "0I-z9f(VJX@0/iLxBify",
+                                                    "fields": {
+                                                      "VAR": {
+                                                        "id": "-/3Xn_7V[E=0NB1;(9yz"
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                "TEXT_B": {
+                                                  "shadow": {
+                                                    "type": "text",
+                                                    "id": "*`3jq)-WV-0h#~KaI.Jf",
+                                                    "fields": {
+                                                      "TEXT": "s"
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "DO1": {
+                                      "block": {
+                                        "type": "smarty_led",
+                                        "id": "HISjePLQvtSXeT@M4R5`",
+                                        "fields": {
+                                          "ID": "LED1",
+                                          "ACT": "OFF"
+                                        },
+                                        "next": {
+                                          "block": {
+                                            "type": "smarty_led",
+                                            "id": "g#e[9.w@;GI!Ye[h$-kg",
+                                            "fields": {
+                                              "ID": "LED2",
+                                              "ACT": "ON"
+                                            },
+                                            "next": {
+                                              "block": {
+                                                "type": "turnBumpLED",
+                                                "id": "@Ht/LBLpr,J:mmMEe|0x",
+                                                "fields": {
+                                                  "DIR": "2",
+                                                  "COLOR": "2",
+                                                  "STATE": "0"
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "ELSE": {
+                                      "block": {
+                                        "type": "turnBumpLED",
+                                        "id": "so@~LmvCaxwt-D/v7Od]",
+                                        "fields": {
+                                          "DIR": "2",
+                                          "COLOR": "2",
+                                          "STATE": "1"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "type": "logic_compare",
+        "id": "*A9i],t2rIZpK1S+3l*w",
+        "x": 952,
+        "y": 252,
+        "fields": {
+          "OP": "EQ"
+        }
+      }
+    ]
+  },
+  "variables": [
+    {
+      "name": "항목",
+      "id": "RTs]x*+5j}L`vB[f3hk!"
+    },
+    {
+      "name": "명령",
+      "id": "jUki;-y%l!$8lI!W)069",
+      "type": "char"
+    },
+    {
+      "name": "값",
+      "id": "-/3Xn_7V[E=0NB1;(9yz",
+      "type": "int"
+    }
+  ]
+}
