@@ -10,7 +10,7 @@ import * as path from 'path'
 let isManualCheck = false;
 let progressWindow: BrowserWindow | null = null; 
 
-// 🌟 [핵심 추가] 현재 화면에 띄워진 메인 창을 찾아내는 함수!
+// 🌟 현재 화면에 띄워진 메인 창을 찾아내는 함수
 function getMainWindow(): BrowserWindow | undefined {
   return BrowserWindow.getAllWindows().find(w => !w.isDestroyed() && w.isVisible());
 }
@@ -22,8 +22,8 @@ function createProgressWindow() {
   const mainWindow = getMainWindow();
 
   progressWindow = new BrowserWindow({
-    parent: mainWindow, // 🌟 [핵심] 메인 창을 부모로 설정!
-    modal: true,        // 🌟 [핵심] 다운로드 중에는 메인 창 클릭 불가 (무조건 맨 위 유지!)
+    parent: mainWindow, 
+    modal: true,        
     width: 450,
     height: 180,
     resizable: false,
@@ -70,7 +70,7 @@ export function registerUpdateHandlers(): void {
     const mainWindow = getMainWindow();
 
     if (!app.isPackaged) {
-      const opts = { type: 'info' as const, title: '개발 모드 안내 🛠️', message: '개발 모드로 실행 중입니다.\n업데이트 기능은 빌드 후에 작동합니다!', buttons: ['알겠습니다'] };
+      const opts = { type: 'info' as const, title: '개발 모드 안내 🛠️', message: '개발 모드로 실행 중입니다.\n업데이트 기능은 빌드 후에 작동합니다!', buttons:['알겠습니다'] };
       if (mainWindow) dialog.showMessageBox(mainWindow, opts);
       else dialog.showMessageBox(opts);
       return { success: false, reason: 'dev-mode' };
@@ -89,8 +89,17 @@ export function registerUpdateHandlers(): void {
       return { success: true }
     } catch (error: any) {
       if (isManualCheck) { 
-        if (mainWindow) dialog.showErrorBox('업데이트 검사 실패 🚨', `버전 정보를 가져오지 못했습니다.\n\n상세 오류: ${error.message || error}`);
-        else dialog.showErrorBox('업데이트 검사 실패 🚨', `상세 오류: ${error.message || error}`);
+        let cleanErrorMsg = error.message || String(error);
+        
+        // 🌟 [수정됨] 수동 검사 에러 처리에도 HTML 필터링 적용!
+        if (cleanErrorMsg.includes('<!DOCTYPE html>') || cleanErrorMsg.includes('Unicorn')) {
+          cleanErrorMsg = "서버(GitHub)에서 버전을 찾을 수 없습니다.\n(저장소가 비공개이거나, 배포된 릴리즈(Release)가 없습니다.)";
+        } else if (cleanErrorMsg.length > 200) {
+          cleanErrorMsg = cleanErrorMsg.substring(0, 200) + '... (이하 생략)';
+        }
+
+        if (mainWindow) dialog.showErrorBox('업데이트 검사 실패 🚨', `버전 정보를 가져오지 못했습니다.\n\n상세 오류: ${cleanErrorMsg}`);
+        else dialog.showErrorBox('업데이트 검사 실패 🚨', `상세 오류: ${cleanErrorMsg}`);
         isManualCheck = false;
       }
       return { success: false, error: String(error) }
@@ -133,8 +142,6 @@ function checkUpdateSuccessNotify() {
 }
 
 export function setupAutoUpdater(): void {
-  // 프로그램 켜질 때 '업데이트 완료 알림' 띄우기
-  // 약간의 딜레이를 주어 메인 창이 완전히 뜬 다음에 알림이 뜨도록 보장합니다!
   setTimeout(() => checkUpdateSuccessNotify(), 1500);
 
   autoUpdater.autoDownload = true
@@ -182,7 +189,6 @@ export function setupAutoUpdater(): void {
       detail: '지금 재시작하여 새로운 버전을 설치하시겠습니까?\n(작업 중인 내용은 미리 저장해 주세요!)'
     }
 
-    // 🌟 [핵심] 재시작 알림창도 메인 창을 붙잡고 모달로 띄웁니다!
     if (mainWindow) {
       dialog.showMessageBox(mainWindow, dialogOpts).then((returnValue) => {
         if (returnValue.response === 0) autoUpdater.quitAndInstall(false, true)
@@ -199,8 +205,16 @@ export function setupAutoUpdater(): void {
 
     if (isManualCheck) {
       const mainWindow = getMainWindow();
-      if (mainWindow) dialog.showErrorBox('업데이트 오류 🚨', `업데이트 중 문제가 발생했습니다.\n\n${error.message}`);
-      else dialog.showErrorBox('업데이트 오류 🚨', `상세 오류: ${error.message}`);
+      
+      let cleanErrorMsg = error.message || String(error);
+      if (cleanErrorMsg.includes('<!DOCTYPE html>') || cleanErrorMsg.includes('Unicorn')) {
+        cleanErrorMsg = "업데이트 서버(GitHub)에서 올바른 응답을 받지 못했습니다.\n(저장소가 비공개이거나, 아직 등록된 릴리즈(Release)가 없습니다.)";
+      } else if (cleanErrorMsg.length > 200) {
+        cleanErrorMsg = cleanErrorMsg.substring(0, 200) + '... (이하 생략)';
+      }
+
+      if (mainWindow) dialog.showErrorBox('업데이트 오류 🚨', `업데이트 중 문제가 발생했습니다.\n\n${cleanErrorMsg}`);
+      else dialog.showErrorBox('업데이트 오류 🚨', `상세 오류: ${cleanErrorMsg}`);
       isManualCheck = false;
     }
   })
