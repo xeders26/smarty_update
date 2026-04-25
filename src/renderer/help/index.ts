@@ -2,7 +2,7 @@ import { BaseBlocksHelp } from './baseBlocksHelp';
 import { BluetoothBlocksHelp } from './bluetoothBlocksHelp';
 import { FunctionsBlocksHelp } from './functionsBlocksHelp';
 import { IoBlocksHelp } from './ioBlocksHelp';
-import { LedBlocksHelp } from './ledBlockshelp';  
+import { LedBlocksHelp } from './ledBlocksHelp';  
 import { LogicLoopBlocksHelp } from './logicLoopBlocksHelp';  
 import { MathBlocksHelp } from './mathBlocksHelp';
 import { MotorBlocksHelp } from './motorBlocksHelp';
