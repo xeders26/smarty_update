@@ -1,0 +1,25 @@
+<h2 style="color: #3498db; margin: 0 0 5px 0;">📦 심화 예제: 문자열 결합(합치기) 및 변수 제어</h2>
+<hr style="margin: 5px 0 15px 0; border-color: #555;">
+
+<p style="margin: 0 0 15px 0; line-height: 1.5;">다양한 변수를 만들고, 조건문에 따라 <b>글자(문자열)를 이어 붙이는 방법</b>을 배우는 심화 예제입니다.<br>
+기존에 있던 단어 뒤에 새로운 단어를 덧붙여서 더 긴 문장을 만들어 봅니다.</p>
+
+<h3 style="color: #3498db; margin: 0 0 10px 0;">🧩 블록 동작 흐름</h3>
+<ol style="line-height: 1.5; margin: 0 0 15px 25px; padding: 0;">
+  <li style="margin-bottom: 5px;"><b>초기 설정 (setup) - 5가지 변수 준비:</b>
+    <ul style="margin: 5px 0 5px 20px; padding: 0;">
+      <li style="margin-bottom: 3px;">논리형 <code style="color: #f1c40f;">b</code>에 <b>참(TRUE)</b>을 넣습니다.</li>
+      <li style="margin-bottom: 3px;">문자형 <code style="color: #f1c40f;">cc</code>에 알파벳 <b>"A"</b>를 넣습니다.</li>
+      <li style="margin-bottom: 3px;">실수형 <code style="color: #f1c40f;">f</code>와 정수형 <code style="color: #f1c40f;">i</code>에 숫자 <b>0</b>을 넣습니다.</li>
+      <li style="margin-bottom: 3px;">문자열형 <code style="color: #f1c40f;">ss</code>에 단어 <b>"hello"</b>를 넣습니다.</li>
+    </ul>
+  </li>
+  <li style="margin-bottom: 5px;"><b>조건 확인 (만약 ~라면):</b> 변수 <code style="color: #f1c40f;">i</code>에 들어있는 값이 <b>0</b>과 같은지 확인합니다.</li>
+  <li style="margin-bottom: 5px;"><b>문자열 이어 붙이기:</b> 만약 <code style="color: #f1c40f;">i</code>가 0이라면, 변수 <code style="color: #f1c40f;">ss</code>에 들어있는 글자("hello") 뒤에 <b>"bye"</b>라는 글자를 덧붙여서 다시 <code style="color: #f1c40f;">ss</code> 상자에 집어넣습니다. (결과: "hellobye")</li>
+  <li><b>변수 값 변화:</b> 만약 <code style="color: #f1c40f;">i</code>가 0이 <b>아니라면 (그렇지 않다면)</b>, 변수 <code style="color: #f1c40f;">i</code>의 값을 <b>1만큼 증가(변화)</b>시킵니다.</li>
+</ol>
+
+<div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #f39c12; border-radius: 4px; margin-top: 15px;">
+  <b style="color: #f39c12;">💡 핵심 포인트</b>
+  <div style="margin-top: 5px; color: #e0e0e0; line-height: 1.5;"><b>'텍스트 만들기(Join)'</b> 블록을 사용하면 여러 개의 글자나 변수를 하나의 긴 문장으로 찰싹 붙일 수 있습니다! <br><br>※ <b>재미있는 코딩 논리:</b> 위 코드에서는 처음에 <code style="color: #f1c40f;">i</code>가 0이므로 첫 번째 조건만 계속 실행됩니다. 그래서 <code style="color: #f1c40f;">ss</code> 상자 안의 글자는 "hellobyebyebye..."처럼 끝없이 길어지게 됩니다! 만약 한 번만 붙이고 싶다면 "bye"를 붙인 직후에 <code style="color: #f1c40f;">i</code>의 값을 1로 바꿔주면 되겠죠? 학생들에게 질문을 던지기 아주 좋은 예제입니다!</div>
+</div>

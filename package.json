@@ -1,6 +1,6 @@
 {
   "name": "Smarty",
-  "version": "2.5.10",
+  "version": "2.6.0",
   "description": "Smarty robot editor",
   "main": "./out/main/index.js",
   "author": "xeders.com",
@@ -56,8 +56,8 @@
     ],
     "extraResources": [
       {
-        "from": "example",
-        "to": "example",
+        "from": "examples",
+        "to": "examples",
         "filter": [
           "**/*"
         ]

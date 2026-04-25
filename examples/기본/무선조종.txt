@@ -1,0 +1,22 @@
+<h2 style="color: #3498db; margin: 0 0 5px 0;">📱 고급 통신: 연속 명령어(패킷) 처리하기</h2>
+<hr style="margin: 5px 0 15px 0; border-color: #555;">
+
+<p style="margin: 0 0 15px 0; line-height: 1.5;">스마트폰에서 블루투스로 <b>두 개의 글자를 연속으로 전송(예: "Fa", "Fs")</b>했을 때, 이를 순서대로 읽어서 조합에 따라 로봇의 LED를 제어하는 고급 예제입니다.</p>
+
+<h3 style="color: #3498db; margin: 0 0 10px 0;">🧩 블록 동작 흐름</h3>
+<ol style="line-height: 1.5; margin: 0 0 15px 25px; padding: 0;">
+  <li style="margin-bottom: 5px;"><b>첫 번째 글자 읽기:</b> 블루투스 데이터가 들어오면 <b>첫 번째 글자</b>를 읽어서 <code style="color: #f1c40f;">명령</code> 변수에 저장합니다.</li>
+  <li style="margin-bottom: 5px;"><b>두 번째 글자 읽기:</b> 그 뒤에 또 데이터가 들어왔는지 확인하고, <b>두 번째 글자</b>를 읽어서 <code style="color: #f1c40f;">값</code> 변수에 저장합니다.</li>
+  <li style="margin-bottom: 5px;"><b>명령어 조합 분석 (만약 ~라면):</b>
+    <ul style="margin: 5px 0 5px 20px; padding: 0;">
+      <li style="margin-bottom: 3px;"><b>"Fa" 가 들어왔을 때:</b> (<code style="color: #f1c40f;">명령</code>이 'F' <b>그리고</b> <code style="color: #f1c40f;">값</code>이 'a' 라면) 👉 <b>내장 LED1을 켜고</b>, LED2는 끕니다. 범퍼 LED도 끕니다.</li>
+      <li style="margin-bottom: 3px;"><b>"Fs" 가 들어왔을 때:</b> (<code style="color: #f1c40f;">명령</code>이 'F' <b>그리고</b> <code style="color: #f1c40f;">값</code>이 's' 라면) 👉 내장 LED1을 끄고, <b>내장 LED2를 켭니다.</b> 범퍼 LED도 끕니다.</li>
+      <li style="margin-bottom: 3px;"><b>그 외의 다른 글자일 때:</b> (예: "Fq", "Ab" 등) 👉 내장 LED 대신 <b>범퍼 LED에 불을 켭니다.</b></li>
+    </ul>
+  </li>
+</ol>
+
+<div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #f39c12; border-radius: 4px; margin-top: 15px;">
+  <b style="color: #f39c12;">💡 핵심 포인트</b>
+  <div style="margin-top: 5px; color: #e0e0e0; line-height: 1.5;">이처럼 여러 개의 데이터를 묶어서 보내는 방식을 <b>'패킷(Packet) 통신'</b>이라고 부릅니다. <br>스마트폰의 블루투스 터미널 앱에서 키보드로 <b>Fa</b>를 치고 전송해 보세요. 그 다음엔 <b>Fs</b>를 쳐보세요. 로봇이 명령어의 조합을 똑똑하게 알아듣고 각기 다른 불빛을 보여줄 것입니다! 논리 연산자(그리고, AND)를 아주 잘 활용한 예제입니다!</div>
+</div>

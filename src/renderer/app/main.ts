@@ -79,13 +79,13 @@ if (!(window as any).__flyoutCorePatched) {
     const FlyoutProto = Blockly.VerticalFlyout.prototype as any; 
 
     FlyoutProto.getFlyoutScale = function() { return 0.8; };
-    FlyoutProto.getWidth = function() { return 300; };
+    FlyoutProto.getWidth = function() { return 215; };
 
     const origReflow = FlyoutProto.reflowInternal_;
     if (origReflow) {
       FlyoutProto.reflowInternal_ = function() {
         origReflow.call(this);
-        (this as any).width_ = 300; 
+        (this as any).width_ = 215; 
       };
     }
 
@@ -94,22 +94,43 @@ if (!(window as any).__flyoutCorePatched) {
       FlyoutProto.position = function() {
         origPosition.call(this); 
         const _this = this as any; 
-        _this.width_ = 300;
+        _this.width_ = 215;
 
         if (_this.svgBackground_) {
-          _this.svgBackground_.setAttribute('width', '280');
+          _this.svgBackground_.setAttribute('width', '200');
           _this.svgBackground_.setAttribute('x', '0'); 
         }
 
         if (_this.svgGroup_) {
           const transform = _this.svgGroup_.getAttribute('transform') || '';
           _this.svgGroup_.setAttribute('transform', transform.replace(/translate\([^,]+,/, 'translate(0,'));
+                    // 🚨 [여기에 새로 추가!!] 블록 목록 가장 오른쪽에 경계선(가위선) 긋기
+          if (!_this.rightBorderLine_) {
+            _this.rightBorderLine_ = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            _this.rightBorderLine_.setAttribute('class', 'smarty-flyout-border');
+            
+            // 선이 블록들을 가리지 않도록, 배경 바로 위에만 살짝 얹어줍니다!
+            if (_this.svgBackground_ && _this.svgBackground_.nextSibling) {
+              _this.svgGroup_.insertBefore(_this.rightBorderLine_, _this.svgBackground_.nextSibling);
+            } else {
+              _this.svgGroup_.appendChild(_this.rightBorderLine_);
+            }
+          }
+          // 200px 위치에 위에서 아래로 쫙 뻗은 선을 설정합니다.
+          _this.rightBorderLine_.setAttribute('x1', '200');
+          _this.rightBorderLine_.setAttribute('x2', '200');
+          _this.rightBorderLine_.setAttribute('y1', '0');
+          _this.rightBorderLine_.setAttribute('y2', '5000'); // 아래까지 닿도록 넉넉하게 설정
+        
         }
 
         if (_this.scrollbar && _this.scrollbar.svgGroup_ && _this.scrollbar.position_) {
           const currentY = _this.scrollbar.position_.y || 0;
-          _this.scrollbar.position_.x = 264; 
-          _this.scrollbar.svgGroup_.setAttribute('transform', `translate(264, ${currentY})`);
+          _this.scrollbar.position_.x = 185; 
+          _this.scrollbar.svgGroup_.setAttribute('transform', `translate(185, ${currentY})`);
+        }
+        if (_this.clipRect_) {
+          _this.clipRect_.setAttribute('width', '200');
         }
       };
     }
@@ -136,7 +157,7 @@ window.addEventListener('DOMContentLoaded', () => {
     horizontalLayout: false,
     disable: true,   
     collapse: true,  
-    zoom: { controls: true, wheel: true, startScale: 1.0, maxScale: 3, minScale: 0.3, scaleSpeed: 1.2 }
+    zoom: { controls: true, wheel: true, startScale: 0.85, maxScale: 3, minScale: 0.3, scaleSpeed: 1.2 }
   });
 
   workspace.registerToolboxCategoryCallback(

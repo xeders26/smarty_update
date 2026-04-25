@@ -1,0 +1,19 @@
+<h2 style="color: #3498db; margin: 0 0 5px 0;">⚙️ 기초 예제: 서보 모터 각도 제어하기</h2>
+<hr style="margin: 5px 0 15px 0; border-color: #555;">
+
+<p style="margin: 0 0 15px 0; line-height: 1.5;">스마티 로봇에 연결된 <b>서보 모터의 각도를 제어</b>하는 기초 예제입니다.<br>
+1번 서보 모터(S1)가 0도와 90도 위치를 1초 간격으로 무한히 왕복하며 움직입니다.</p>
+
+<h3 style="color: #3498db; margin: 0 0 10px 0;">🧩 블록 동작 흐름</h3>
+<ol style="line-height: 1.5; margin: 0 0 15px 25px; padding: 0;">
+  <li style="margin-bottom: 5px;"><b>초기 설정 (setup):</b> 스마티 로봇을 시작할 준비를 합니다.</li>
+  <li style="margin-bottom: 5px;"><b>서보 모터 S1 0도 이동:</b> 1번 서보 모터(S1)의 각도를 <b>0도</b>로 회전시킵니다.</li>
+  <li style="margin-bottom: 5px;"><b>1000 밀리초(ms) 기다리기:</b> 모터가 0도 위치까지 물리적으로 이동할 수 있도록 1초(1000ms) 동안 대기합니다.</li>
+  <li style="margin-bottom: 5px;"><b>서보 모터 S1 90도 이동:</b> 1번 서보 모터(S1)의 각도를 <b>90도</b>로 회전시킵니다.</li>
+  <li><b>1000 밀리초(ms) 기다리기:</b> 모터가 90도 위치까지 이동할 수 있도록 다시 1초 동안 대기합니다.</li>
+</ol>
+
+<div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #f39c12; border-radius: 4px; margin-top: 15px;">
+  <b style="color: #f39c12;">💡 핵심 포인트</b>
+  <div style="margin-top: 5px; color: #e0e0e0; line-height: 1.5;">서보 모터는 뱅글뱅글 도는 DC 모터와 달리 <b>우리가 지정해 준 각도(보통 0도~180도)로 정확하게 움직이는 관절 모터</b>입니다. 로봇의 팔다리를 만들거나 자동차의 핸들(조향장치)을 만들 때 아주 유용합니다!<br><br>※ <b>주의:</b> 각도를 바꾸라고 명령한 뒤에는 모터가 실제로 움직일 <b>시간(기다리기 블록)이 반드시 필요</b>합니다. 기다리기 블록이 없으면 모터가 채 움직이기도 전에 다음 명령이 들어가서 모터가 덜덜거릴 수 있습니다!</div>
+</div>

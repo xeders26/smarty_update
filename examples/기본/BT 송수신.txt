@@ -1,0 +1,24 @@
+<h2 style="color: #3498db; margin: 0 0 5px 0;">📱 고급 예제: 블루투스 양방향 통신 및 범퍼 LED 제어</h2>
+<hr style="margin: 5px 0 15px 0; border-color: #555;">
+
+<p style="margin: 0 0 15px 0; line-height: 1.5;">로봇이 스마트폰이나 PC와 <b>블루투스로 데이터를 주고받는(통신하는) 방법</b>을 배우는 예제입니다.<br>
+특정 명령어 글자(예: 'F')를 받으면 그에 맞춰 로봇이 답장을 보내고 LED를 다르게 깜빡입니다.</p>
+
+<h3 style="color: #3498db; margin: 0 0 10px 0;">🧩 블록 동작 흐름</h3>
+<ol style="line-height: 1.5; margin: 0 0 15px 25px; padding: 0;">
+  <li style="margin-bottom: 5px;"><b>초기 설정 (setup):</b> 스마티를 시작하고, 범퍼 LED를 켠 뒤 <b>블루투스 모듈을 켭니다(ON).</b></li>
+  <li style="margin-bottom: 5px;"><b>데이터 수신 확인:</b> <code style="color: #f1c40f;">[만약 블루투스 데이터가 있는가?]</code> 블록으로 스마트폰에서 무언가 날아왔는지 계속 확인합니다.</li>
+  <li style="margin-bottom: 5px;"><b>명령어 저장:</b> 데이터가 들어왔다면, 블루투스로부터 <b>명령어(문자)</b>와 <b>값(숫자)</b>을 읽어와서 각각 <code style="color: #f1c40f;">cmd</code>와 <code style="color: #f1c40f;">val</code>이라는 변수 상자에 저장합니다.</li>
+  <li style="margin-bottom: 5px;"><b>명령어 분석 및 답장:</b>
+    <ul style="margin: 5px 0 5px 20px; padding: 0;">
+      <li style="margin-bottom: 3px;">받은 명령어(cmd)가 <b>"F"</b> 라면 👉 스마트폰으로 <b>"Hello"</b>라는 글자를 답장으로 보내고 범퍼 LED를 깜빡입니다.</li>
+      <li style="margin-bottom: 3px;">받은 명령어(cmd)가 "F"가 <b>아니라면</b> 👉 스마트폰으로 숫자 <b>100</b>을 답장으로 보내고 범퍼 LED를 다르게 깜빡입니다.</li>
+    </ul>
+  </li>
+  <li><b>대기 상태:</b> 들어온 데이터가 없다면, 범퍼 LED를 끄고 10ms 동안 짧게 대기합니다.</li>
+</ol>
+
+<div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #f39c12; border-radius: 4px; margin-top: 15px;">
+  <b style="color: #f39c12;">💡 핵심 포인트</b>
+  <div style="margin-top: 5px; color: #e0e0e0; line-height: 1.5;">스마트폰에 '블루투스 터미널' 앱을 설치하고 스마티와 연결해 보세요! 스마트폰에서 <b>'F'</b>를 전송하면 로봇이 <b>'Hello'</b>라고 대답하는 마법 같은 통신을 경험할 수 있습니다.<br><br>※ 블루투스로 글자를 보낼 때 <code style="color: #f1c40f;">rcvByte</code> 변수에는 전송에 성공한 데이터의 크기(바이트)가 저장됩니다.</div>
+</div>

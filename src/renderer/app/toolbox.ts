@@ -1240,29 +1240,21 @@ function injectWaterdropCSS() {
   const style = document.createElement('style')
   style.id = 'waterdrop-sidebar-style'
   style.innerHTML = `
-    .blocklyFlyout { display: block !important; }
-    body:not(.dark-mode) .blocklyFlyoutBackground,
-    html:not(.dark-mode) .blocklyFlyoutBackground { 
-      fill: #f4f7f9 !important; 
-      fill-opacity: 0.95 !important; 
-      stroke: none !important; 
-    }
-    body.dark-mode .blocklyFlyoutBackground,
-    html.dark-mode .blocklyFlyoutBackground { 
-      fill: #2d3436 !important; 
-      fill-opacity: 0.95 !important; 
+    .blocklyFlyoutBackground { 
+      fill: transparent !important; 
+      fill-opacity: 0 !important; 
       stroke: none !important; 
     }
     .blocklyFlyout > g { clip-path: none !important; }
-    .blocklyFlyout .blocklyBlockCanvas > g.blocklyDraggable, .blocklyFlyout .blocklyBlockCanvas > g.blockly-custom-label, .blocklyFlyout .blocklyBlockCanvas > g.blocklyFlyoutButton { clip-path: polygon(-1000px -5000px, 350px -5000px, 350px 5000px, -1000px 5000px) !important; transition: clip-path 0.15s ease, filter 0.15s ease !important; cursor: pointer !important; }
+    .blocklyFlyout .blocklyBlockCanvas > g.blocklyDraggable, .blocklyFlyout .blocklyBlockCanvas > g.blockly-custom-label, .blocklyFlyout .blocklyBlockCanvas > g.blocklyFlyoutButton { clip-path: polygon(-1000px -5000px, 250px -5000px, 250px 5000px, -1000px 5000px) !important; transition: clip-path 0.15s ease, filter 0.15s ease !important; cursor: pointer !important; }
     .blocklyFlyout .blocklyBlockCanvas > g.blocklyDraggable:hover, .blocklyFlyout .blocklyBlockCanvas > g.blockly-custom-label:hover, .blocklyFlyout .blocklyBlockCanvas > g.blocklyFlyoutButton:hover { clip-path: polygon(-1000px -5000px, 3000px -5000px, 3000px 5000px, -1000px 5000px) !important; filter: drop-shadow(4px 4px 10px rgba(0,0,0,0.5)) !important; }
-    .blockly-custom-label text { font-weight: 900 !important; font-size: 16pt !important; }
+    .blockly-custom-label text { font-weight: 900 !important; font-size: 13.5pt !important; }
     .blocklyToolboxDiv { display: none !important; }
     #category-sidebar { 
       border-radius: 0 !important; 
-      width: 60px !important; 
-      min-width: 60px !important; 
-      max-width: 60px !important; 
+      width: 54px !important; 
+      min-width: 54px !important; 
+      max-width: 54px !important; 
       padding: 10px 0 !important; 
       background: transparent !important; 
       border-right: none !important; 
@@ -1274,7 +1266,7 @@ function injectWaterdropCSS() {
       z-index: 10; 
     }
     .smarty-category-btn::before, .waterdrop-chip::before { content: none !important; display: none !important; }
-    #category-sidebar .waterdrop-chip { position: relative; border-radius: 14px !important; opacity: 1 !important; filter: none !important; background: radial-gradient(circle at 30% 30%, var(--glass-light) 0%, var(--glass-base) 45%, var(--glass-dark) 100%) !important; box-shadow: inset 0px -4px 8px rgba(255, 255, 255, 0.4), inset 0px 4px 6px rgba(255, 255, 255, 0.3), 0px 6px 10px var(--glass-shadow) !important; margin: 1px auto !important; width: 42px !important; height: 42px !important; border: none !important; display: flex; align-items: center; justify-content: center; transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important; outline: none; cursor: pointer; }
+    #category-sidebar .waterdrop-chip { position: relative; border-radius: 14px !important; opacity: 1 !important; filter: none !important; background: radial-gradient(circle at 30% 30%, var(--glass-light) 0%, var(--glass-base) 45%, var(--glass-dark) 100%) !important; box-shadow: inset 0px -4px 8px rgba(255, 255, 255, 0.4), inset 0px 4px 6px rgba(255, 255, 255, 0.3), 0px 6px 10px var(--glass-shadow) !important; margin: 1px auto !important; width: 38px !important; height: 38px !important; border: none !important; display: flex; align-items: center; justify-content: center; transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important; outline: none; cursor: pointer; }
     #category-sidebar .waterdrop-chip::after { content: ''; position: absolute; top: 2px; left: 15%; width: 70%; height: 35%; background: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 100%); border-radius: 10px 10px 16px 16px; pointer-events: none; z-index: 2; }
     #category-sidebar .waterdrop-chip:hover { transform: translateY(-2px) scale(1.05); box-shadow: inset 0px -8px 12px rgba(255, 255, 255, 0.6), inset 0px 4px 6px rgba(255, 255, 255, 0.3), 0px 10px 16px var(--glass-shadow) !important; }
     #category-sidebar .waterdrop-chip.selected { background: radial-gradient(circle at 30% 30%, var(--glass-light) 0%, var(--glass-base) 45%, var(--glass-dark) 100%) !important; box-shadow: inset 0px -4px 8px rgba(255, 255, 255, 0.4), inset 0px 4px 6px rgba(255, 255, 255, 0.3), 0px 0px 15px var(--glass-base), 0px 6px 15px var(--glass-shadow) !important; transform: scale(1.15); }

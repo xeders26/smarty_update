@@ -1,0 +1,22 @@
+<h2 style="color: #3498db; margin: 0 0 5px 0;">🕹️ 기초 예제: 내장 스위치로 LED 제어하기</h2>
+<hr style="margin: 5px 0 15px 0; border-color: #555;">
+
+<p style="margin: 0 0 15px 0; line-height: 1.5;">로봇에 달려있는 <b>버튼(스위치)을 눌러서 직접 LED 불빛을 제어</b>하는 기초 예제입니다.<br>
+SW1 버튼을 누르면 첫 번째 불이 켜지고, SW2 버튼을 누르면 두 번째 불이 켜집니다.</p>
+
+<h3 style="color: #3498db; margin: 0 0 10px 0;">🧩 블록 동작 흐름</h3>
+<ol style="line-height: 1.5; margin: 0 0 15px 25px; padding: 0;">
+  <li style="margin-bottom: 5px;"><b>초기 설정 (setup):</b> 스마티 로봇을 시작할 준비를 합니다.</li>
+  <li style="margin-bottom: 5px;"><b>버튼 상태 확인 및 제어 (만약 ~라면):</b> 스위치가 눌렸는지 계속 확인하며 아래와 같이 행동합니다.
+    <ul style="margin: 5px 0 5px 20px; padding: 0;">
+      <li style="margin-bottom: 3px;"><b>만약 <code style="color: #f1c40f;">SW1</code> 스위치가 눌렸다면:</b> 내장 LED1을 켜고(ON), LED2는 끕니다(OFF).</li>
+      <li style="margin-bottom: 3px;"><b>아니고 만약 <code style="color: #f1c40f;">SW2</code> 스위치가 눌렸다면:</b> 내장 LED1을 끄고(OFF), LED2를 켭니다(ON).</li>
+      <li style="margin-bottom: 3px;"><b>그렇지 않다면 (아무 버튼도 누르지 않았다면):</b> 내장 LED1과 LED2를 모두 끕니다(OFF).</li>
+    </ul>
+  </li>
+</ol>
+
+<div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #f39c12; border-radius: 4px; margin-top: 15px;">
+  <b style="color: #f39c12;">💡 핵심 포인트</b>
+  <div style="margin-top: 5px; color: #e0e0e0; line-height: 1.5;">사용자의 조작이나 센서 값에 따라 로봇이 다르게 행동하도록 만드는 것을 <b>'조건문(If)'</b>이라고 합니다. <br>이 예제는 <b>[만약] - [아니고 만약] - [그렇지 않다면]</b> 구조를 사용하여, 여러 가지 상황을 한 번에 깔끔하게 처리하는 아주 좋은 프로그래밍 습관을 보여줍니다!</div>
+</div>

@@ -9,8 +9,8 @@ export function registerExampleHandlers(): void {
   ipcMain.handle('get-examples-tree', async () => {
     // 패키징(빌드) 여부에 따라 example 폴더 경로를 자동으로 찾습니다.
     const examplesPath = app.isPackaged 
-      ? join(process.resourcesPath, 'example') 
-      : join(process.cwd(), 'example')
+      ? join(process.resourcesPath, 'examples') 
+      : join(process.cwd(), 'examples')
 
     console.log('====================================')
     console.log('🔍 [예제 스캔] 폴더를 찾는 중입니다...')

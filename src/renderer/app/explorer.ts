@@ -1,7 +1,7 @@
-/*================
-src/renderer/app/explorer.ts
-===============*/ 
 import * as Blockly from 'blockly';
+
+// 🌟 [추가됨] 미리보기 워크스페이스를 기억해둘 변수 (메모리 누수 방지용)
+let previewWorkspace: Blockly.WorkspaceSvg | null = null;
 
 export async function initExplorer(
   workspace: Blockly.WorkspaceSvg,
@@ -32,16 +32,18 @@ export async function initExplorer(
     console.error("❌ 예제 불러오기 실패:", e);
   }
 
-  // 3. 팝업창 컨테이너 가져오기
+  // 3. 팝업창 컨테이너 세팅
   const explorerContainer = document.getElementById('my-custom-explorer');
-  if (!explorerContainer) {
-    console.error("❌ my-custom-explorer 창을 찾을 수 없습니다!");
-    return;
-  }
+  if (!explorerContainer) return;
 
-  // 🌟 부드러운 가로 확장 애니메이션 및 최대 크기 방어 적용
-  explorerContainer.style.transition = 'width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
-  explorerContainer.style.maxWidth = '90vw'; 
+  explorerContainer.style.transition = 'opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
+  explorerContainer.style.position = 'absolute';
+  explorerContainer.style.top = '0';
+  explorerContainer.style.bottom = '0';
+  explorerContainer.style.right = '0';
+  explorerContainer.style.width = 'auto';
+  explorerContainer.style.height = 'auto'; 
+  explorerContainer.style.maxWidth = 'none';
 
   // 4. 창 닫기 함수
   const closeExplorerWindow = () => {
@@ -52,51 +54,131 @@ export async function initExplorer(
       const tb = workspace.getToolbox();
       if (tb && typeof tb.clearSelection === 'function') tb.clearSelection();
     }
+    
+    // 🌟 [추가됨] 창을 닫을 때 미리보기 워크스페이스도 깔끔하게 메모리에서 지워줍니다.
+    if (previewWorkspace) {
+      previewWorkspace.dispose();
+      previewWorkspace = null;
+    }
   };
   (window as any).closeExplorerWindow = closeExplorerWindow;
 
-  // 🚨 [강력한 마법 적용] 도화지(배경), 블록 클릭 시 예제 창 닫기!
-  // Blockly가 이벤트를 훔쳐가지 못하도록 pointerdown, touchstart 모두 캡처링으로 방어합니다.
+  // 창 바깥 클릭 시 닫기
   const handleOutsideClick = (e: Event) => {
     if (explorerContainer.style.display === 'none') return;
-    
     const target = e.target as Element;
-    // target 요소가 Element가 아니거나(SVG 하위 속성 등) closest 함수가 없으면 무시
     if (!target || typeof target.closest !== 'function') return; 
-
-    // 1. 예제 창 내부나 도움말 창을 클릭한 경우는 안 닫힘
     if (target.closest('.explorer-col') || target.closest('#helpPanel')) return;
-    
-    // 2. 블록 도구함(카테고리 툴박스) 클릭 시 안 닫힘 (예제 열기 버튼과 충돌 방지)
     if (target.closest('.blocklyToolboxDiv') || target.closest('#category-sidebar') || target.closest('.category-sidebar')) return;
-
-    // 3. 그 외의 모든 곳(캔버스, 블록, 빈 공간)을 클릭하면 닫아버림!
     closeExplorerWindow();
   };
 
-  // true(캡처링 단계)로 설정하여 가장 먼저 이벤트를 가져옵니다!
   document.addEventListener('pointerdown', handleOutsideClick, true);
   document.addEventListener('mousedown', handleOutsideClick, true);
   document.addEventListener('touchstart', handleOutsideClick, true);
 
-  // 5. 헬프(도움말) 패널 업데이트
+  // 🌟 [핵심 수정] 5. 헬프 패널 업데이트 (반으로 쪼개고 우측에 블록 렌더링)
   function updateHelpPanel(item: any) {
     const hp = document.getElementById('helpPanel');
     if (!hp) return;
+
+    // 이전에 그려진 블록 미리보기가 있다면 메모리에서 삭제
+    if (previewWorkspace) {
+      previewWorkspace.dispose();
+      previewWorkspace = null;
+    }
+
     if (item.type === 'file') {
       hp.innerHTML = `
-        <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 700; font-size: 24px; color: #4cc71a; margin-bottom: 15px; border-bottom: 1px solid #3c3c3c; padding-bottom: 10px; pointer-events: none;">
-          📝 ${item.name} 예제
+        <div style="display: flex; flex-direction: row; width: 100%; height: 100%; gap: 30px;">
+          
+          <!-- 좌측: 설명 텍스트 창 (flex: 1) -->
+          <div style="flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding-right: 10px;">
+            <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 700; font-size: 21px; color: #4cc71a; margin-bottom: 12px; border-bottom: 1px solid #3c3c3c; padding-bottom: 8px; pointer-events: none;">
+              📝 ${item.name} 예제
+            </div>
+            <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 500; color: #d4d4d4; line-height: 1.5; white-space: normal; font-size: 15px; pointer-events: none;">
+              ${item.help || '저장된 설명이 없습니다.'}
+            </div>
+          </div>
+
+          <!-- 우측: 블록 미리보기 창 (flex: 1) -->
+          <div style="flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.3); border: 1px solid #3c3c3c; border-radius: 12px; overflow: hidden;">
+            <div style="padding: 10px; background: rgba(255,255,255,0.05); color: #aaa; font-size: 13px; font-weight: bold; text-align: center; border-bottom: 1px solid #3c3c3c; pointer-events: none;">
+              🧩 블록 미리보기 (읽기 전용)
+            </div>
+            <!-- 이 div 안에 Blockly가 주입됩니다! -->
+            <div id="blockly-preview-div" style="flex: 1; width: 100%; height: 100%;"></div>
+          </div>
+
         </div>
-        <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 500; color: #d4d4d4; line-height: 1.6; white-space: pre-wrap; font-size: 16px; pointer-events: none;">${item.help || '저장된 설명이 없습니다.'}</div>
       `;
+
+      // 🌟 HTML 렌더링 후 50ms 뒤에 블록 렌더링 시작
+      setTimeout(() => {
+        const previewDiv = document.getElementById('blockly-preview-div');
+        if (!previewDiv) return;
+
+        // 1. 읽기 전용 워크스페이스 주입 (메인 도화지와 100% 동일한 유전자 이식!)
+        previewWorkspace = Blockly.inject(previewDiv, {
+          readOnly: true,
+          scrollbars: true,
+          trashcan: false,
+          renderer: 'zelos', 
+          theme: workspace.getTheme(), 
+          move: { scrollbars: true, drag: true, wheel: true },
+          // 🌟 [추가됨] 블록 크기를 60%로 줄이고, 휠로 확대/축소를 못하게 고정합니다!
+          zoom: {
+            controls: false, // 줌 인/아웃 버튼 숨기기
+            wheel: false,    // 마우스 휠로 줌 조절 금지 (스크롤만 가능하게)
+            startScale: 0.7  // 🌟 핵심! 시작부터 60% 크기로 보여주기!
+          }
+        });
+
+        try {
+          const blockData = item.code; 
+
+          // 2. 데이터가 존재한다면 바로 화면에 그리기!
+          if (blockData) {
+            const parsedData = typeof blockData === 'string' ? JSON.parse(blockData) : blockData;
+            Blockly.serialization.workspaces.load(parsedData, previewWorkspace);
+            
+            // 🎨 스마티 전용 커스텀 블록 색상 덧칠하기 유지
+            const customColors = (window as any).__smartyBlockColors || (window as any).__blockColorMap;
+            if (customColors) {
+              previewWorkspace.getAllBlocks(false).forEach(block => {
+                if (!block.isShadow() && customColors[block.type] && typeof block.setColour === 'function') {
+                  block.setColour(customColors[block.type]);
+                }
+              });
+            }
+
+            console.log("✅ 블록 모양(Zelos) 및 테마 완벽 적용 성공!");
+            
+          } else {
+            throw new Error("item.code 안에 블록 데이터가 없습니다!");
+          }
+
+        } catch (err) {
+          console.error("❌ 블록 로드 실패:", err);
+          previewDiv.innerHTML = `
+            <div style="color:#ff6b6b; padding:20px; text-align:center; font-family: Pretendard; line-height: 1.5;">
+              <b>블록 데이터를 불러오지 못했습니다 😭</b><br><br>
+              <span style="font-size:13px; color:#aaa;">JSON 파일 형식이 잘못되었거나 파일이 비어있습니다.</span>
+            </div>
+          `;
+        }
+      }, 50);
     } else {
+      // 폴더를 클릭했을 때의 화면 (가운데 정렬된 깔끔한 UI 유지)
       hp.innerHTML = `
-        <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 700; font-size: 24px; color: #4cc71a; margin-bottom: 15px; border-bottom: 1px solid #3c3c3c; padding-bottom: 10px; pointer-events: none;">
-          📁 ${item.name} 폴더
-        </div>
-        <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 500; color: #aaaaaa; line-height: 1.6; font-size: 16px; pointer-events: none;">
-          이 폴더 안에는 다양한 하위 예제들이 들어있습니다.<br>클릭해서 내용물을 확인해 보세요!
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; text-align: center; pointer-events: none;">
+          <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 700; font-size: 24px; color: #4cc71a; margin-bottom: 15px;">
+            📁 ${item.name} 폴더
+          </div>
+          <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 500; color: #aaaaaa; line-height: 1.6; font-size: 16px;">
+            이 폴더 안에는 다양한 하위 예제들이 들어있습니다.<br>왼쪽 목록에서 파일(📝)을 클릭하여 예제 내용과 블록 코드를 확인하세요!
+          </div>
         </div>
       `;
     }
@@ -114,12 +196,12 @@ export async function initExplorer(
       helpPanel.id = 'helpPanel';
       helpPanel.style.cssText = `
         flex-grow: 1; min-width: 480px; height: 100%; background: rgba(20, 20, 20, 0.4); padding: 30px; box-sizing: border-box;
-        border-left: 1px solid #3c3c3c; color: #d4d4d4; font-size: 16px; overflow-y: auto; cursor: default;
+        border-left: 1px solid #3c3c3c; color: #d4d4d4; font-size: 16px; overflow: hidden; cursor: default;
       `;
       helpPanel.innerHTML = `
-        <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 500; color: #666; text-align: center; margin-top: 80px; pointer-events: none;">
-          <div style="font-size: 40px; margin-bottom: 20px;">💡</div>
-          <div style="font-size: 20px; font-weight: 600; color: #888;">폴더나 예제 파일에 마우스를 올리면<br>이곳에 상세 설명이 표시됩니다.</div><br>
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; text-align: center; pointer-events: none;">
+          <div style="font-size: 50px; margin-bottom: 20px;">💡</div>
+          <div style="font-size: 20px; font-weight: 600; color: #888; line-height: 1.5;">목록에서 예제 파일을 선택하면<br>상세 설명과 블록 설계도가 여기에 표시됩니다.</div>
         </div>
       `;
       helpPanel.addEventListener('wheel', (e) => e.stopPropagation());
@@ -139,9 +221,6 @@ export async function initExplorer(
         break;
       }
     }
-
-    const newWidth = (neededCols.length * 220) + 480;
-    explorerContainer!.style.width = `${newWidth}px`;
 
     Array.from(explorerContainer!.querySelectorAll('.explorer-col')).forEach((col: any) => {
       if (parseInt(col.dataset.depth) >= neededCols.length) col.remove();
@@ -164,7 +243,7 @@ export async function initExplorer(
           overflow-y: auto; padding: 10px; box-sizing: border-box; flex-shrink: 0;
         `;
         col.addEventListener('mousedown', (e) => e.stopPropagation());
-        col.addEventListener('pointerdown', (e) => e.stopPropagation()); // 예제 목록 안쪽 클릭 시 닫히지 않도록 이벤트 보호!
+        col.addEventListener('pointerdown', (e) => e.stopPropagation()); 
         col.addEventListener('wheel', (e) => e.stopPropagation());
         explorerContainer!.insertBefore(col, document.getElementById('helpPanel'));
       } else if (col.currentData !== dirData) {

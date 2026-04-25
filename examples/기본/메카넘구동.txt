@@ -1,0 +1,18 @@
+<h2 style="color: #3498db; margin: 0 0 5px 0;">🏎️ 주행 예제: 메카넘 휠 4방향 평행 이동 (게걸음)</h2>
+<hr style="margin: 5px 0 15px 0; border-color: #555;">
+
+<p style="margin: 0 0 15px 0; line-height: 1.5;">특수 바퀴인 <b>메카넘 휠</b>을 사용하여 로봇의 머리 방향을 돌리지 않고, 자동차는 할 수 없는 <b>전진, 우측, 후진, 좌측으로 미끄러지듯 이동</b>하는 방법을 배웁니다.</p>
+
+<h3 style="color: #3498db; margin: 0 0 10px 0;">🧩 블록 동작 흐름</h3>
+<ol style="line-height: 1.5; margin: 0 0 15px 25px; padding: 0;">
+  <li style="margin-bottom: 5px;"><b>초기 설정 (setup):</b> 스마티를 시작하고, <code style="color: #f1c40f;">power</code>라는 변수를 만들어 <b>400</b>이라는 기본 속도 값을 저장해 둡니다.</li>
+  <li style="margin-bottom: 5px;"><b>전진 (방향 0):</b> <code style="color: #f1c40f;">power</code> 변수 안의 값(400)을 꺼내어 그 속도만큼 로봇을 앞으로 2초(2000ms) 동안 이동시킵니다.</li>
+  <li style="margin-bottom: 5px;"><b>우측 이동 (방향 2):</b> 차체를 돌리지 않고 오른쪽으로 게처럼 2초 동안 평행 이동합니다.</li>
+  <li style="margin-bottom: 5px;"><b>후진 (방향 4):</b> 그대로 뒤로 2초 동안 이동합니다.</li>
+  <li><b>좌측 이동 (방향 6):</b> 왼쪽으로 2초 동안 평행 이동하여 원래 있던 자리로 되돌아옵니다.</li>
+</ol>
+
+<div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #f39c12; border-radius: 4px; margin-top: 15px;">
+  <b style="color: #f39c12;">💡 핵심 포인트</b>
+  <div style="margin-top: 5px; color: #e0e0e0; line-height: 1.5;">이 예제는 로봇이 <b>정사각형 궤적</b>을 그리며 제자리로 돌아오는 마법 같은 동작을 보여줍니다. <br><br>또한, 숫자 블록 대신 <code style="color: #f1c40f;">power</code>라는 <b>변수</b>를 끼워 넣었기 때문에, 전체 속도를 400에서 600으로 바꾸고 싶을 때 블록 4개를 일일이 고칠 필요 없이 <b>맨 처음 setup에 있는 숫자 400만 600으로 한 번만 고쳐주면 됩니다!</b> 코딩에서 변수가 왜 편리한지 아주 잘 보여주는 훌륭한 예제입니다!</div>
+</div>

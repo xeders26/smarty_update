@@ -1,0 +1,25 @@
+<h2 style="color: #3498db; margin: 0 0 5px 0;">📦 기초 예제: 다양한 종류의 변수 만들기 (자료형)</h2>
+<hr style="margin: 5px 0 15px 0; border-color: #555;">
+
+<p style="margin: 0 0 15px 0; line-height: 1.5;">프로그래밍에서 데이터를 담는 상자인 <b>'변수(Variable)'의 종류와 사용법</b>을 배우는 예제입니다.<br>
+숫자, 글자, 참/거짓 등 다양한 형태의 데이터를 알맞은 모양의 변수 상자에 저장해 봅니다.</p>
+
+<h3 style="color: #3498db; margin: 0 0 10px 0;">🧩 블록 동작 흐름</h3>
+<ol style="line-height: 1.5; margin: 0 0 15px 25px; padding: 0;">
+  <li style="margin-bottom: 5px;"><b>초기 설정 (setup) - 5가지 변수 상자 준비하기:</b>
+    <ul style="margin: 5px 0 5px 20px; padding: 0;">
+      <li style="margin-bottom: 3px;">정수형(int) <code style="color: #f1c40f;">i</code> 상자에 숫자 <b>0</b>을 넣습니다.</li>
+      <li style="margin-bottom: 3px;">논리형(boolean) <code style="color: #f1c40f;">b</code> 상자에 <b>참(TRUE)</b>을 넣습니다.</li>
+      <li style="margin-bottom: 3px;">문자형(char) <code style="color: #f1c40f;">c</code> 상자에 알파벳 <b>"A"</b>를 넣습니다.</li>
+      <li style="margin-bottom: 3px;">문자열형(String) <code style="color: #f1c40f;">s</code> 상자에 단어 <b>"hello"</b>를 넣습니다.</li>
+      <li style="margin-bottom: 3px;">실수형(float) <code style="color: #f1c40f;">f</code> 상자에 소수점 숫자 <b>3.6</b>을 넣습니다.</li>
+    </ul>
+  </li>
+  <li style="margin-bottom: 5px;"><b>조건 확인 (만약 ~라면):</b> 변수 <code style="color: #f1c40f;">i</code>에 들어있는 값이 <b>0</b>과 같은지 확인합니다.</li>
+  <li><b>변수 값 변화시키기:</b> 만약 조건이 맞다면(i가 0이라면), 변수 <code style="color: #f1c40f;">b</code>의 값을 <b>1만큼 변화(증가)</b>시킵니다.</li>
+</ol>
+
+<div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #f39c12; border-radius: 4px; margin-top: 15px;">
+  <b style="color: #f39c12;">💡 핵심 포인트</b>
+  <div style="margin-top: 5px; color: #e0e0e0; line-height: 1.5;">코딩을 할 때는 <b>저장할 데이터의 성격에 맞는 알맞은 변수 상자(자료형)</b>를 골라야 합니다. 소수점이 없는 숫자는 정수(int)에, 글자 하나는 문자(char)에, 맞다/틀리다 같은 상태는 논리(boolean) 상자에 넣어야 에러가 나지 않고 로봇이 똑똑하게 작동합니다!</div>
+</div>

@@ -11,149 +11,6 @@ export function initHelpTabUI(workspace: Blockly.WorkspaceSvg, tabManager: Retur
   let currentTopTab: 'help' | 'rc' | 'cpp' = 'help'; 
   let currentFontSize = 14;
 
-  /*
-  function switchTopTab(activeTab: 'help' | 'rc' | 'cpp') {
-    currentTopTab = activeTab;
-    const isDark = document.body.classList.contains('dark-mode');
-    
-    const bgInactive = isDark ? '#21252b' : '#e1e8ed';
-    const textInactive = isDark ? '#bdc3c7' : '#7f8c8d';
-    const bgActive = isDark ? '#1a252f' : '#ffffff'; 
-    const textActive = '#3498db';
-
-    const tHelp = document.getElementById('tabHelpBtn');
-    const tRc = document.getElementById('tabRcBtn');
-    const tCpp = document.getElementById('tabCppBtn');
-    const hArea = document.getElementById('helpArea');
-    const rArea = document.getElementById('rcArea');
-    const cArea = document.getElementById('codeArea');
-    const cToolbar = document.getElementById('codeToolbar');
-    
-    [tHelp, tRc, tCpp].forEach(btn => {
-      if (btn) {
-        btn.style.background = bgInactive;
-        btn.style.color = textInactive;
-        btn.style.borderTop = '2px solid transparent';
-        btn.style.borderBottom = '2px solid #3498db'; 
-      }
-    });
-
-    if (hArea) hArea.style.display = 'none';
-    if (rArea) rArea.style.display = 'none';
-    if (cArea) cArea.style.display = 'none';
-    if (cToolbar) cToolbar.style.display = 'none';
-
-    if (activeTab === 'help' && tHelp && hArea) {
-      tHelp.style.background = bgActive;
-      tHelp.style.color = textActive;
-      tHelp.style.borderTop = '2px solid #3498db';
-      tHelp.style.borderBottom = '2px solid transparent'; 
-      hArea.style.display = 'block';
-    } else if (activeTab === 'rc' && tRc && rArea) {
-      tRc.style.background = bgActive;
-      tRc.style.color = textActive;
-      tRc.style.borderTop = '2px solid #3498db';
-      tRc.style.borderBottom = '2px solid transparent';
-      rArea.style.display = 'block'; 
-      rArea.style.position = 'relative';
-      rArea.style.width = '100%';
-      rArea.style.height = '100%';
-      rArea.style.overflow = 'hidden';
-      setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 50);
-    } else if (activeTab === 'cpp' && tCpp && cArea) {
-      tCpp.style.background = bgActive;
-      tCpp.style.color = textActive;
-      tCpp.style.borderTop = '2px solid #3498db';
-      tCpp.style.borderBottom = '2px solid transparent';
-      cArea.style.display = 'block';
-      if (cToolbar) cToolbar.style.display = 'flex';
-    }
-  }
-
-   function applyTheme() {
-    const themeToggle = document.getElementById('themeToggleBtn');
-    
-    const codeBtns =[
-      document.getElementById('fontIncreaseBtn'),
-      document.getElementById('fontDecreaseBtn'),
-      document.getElementById('copyCodeBtn'),
-      document.getElementById('saveCodeBtn')
-    ];
-
-    let rcStyle = document.getElementById('smarty-rc-theme-css');
-    if (!rcStyle) {
-      rcStyle = document.createElement('style');
-      rcStyle.id = 'smarty-rc-theme-css';
-      document.head.appendChild(rcStyle);
-    }
-
-    const commonCSS = `
-      #helpArea, #rcArea, #codeArea, #codeToolbar {
-        border: none !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-        outline: none !important;
-        margin-top: 0 !important;
-      }
-    `;
-
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark-mode');
-      document.body.classList.add('dark-mode');
-      
-      if (themeToggle) {
-        themeToggle.innerHTML = '☀️';
-        themeToggle.setAttribute('data-tooltip', '라이트 모드');
-        themeToggle.style.background = '#f1c40f';
-        themeToggle.style.color = 'black';
-      }
-
-      codeBtns.forEach(btn => {
-        if (btn) {
-          btn.style.background = '#34495e';
-          btn.style.color = '#ecf0f1';
-          btn.style.border = '1px solid #7f8c8d';
-        }
-      });
-
-      if (rcStyle) {
-        rcStyle.innerHTML = commonCSS + `
-          #helpArea, #rcArea, #codeArea { background-color: #1a252f !important; }
-        `;
-      }
-
-    } else {
-      document.documentElement.classList.remove('dark-mode');
-      document.body.classList.remove('dark-mode');
-      
-      if (themeToggle) {
-        themeToggle.innerHTML = '🌙';
-        themeToggle.setAttribute('data-tooltip', '다크 모드');
-        themeToggle.style.background = '#2c3e50';
-        themeToggle.style.color = 'white';
-      }
-
-      codeBtns.forEach(btn => {
-        if (btn) {
-          btn.style.background = '#ffffff';
-          btn.style.color = '#2c3e50';
-          btn.style.border = '1px solid #bdc3c7';
-        }
-      });
-
-      if (rcStyle) {
-        rcStyle.innerHTML = commonCSS + `
-          #helpArea, #rcArea, #codeArea { background-color: #ffffff !important; }
-        `;
-      }
-    }
-    
-    setTimeout(() => {
-      switchTopTab(currentTopTab);
-      if (tabManager && typeof tabManager.renderTabs === 'function') tabManager.renderTabs();
-    }, 50);
-  }
-*/
   // 🌟 [수정 1] 탭 전환 함수 (마법의 새로고침 코드 복구!)
   function switchTopTab(activeTab: 'help' | 'rc' | 'cpp') {
     currentTopTab = activeTab;
@@ -237,7 +94,7 @@ export function initHelpTabUI(workspace: Blockly.WorkspaceSvg, tabManager: Retur
       document.head.appendChild(rcStyle);
     }
 
-    // 🔥 [핵심 수정] #codeArea는 에디터 고유의 테마를 유지하도록 여기서 제외했습니다.
+    // 🔥 [요청사항 완벽 반영] 기존 설정에 폰트 80%, 줄간격 축소 속성을 아예 융합시켰습니다!
     const commonCSS = `
       #helpArea, #rcArea, #codeToolbar {
         border: none !important;
@@ -245,6 +102,20 @@ export function initHelpTabUI(workspace: Blockly.WorkspaceSvg, tabManager: Retur
         box-shadow: none !important;
         outline: none !important;
         margin-top: 0 !important;
+      }
+      #helpArea {
+        font-size: 80% !important;
+        line-height: 1.3 !important;
+      }
+      #helpArea p, #helpArea li, #helpArea div {
+        line-height: 1.3 !important;
+        margin-top: 4px !important;
+        margin-bottom: 4px !important;
+      }
+      #helpArea h1, #helpArea h2, #helpArea h3, #helpArea h4 {
+        line-height: 1.2 !important;
+        margin-top: 10px !important;
+        margin-bottom: 6px !important;
       }
     `;
 
@@ -268,7 +139,6 @@ export function initHelpTabUI(workspace: Blockly.WorkspaceSvg, tabManager: Retur
       });
 
       if (rcStyle) {
-        // #codeArea 제외
         rcStyle.innerHTML = commonCSS + `
           #helpArea, #rcArea { background-color: #1a252f !important; }
         `;
@@ -294,7 +164,6 @@ export function initHelpTabUI(workspace: Blockly.WorkspaceSvg, tabManager: Retur
       });
 
       if (rcStyle) {
-        // #codeArea 제외
         rcStyle.innerHTML = commonCSS + `
           #helpArea, #rcArea { background-color: #ffffff !important; }
         `;
@@ -306,7 +175,6 @@ export function initHelpTabUI(workspace: Blockly.WorkspaceSvg, tabManager: Retur
       if (tabManager && typeof tabManager.renderTabs === 'function') tabManager.renderTabs();
     }, 50);
   }
-
 
   applyTheme();
 
