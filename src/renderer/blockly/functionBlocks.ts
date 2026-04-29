@@ -327,12 +327,23 @@ export function initFunctionBlocks(arduinoGenerator: any) {
         ["결과: 문자열", "STRING"],
         ["결과: 논리값", "BOOLEAN"]
       ], function(option: string) {
+        
+        // 🚨 1. 하단 '결과 반환' 공간 모양을 즉시 육각형으로!
+        const returnInput = block.getInput('RETURN');
+        if (returnInput) {
+          if (option === 'BOOLEAN') returnInput.setCheck(['Boolean']);
+          else if (option === 'STRING') returnInput.setCheck(['String']);
+          else returnInput.setCheck(['Number']);
+        }
+        // 🚨 모양을 바꾼 후 즉시 강제로 화면을 갱신! (둥근 모양으로 남는 버그 해결)
+        if (block.render) block.render();
+
         const oldMut = block.mutationToDom();
         setTimeout(() => {
             const newMut = block.mutationToDom();
             fireMutationEvent(block, oldMut, newMut);
             syncToolbox(block);
-        }, 50); 
+        }, 10); 
         return option;
       });
 
@@ -354,10 +365,32 @@ export function initFunctionBlocks(arduinoGenerator: any) {
       this.arguments_ = [];
       this.argumentTypes_ = [];
       this.paramIds_ = [];
+
+      // 🚨 블록이 처음 나타날 때도 모양 맞추기
+      setTimeout(() => {
+        const rType = this.getFieldValue('RETURN_TYPE');
+        const returnInput = this.getInput('RETURN');
+        if (returnInput) {
+          if (rType === 'BOOLEAN') returnInput.setCheck(['Boolean']);
+          else if (rType === 'STRING') returnInput.setCheck(['String']);
+          else returnInput.setCheck(['Number']);
+        }
+        if (this.render) this.render();
+      }, 50);
     },
     updateParams_: updateParamsFn,
     mutationToDom: Blockly.Blocks['procedures_defnoreturn'].mutationToDom,
-    domToMutation: Blockly.Blocks['procedures_defnoreturn'].domToMutation,
+    domToMutation: function(xml: any) {
+      // 🚨 블록을 불러올 때 하단 구멍 모양 덮어쓰기
+      Blockly.Blocks['procedures_defnoreturn'].domToMutation.call(this, xml);
+      const rType = this.getFieldValue('RETURN_TYPE');
+      const returnInput = this.getInput('RETURN');
+      if (returnInput) {
+        if (rType === 'BOOLEAN') returnInput.setCheck(['Boolean']);
+        else if (rType === 'STRING') returnInput.setCheck(['String']);
+        else returnInput.setCheck(['Number']);
+      }
+    },
     getProcedureDef: function() { return [this.getFieldValue('NAME'), this.arguments_ || [], true]; },
     getVars: Blockly.Blocks['procedures_defnoreturn'].getVars,
     getVarModels: Blockly.Blocks['procedures_defnoreturn'].getVarModels,
@@ -367,48 +400,93 @@ export function initFunctionBlocks(arduinoGenerator: any) {
     callType_: 'procedures_callreturn'
   };
 
-
-  // =========================================================
-  // ⚙️ 3. 호출 블록(Caller)
+  
+    // =========================================================
+  // ⚙️ 3. 호출 블록(Caller) - 입력 0개 버그 완벽 해결판
   // =========================================================
   const patchCaller = (blockName: string, hasReturn: boolean) => {
     const blockDef = Blockly.Blocks[blockName];
     if (!blockDef) return;
 
-    const origSetParams = blockDef.setProcedureParameters_;
-    blockDef.setProcedureParameters_ = function(this: any, paramNames: any, paramIds: any) { // 🚨 타입 에러 무시
-      if (origSetParams) origSetParams.call(this, paramNames, paramIds);
+    // 🚨 툴박스 블록 모양 강제 동기화 함수
+    const updateShapeFromDef = function(block: any) {
+      let funcName = block.getFieldValue('NAME');
+      if (!funcName && block.getProcedureCall) funcName = block.getProcedureCall();
+      if (!funcName) return;
 
-      this.setInputsInline(true);
+      const mainWs = block.workspace.targetWorkspace || block.workspace;
+      if (!mainWs) return;
 
-      try {
-        const ws = this.workspace.targetWorkspace || this.workspace;
-        const def = Blockly.Procedures.getDefinition(this.getFieldValue('NAME'), ws);
+      let defBlock = null;
+      const topBlocks = mainWs.getTopBlocks(false);
+      for (let i = 0; i < topBlocks.length; i++) {
+        if ((topBlocks[i].type === 'procedures_defreturn' || topBlocks[i].type === 'procedures_defnoreturn') &&
+            topBlocks[i].getFieldValue('NAME') === funcName) {
+          defBlock = topBlocks[i];
+          break;
+        }
+      }
 
-        if (def) {
-          const types = (def as any).argumentTypes_ || []; // 🚨 타입 에러 무시
-          for (let i = 0; i < (this.arguments_ || []).length; i++) {
-            const input = this.getInput('ARG' + i);
-            if (input) {
-              const t = types[i] || 'INT';
-              if (t === 'BOOLEAN') input.setCheck(['Boolean']);
-              else if (t === 'STRING') input.setCheck(['String']);
-              else input.setCheck(['Number']);
-            }
-          }
-
-          if (hasReturn) {
-            const rType = (def as any).getField('RETURN_TYPE') ? (def as any).getFieldValue('RETURN_TYPE') : 'INT'; // 🚨 타입 에러 무시
-            if (rType === 'BOOLEAN') this.setOutput(true, ['Boolean']);
-            else if (rType === 'STRING') this.setOutput(true, ['String']);
-            else this.setOutput(true, ['Number']);
+      if (defBlock) {
+        const argTypes = defBlock.argumentTypes_ || []; 
+        for (let i = 0; i < (block.arguments_ || []).length; i++) {
+          const input = block.getInput('ARG' + i);
+          if (input) {
+            const t = argTypes[i] || 'INT';
+            if (t === 'BOOLEAN') input.setCheck(['Boolean']);
+            else if (t === 'STRING') input.setCheck(['String']);
+            else input.setCheck(['Number']);
           }
         }
-      } catch(e) { }
+
+        // 🚨 결과값이 있는 함수만 전체 모양 변신! (없는 함수는 무시됨)
+        if (hasReturn) {
+          const rType = defBlock.getFieldValue('RETURN_TYPE') || 'INT';
+          if (rType === 'BOOLEAN') {
+             block.setOutput(true, ['Boolean']);
+          } else if (rType === 'STRING') {
+             block.setOutput(true, ['String']);
+          } else {
+             block.setOutput(true, ['Number']);
+          }
+        }
+      }
+    };
+
+    // 1. 파라미터가 바뀔 때 실행
+    const origSetParams = blockDef.setProcedureParameters_;
+    blockDef.setProcedureParameters_ = function(this: any, paramNames: any, paramIds: any) { 
+      if (origSetParams) origSetParams.call(this, paramNames, paramIds);
+      this.setInputsInline(true);
+      updateShapeFromDef(this);
+    };
+
+    // 2. 파라미터가 1개 이상일 때 툴박스에서 실행
+    const origDomToMut = blockDef.domToMutation;
+    blockDef.domToMutation = function(this: any, xml: any) {
+      if (origDomToMut) origDomToMut.call(this, xml);
+      updateShapeFromDef(this);
+    };
+
+    // 🚨 3. [핵심 패치] 파라미터가 0개라서 위 함수들이 무시될 때를 대비한 강제 초기화!
+    // 블록이 툴박스나 화면에 나타나는 순간 무조건 0.05초 뒤에 모양을 잡아줍니다.
+    const origInit = blockDef.init;
+    blockDef.init = function(this: any) {
+      if (origInit) origInit.call(this);
+      
+      // 블록이 그려진 직후 찰나의 순간을 노려 강제 동기화
+      setTimeout(() => {
+         updateShapeFromDef(this);
+         // 모양을 강제로 바꾼 뒤 화면 찌그러짐을 방지하기 위해 다시 그림
+         if (this.render) this.render();
+      }, 50);
     };
   };
 
-  patchCaller('procedures_callnoreturn', false);
+  // 결과값 없는 함수는 false (안전장치)
+  patchCaller('procedures_callnoreturn', false); 
+  
+  // 결과값 있는 함수는 true (모양 변경 허용)
   patchCaller('procedures_callreturn', true);
 
   // =========================================================
