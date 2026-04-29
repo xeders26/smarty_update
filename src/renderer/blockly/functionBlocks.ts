@@ -9,20 +9,26 @@ export function initFunctionBlocks(arduinoGenerator: any) {
     (window as any).__patchedFlyoutButtonTooltip = true;
     if (Blockly.FlyoutButton && Blockly.FlyoutButton.prototype) {
       const origCreateDom = Blockly.FlyoutButton.prototype.createDom;
-      Blockly.FlyoutButton.prototype.createDom = function() {
-        const svgGroup = origCreateDom.call(this); // 원래 버튼 생성 로직 실행
+      Blockly.FlyoutButton.prototype.createDom = function(this: any) { // 🚨 타입 에러 무시
+        const svgGroup = origCreateDom.call(this);
         
-        // 우리가 툴박스 JSON에 추가한 tooltip 속성이 있다면?
-        if (this.info_ && this.info_.tooltip) {
-          // 브라우저 기본 툴팁(SVG title) 강제 주입!
+        const btnInfo = this.info || this.info_; 
+        
+        if (btnInfo && btnInfo.tooltip) {
+          // 브라우저 기본 툴팁(SVG title) 강제 주입
           const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-          title.textContent = this.info_.tooltip;
+          title.textContent = btnInfo.tooltip;
           svgGroup.appendChild(title);
           
           // 블록리 자체 툴팁 시스템에도 연결
-          this.tooltip = this.info_.tooltip;
-          if (Blockly.Tooltip && Blockly.Tooltip.bindMouseEvents) {
-            Blockly.Tooltip.bindMouseEvents(svgGroup, this, svgGroup);
+          this.tooltip = btnInfo.tooltip;
+          
+          if (Blockly.Tooltip && (Blockly.Tooltip as any).bindMouseEvents) {
+            try {
+              (Blockly.Tooltip as any).bindMouseEvents(svgGroup);
+            } catch(e) {
+              (Blockly.Tooltip as any).bindMouseEvents(svgGroup, this, svgGroup);
+            }
           }
         }
         return svgGroup;
@@ -54,7 +60,7 @@ export function initFunctionBlocks(arduinoGenerator: any) {
     }
   };
 
-  // 블록 구조가 변했음을 블록리 코어에 신고하는 핵심 함수 (이게 있어야 메뉴가 바뀝니다)
+  // 블록 구조가 변했음을 블록리 코어에 신고하는 핵심 함수
   const fireMutationEvent = (block: any, oldMutationDom: any, newMutationDom: any) => {
     if (Blockly.Events.isEnabled()) {
       const oldStr = Blockly.Xml && oldMutationDom ? Blockly.Xml.domToText(oldMutationDom) : oldMutationDom.outerHTML;
@@ -116,7 +122,7 @@ export function initFunctionBlocks(arduinoGenerator: any) {
         // ⛔ 삭제 버튼
         const minusBtn = new Blockly.FieldLabel('⛔ 삭제');
         (minusBtn as any).EDITABLE = true;
-        (minusBtn as any).SERIALIZABLE = true; // 🚨 [경고 완전 해결!] 저장 데이터로 인식되게 함
+        (minusBtn as any).SERIALIZABLE = true; 
         (minusBtn as any).showEditor_ = () => {
            setTimeout(() => {
                const oldMut = this.mutationToDom();
@@ -176,7 +182,7 @@ export function initFunctionBlocks(arduinoGenerator: any) {
       ], function(option: string) {
         if (option !== "NONE") {
           setTimeout(() => {
-            const oldMut = block.mutationToDom(); // 🚨 추가 전 상태 캡처
+            const oldMut = block.mutationToDom(); 
             
             const defaultName = "정보명" + ((block.arguments_?.length || 0) + 1);
             block.arguments_ = block.arguments_ || [];
@@ -192,9 +198,9 @@ export function initFunctionBlocks(arduinoGenerator: any) {
 
             block.updateParams_();
             
-            const newMut = block.mutationToDom(); // 🚨 추가 후 상태 캡처
-            fireMutationEvent(block, oldMut, newMut); // 블록리 엔진에 정식 신고!
-            syncToolbox(block); // 툴박스 새로고침
+            const newMut = block.mutationToDom(); 
+            fireMutationEvent(block, oldMut, newMut); 
+            syncToolbox(block); 
           }, 50);
         }
         return "NONE"; 
@@ -209,6 +215,7 @@ export function initFunctionBlocks(arduinoGenerator: any) {
       this.appendStatementInput('STACK').appendField('실행할 내용');
 
       this.setColour(290);
+      this.setTooltip('새로운 명령(함수)을 만드는 블록입니다. 동작만 실행하고 값을 돌려주지 않습니다.');
       this.arguments_ = [];
       this.argumentTypes_ = [];
       this.paramIds_ = [];
@@ -290,7 +297,7 @@ export function initFunctionBlocks(arduinoGenerator: any) {
       ], function(option: string) {
         if (option !== "NONE") {
           setTimeout(() => {
-            const oldMut = block.mutationToDom(); // 🚨 추가 전 상태 캡처
+            const oldMut = block.mutationToDom(); 
             
             const defaultName = "정보명" + ((block.arguments_?.length || 0) + 1);
             block.arguments_ = block.arguments_ || [];
@@ -306,8 +313,8 @@ export function initFunctionBlocks(arduinoGenerator: any) {
 
             block.updateParams_();
             
-            const newMut = block.mutationToDom(); // 🚨 추가 후 상태 캡처
-            fireMutationEvent(block, oldMut, newMut); // 블록리 엔진에 정식 신고!
+            const newMut = block.mutationToDom(); 
+            fireMutationEvent(block, oldMut, newMut); 
             syncToolbox(block);
           }, 50);
         }
@@ -343,6 +350,7 @@ export function initFunctionBlocks(arduinoGenerator: any) {
           .appendField('➔ 결과 반환');
 
       this.setColour(290);
+      this.setTooltip('새로운 계산식이나 판단 기능을 만들고, 마지막에 결과값을 돌려주는 블록입니다.');
       this.arguments_ = [];
       this.argumentTypes_ = [];
       this.paramIds_ = [];
@@ -368,7 +376,7 @@ export function initFunctionBlocks(arduinoGenerator: any) {
     if (!blockDef) return;
 
     const origSetParams = blockDef.setProcedureParameters_;
-    blockDef.setProcedureParameters_ = function(paramNames: any, paramIds: any) {
+    blockDef.setProcedureParameters_ = function(this: any, paramNames: any, paramIds: any) { // 🚨 타입 에러 무시
       if (origSetParams) origSetParams.call(this, paramNames, paramIds);
 
       this.setInputsInline(true);
@@ -378,7 +386,7 @@ export function initFunctionBlocks(arduinoGenerator: any) {
         const def = Blockly.Procedures.getDefinition(this.getFieldValue('NAME'), ws);
 
         if (def) {
-          const types = def.argumentTypes_ || [];
+          const types = (def as any).argumentTypes_ || []; // 🚨 타입 에러 무시
           for (let i = 0; i < (this.arguments_ || []).length; i++) {
             const input = this.getInput('ARG' + i);
             if (input) {
@@ -390,7 +398,7 @@ export function initFunctionBlocks(arduinoGenerator: any) {
           }
 
           if (hasReturn) {
-            const rType = def.getField('RETURN_TYPE') ? def.getFieldValue('RETURN_TYPE') : 'INT';
+            const rType = (def as any).getField('RETURN_TYPE') ? (def as any).getFieldValue('RETURN_TYPE') : 'INT'; // 🚨 타입 에러 무시
             if (rType === 'BOOLEAN') this.setOutput(true, ['Boolean']);
             else if (rType === 'STRING') this.setOutput(true, ['String']);
             else this.setOutput(true, ['Number']);
