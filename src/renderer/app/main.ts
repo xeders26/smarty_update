@@ -157,7 +157,7 @@ window.addEventListener('DOMContentLoaded', () => {
     horizontalLayout: false,
     disable: true,   
     collapse: true,  
-    zoom: { controls: true, wheel: true, startScale: 0.85, maxScale: 3, minScale: 0.3, scaleSpeed: 1.2 }
+    zoom: { controls: true, wheel: true, startScale: 0.85, maxScale: 2.5, minScale: 0.4, scaleSpeed: 1.01 }
   });
 
   workspace.registerToolboxCategoryCallback(
