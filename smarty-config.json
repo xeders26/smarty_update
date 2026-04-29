@@ -1,0 +1,18 @@
+{
+  "moveBlueHand": {
+    "min": 20,
+    "max": 60
+  },
+  "moveRedHand": {
+    "min": 10,
+    "max": 60
+  },
+  "moveBlueSlide": {
+    "min": 30,
+    "max": 40
+  },
+  "moveRedSlide": {
+    "min": 10,
+    "max": 90
+  }
+}
