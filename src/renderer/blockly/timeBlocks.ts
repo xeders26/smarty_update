@@ -98,14 +98,18 @@ export function initTimeBlocks(arduinoGenerator: any) {
 
   arduinoGenerator.forBlock['smarty_wait'] = function (block: any) {
     const waitType = block.getFieldValue('TYPE')
+    
+    // SW1 버튼 로직
     if (waitType === 'waitSW(SW1)') {
-      arduinoGenerator.definitions_['var_last_sw1'] = 'bool _last_sw1_state = false;'
-      return `while (true) {\n  bool _curr_sw1 = readSw(SW1);\n  if (_curr_sw1 && !_last_sw1_state) {\n    _last_sw1_state = true;\n  } else if( !_curr_sw1 && _last_sw1_state) {\n    _last_sw1_state = false;\n    break;\n  }\n}\n`
-    } else if (waitType === 'waitSW(SW2)') {
-      arduinoGenerator.definitions_['var_last_sw2'] = 'bool _last_sw2_state = false;'
-      // 🚨 버그 완벽 수정!! _last_sw1_state 라고 적혀있던 오타를 _last_sw2_state 로 고쳤습니다!!
-      return `while (true) {\n  bool _curr_sw2 = readSw(SW2);\n  if (_curr_sw2 && !_last_sw2_state) {\n    _last_sw2_state = true;\n  } else if( !_curr_sw2 && _last_sw2_state) {\n    _last_sw2_state = false;\n    break;\n  }\n}\n`
+      // 1. 눌릴 때까지 대기 (!readSw 이면 계속 루프)
+      // 2. 떼어질 때까지 대기 (readSw 이면 계속 루프)
+      return `while (!readSw(SW1)) { delay(10); }\nwhile (readSw(SW1)) { delay(10); }\n`
+    } 
+    // SW2 버튼 로직
+    else if (waitType === 'waitSW(SW2)') {
+      return `while (!readSw(SW2)) { delay(10); }\nwhile (readSw(SW2)) { delay(10); }\n`
     }
+    
     return `\n`
   }
 

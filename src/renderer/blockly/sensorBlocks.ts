@@ -1,6 +1,3 @@
-/*================
-  src/renderer/blockly/sensorBlocks.ts
-=================*/
 import * as Blockly from 'blockly';
 
 export function initSensorBlocks(arduinoGenerator: any) {
@@ -20,14 +17,25 @@ export function initSensorBlocks(arduinoGenerator: any) {
     { "type": "readSw", "message0": "스위치 상태 읽기 ID: %1", "args0":[{"type": "field_dropdown", "name": "ID", "options": [["SW1", "SW1"], ["SW2", "SW2"]]}], "output": ["Number", "Boolean"], "colour": 60 },
     { "type": "waitUntilSw", "message0": "스위치 대기 ID: %1 상태: %2", "args0":[ {"type": "field_dropdown", "name": "ID", "options": [["SW1", "SW1"], ["SW2", "SW2"]]}, {"type": "field_dropdown", "name": "STATE", "options": [["누름", "ON"],["뗌", "OFF"]]} ], "previousStatement": null, "nextStatement": null, "colour": 60 },
     { "type": "initBump", "message0": "범퍼 센서 초기화", "previousStatement": null, "nextStatement": null, "colour": 30 },
-    { "type": "findBumpLine", "message0": "범퍼 라인 감지(기본) POS: %1 LINE: %2", "args0":[ {"type": "input_value", "name": "POS", "check": "Number"}, {"type": "input_value", "name": "LINE", "check": "Number"} ], "output": "Boolean", "colour": 30 },
-    { "type": "findBumpLine_addr", "message0": "범퍼 라인 감지(주소) ADDR: %1 POS: %2 LINE: %3", "args0":[ {"type": "input_value", "name": "ADDR", "check": "Number"}, {"type": "input_value", "name": "POS", "check": "Number"}, {"type": "input_value", "name": "LINE", "check": "Number"} ], "output": "Boolean", "colour": 30 },
-    { "type": "findBumpObject", "message0": "범퍼 장애물 감지(기본) POS: %1 DIST: %2", "args0":[ {"type": "input_value", "name": "POS", "check": "Number"}, {"type": "input_value", "name": "DIST", "check": "Number"} ], "output": "Boolean", "colour": 30 },
-    { "type": "findBumpObject_addr", "message0": "범퍼 장애물 감지(주소) ADDR: %1 POS: %2 DIST: %3", "args0":[ {"type": "input_value", "name": "ADDR", "check": "Number"}, {"type": "input_value", "name": "POS", "check": "Number"}, {"type": "input_value", "name": "DIST", "check": "Number"} ], "output": "Boolean", "colour": 30 },
+    // 🚨 여기서부터 가로로 펴는 설정("inputsInline": true)이 추가되었습니다.
+    { 
+      "type": "findBumpLine", 
+      "message0": "범퍼 라인 감지(기본) POS: %1 LINE: %2", 
+      "args0":[ {"type": "input_value", "name": "POS", "check": "Number"}, {"type": "input_value", "name": "LINE", "check": "Number"} ], 
+      "output": "Boolean", 
+      "colour": 30,
+      "inputsInline": true 
+    },
+    { 
+      "type": "findBumpObject", 
+      "message0": "범퍼 장애물 감지(기본) POS: %1 DIST: %2", 
+      "args0":[ {"type": "input_value", "name": "POS", "check": "Number"}, {"type": "input_value", "name": "DIST", "check": "Number"} ], 
+      "output": "Boolean", 
+      "colour": 30,
+      "inputsInline": true 
+    },
     { "type": "getBumpDistance", "message0": "범퍼 거리값 읽기(기본) POS: %1", "args0":[{"type": "input_value", "name": "POS", "check": "Number"}], "output": "Number", "colour": 30 },
-    { "type": "getBumpDistance_addr", "message0": "범퍼 거리값 읽기(주소) ADDR: %1 POS: %2", "args0":[ {"type": "input_value", "name": "ADDR", "check": "Number"}, {"type": "input_value", "name": "POS", "check": "Number"} ], "output": "Number", "colour": 30 },
-    { "type": "getBumpLine", "message0": "범퍼 라인값 읽기(기본) POS: %1", "args0":[{"type": "input_value", "name": "POS", "check": "Number"}], "output": "Number", "colour": 30 },
-    { "type": "getBumpLine_addr", "message0": "범퍼 라인값 읽기(주소) ADDR: %1 POS: %2", "args0":[ {"type": "input_value", "name": "ADDR", "check": "Number"}, {"type": "input_value", "name": "POS", "check": "Number"} ], "output": "Number", "colour": 30 }
+    { "type": "getBumpLine", "message0": "범퍼 라인값 읽기(기본) POS: %1", "args0":[{"type": "input_value", "name": "POS", "check": "Number"}], "output": "Number", "colour": 30 }
   ]);
 
   //[C++ 제너레이터] 🚨 배열 리턴값 전부 안전 숫자 0!
@@ -47,11 +55,7 @@ export function initSensorBlocks(arduinoGenerator: any) {
   
   arduinoGenerator.forBlock['initBump'] = function(block: any) { return `initBump();\n`; };
   arduinoGenerator.forBlock['findBumpLine'] = function(block: any) { const pos = arduinoGenerator.valueToCode(block, 'POS', 0) || '0'; const line = arduinoGenerator.valueToCode(block, 'LINE', 0) || '0'; return [`findBumpLine(${pos}, ${line})`, 0]; };
-  arduinoGenerator.forBlock['findBumpLine_addr'] = function(block: any) { const addr = arduinoGenerator.valueToCode(block, 'ADDR', 0) || '0x30'; const pos = arduinoGenerator.valueToCode(block, 'POS', 0) || '0'; const line = arduinoGenerator.valueToCode(block, 'LINE', 0) || '0'; return[`findBumpLine(${addr}, ${pos}, ${line})`, 0]; };
   arduinoGenerator.forBlock['findBumpObject'] = function(block: any) { const pos = arduinoGenerator.valueToCode(block, 'POS', 0) || '0'; const dist = arduinoGenerator.valueToCode(block, 'DIST', 0) || '0'; return [`findBumpObject(${pos}, ${dist})`, 0]; };
-  arduinoGenerator.forBlock['findBumpObject_addr'] = function(block: any) { const addr = arduinoGenerator.valueToCode(block, 'ADDR', 0) || '0x30'; const pos = arduinoGenerator.valueToCode(block, 'POS', 0) || '0'; const dist = arduinoGenerator.valueToCode(block, 'DIST', 0) || '0'; return[`findBumpObject(${addr}, ${pos}, ${dist})`, 0]; };
   arduinoGenerator.forBlock['getBumpDistance'] = function(block: any) { const pos = arduinoGenerator.valueToCode(block, 'POS', 0) || '0'; return [`getBumpDistance(${pos})`, 0]; };
-  arduinoGenerator.forBlock['getBumpDistance_addr'] = function(block: any) { const addr = arduinoGenerator.valueToCode(block, 'ADDR', 0) || '0x30'; const pos = arduinoGenerator.valueToCode(block, 'POS', 0) || '0'; return[`getBumpDistance(${addr}, ${pos})`, 0]; };
   arduinoGenerator.forBlock['getBumpLine'] = function(block: any) { const pos = arduinoGenerator.valueToCode(block, 'POS', 0) || '0'; return[`getBumpLine(${pos})`, 0]; };
-  arduinoGenerator.forBlock['getBumpLine_addr'] = function(block: any) { const addr = arduinoGenerator.valueToCode(block, 'ADDR', 0) || '0x30'; const pos = arduinoGenerator.valueToCode(block, 'POS', 0) || '0'; return[`getBumpLine(${addr}, ${pos})`, 0]; };
 }

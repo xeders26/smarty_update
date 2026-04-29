@@ -118,8 +118,8 @@ export function initLedBlocks(arduinoGenerator: any) {
       this.appendDummyInput()
           .appendField("🔘 스위치 기다리기")
           .appendField(new Blockly.FieldDropdown([
-            ["LED1", "1"],["LED2", "2"],
-            ["LED1 또는 LED2", "EITHER"],
+            ["SW1", "1"],["SW2", "2"],
+            ["SW1 또는 SW2", "EITHER"],
             ["모두", "BOTH"]
           ]), "SW")
           .appendField("상태")

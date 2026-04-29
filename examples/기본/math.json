@@ -1,0 +1,360 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "arduino_main",
+        "id": "z2UC;A{Kl7n,r|A($hYg",
+        "x": 50,
+        "y": 50,
+        "deletable": false,
+        "inputs": {
+          "SETUP": {
+            "block": {
+              "type": "smarty_begin",
+              "id": "+TMneWa960H8x#`_olw4",
+              "next": {
+                "block": {
+                  "type": "smarty_variables_set",
+                  "id": "SJ,{v,PF?8n1#;*!E=-^",
+                  "fields": {
+                    "VAR": {
+                      "id": "jcA%j%l%bXDM3oow4/}["
+                    }
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "shadow": {
+                        "type": "math_number",
+                        "id": "c2x.A7({:+9)_(.Vz=,S",
+                        "fields": {
+                          "NUM": 0
+                        }
+                      },
+                      "block": {
+                        "type": "math_number",
+                        "id": "te1N[q#)5mdPCD)z~T|-",
+                        "fields": {
+                          "NUM": 1000
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "LOOP": {
+            "block": {
+              "type": "smarty_variables_set",
+              "id": "C~kSs7APTRilN(eH0C:r",
+              "fields": {
+                "VAR": {
+                  "id": "jcA%j%l%bXDM3oow4/}["
+                }
+              },
+              "inputs": {
+                "VALUE": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "s0d[+$6Lt$E$2!kNk?n/",
+                    "fields": {
+                      "NUM": 0
+                    }
+                  },
+                  "block": {
+                    "type": "math_random_int",
+                    "id": "~G*%}3~F!FDP#{IIhotb",
+                    "inputs": {
+                      "FROM": {
+                        "shadow": {
+                          "type": "math_number",
+                          "id": "YmM5~hm,10{Qrs#@|.~3",
+                          "fields": {
+                            "NUM": 1
+                          }
+                        }
+                      },
+                      "TO": {
+                        "shadow": {
+                          "type": "math_number",
+                          "id": "476+Cj[E5u]8;pm*;6P[",
+                          "fields": {
+                            "NUM": 100
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "next": {
+                "block": {
+                  "type": "controls_if",
+                  "id": "Il-^yp0k98]ERw+pHKiI",
+                  "extraState": {
+                    "elseIfCount": 0,
+                    "hasElse": true
+                  },
+                  "inputs": {
+                    "IF0": {
+                      "block": {
+                        "type": "smarty_math_in_range",
+                        "id": "*C@#d{azxlh$-+}5|fXp",
+                        "inputs": {
+                          "VAL": {
+                            "block": {
+                              "type": "smarty_variables_get",
+                              "id": ".YM,;9-nL=7dYVJEs(|,",
+                              "fields": {
+                                "VAR": {
+                                  "id": "jcA%j%l%bXDM3oow4/}["
+                                }
+                              }
+                            }
+                          },
+                          "MIN": {
+                            "shadow": {
+                              "type": "math_number",
+                              "id": "rE*]+Tn9Hj8MH8iytnIH",
+                              "fields": {
+                                "NUM": 10
+                              }
+                            }
+                          },
+                          "MAX": {
+                            "shadow": {
+                              "type": "math_number",
+                              "id": ";A}u#+U.kAc,c97d20y*",
+                              "fields": {
+                                "NUM": 50
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "DO0": {
+                      "block": {
+                        "type": "arduino_serial_print",
+                        "id": "Jnf5dO/7e.Y6NB7mFrTZ",
+                        "fields": {
+                          "NEWLINE": true
+                        },
+                        "inputs": {
+                          "TEXT": {
+                            "shadow": {
+                              "type": "text",
+                              "id": "X/;7g/JzMbrRY)3T^A+u",
+                              "fields": {
+                                "TEXT": "Hello!"
+                              }
+                            }
+                          }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "arduino_serial_print",
+                            "id": "uwy@7IK8V$6xOU`WC1yr",
+                            "fields": {
+                              "NEWLINE": true
+                            },
+                            "inputs": {
+                              "TEXT": {
+                                "shadow": {
+                                  "type": "text",
+                                  "id": "}A^=+:`^9W#he3${#)!z",
+                                  "fields": {
+                                    "TEXT": "Hello!"
+                                  }
+                                },
+                                "block": {
+                                  "type": "smarty_variables_get",
+                                  "id": "FXG4(l%RM=]}YFTQk9g.",
+                                  "fields": {
+                                    "VAR": {
+                                      "id": "jcA%j%l%bXDM3oow4/}["
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "next": {
+                              "block": {
+                                "type": "smarty_variables_set",
+                                "id": "GJ1`~TFIE(tVa/$RYx.3",
+                                "fields": {
+                                  "VAR": {
+                                    "id": "8IYM8TYhr7h=l-]WL0UG"
+                                  }
+                                },
+                                "inputs": {
+                                  "VALUE": {
+                                    "shadow": {
+                                      "type": "math_number",
+                                      "id": "Za%=--ZDDutBOb:G*:UN",
+                                      "fields": {
+                                        "NUM": 0
+                                      }
+                                    },
+                                    "block": {
+                                      "type": "arduino_math_map",
+                                      "id": "8VC;2?7{i)xLC:[=[X1{",
+                                      "inputs": {
+                                        "VAL": {
+                                          "shadow": {
+                                            "type": "math_number",
+                                            "id": "fT03Y[J;%sKF4?3x[Awg",
+                                            "fields": {
+                                              "NUM": 512
+                                            }
+                                          },
+                                          "block": {
+                                            "type": "smarty_variables_get",
+                                            "id": "MDMjoE-h6~#(YuwVts0^",
+                                            "fields": {
+                                              "VAR": {
+                                                "id": "jcA%j%l%bXDM3oow4/}["
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "FROMLOW": {
+                                          "shadow": {
+                                            "type": "math_number",
+                                            "id": "$9VdE4y;`l+2$m[oAP+X",
+                                            "fields": {
+                                              "NUM": 10
+                                            }
+                                          }
+                                        },
+                                        "FROMHIGH": {
+                                          "shadow": {
+                                            "type": "math_number",
+                                            "id": "Xkw^3v!Yh~sxkAS`qf+6",
+                                            "fields": {
+                                              "NUM": 50
+                                            }
+                                          }
+                                        },
+                                        "TOLOW": {
+                                          "shadow": {
+                                            "type": "math_number",
+                                            "id": "9IRRTD}h,@uTO5uJ6-Bl",
+                                            "fields": {
+                                              "NUM": 100
+                                            }
+                                          }
+                                        },
+                                        "TOHIGH": {
+                                          "shadow": {
+                                            "type": "math_number",
+                                            "id": "yMrw2h=ZY%Sjk)s?^jzE",
+                                            "fields": {
+                                              "NUM": 500
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "next": {
+                                  "block": {
+                                    "type": "arduino_serial_print",
+                                    "id": "jXe8R6|KNFf]lC)ddhsH",
+                                    "fields": {
+                                      "NEWLINE": true
+                                    },
+                                    "inputs": {
+                                      "TEXT": {
+                                        "shadow": {
+                                          "type": "text",
+                                          "id": "}A^=+:`^9W#he3${#)!z",
+                                          "fields": {
+                                            "TEXT": "Hello!"
+                                          }
+                                        },
+                                        "block": {
+                                          "type": "smarty_variables_get",
+                                          "id": "8rX1v){;cK7HYkA4dT-j",
+                                          "fields": {
+                                            "VAR": {
+                                              "id": "8IYM8TYhr7h=l-]WL0UG"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "ELSE": {
+                      "block": {
+                        "type": "arduino_serial_print",
+                        "id": "IJ!B.HQsPvonxl*xrE-@",
+                        "fields": {
+                          "NEWLINE": true
+                        },
+                        "inputs": {
+                          "TEXT": {
+                            "shadow": {
+                              "type": "text",
+                              "id": "}A^=+:`^9W#he3${#)!z",
+                              "fields": {
+                                "TEXT": "Hello!"
+                              }
+                            },
+                            "block": {
+                              "type": "smarty_variables_get",
+                              "id": "djZJi6TI{oUm_yf);bnV",
+                              "fields": {
+                                "VAR": {
+                                  "id": "jcA%j%l%bXDM3oow4/}["
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "smarty_wait",
+                      "id": "uEm@z#prw/-4Ol2=b`7#",
+                      "fields": {
+                        "TYPE": "waitSW(SW2)"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "variables": [
+    {
+      "name": "p",
+      "id": "jcA%j%l%bXDM3oow4/}[",
+      "type": "int"
+    },
+    {
+      "name": "n",
+      "id": "8IYM8TYhr7h=l-]WL0UG",
+      "type": "int"
+    },
+    {
+      "name": "정보",
+      "id": "e#RX,.Ehxg*%7)L]+U$M"
+    }
+  ]
+}

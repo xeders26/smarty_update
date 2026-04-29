@@ -1,8 +1,3 @@
-
-/*================
-  src/renderer/blockly/motorBlocks.ts
-=================*/
-
 import * as Blockly from 'blockly'
 
 export function initMotorBlocks(arduinoGenerator: any) {
@@ -140,7 +135,8 @@ export function initMotorBlocks(arduinoGenerator: any) {
       ],
       previousStatement: null,
       nextStatement: null,
-      colour: 230
+      colour: 230,
+      inputsInline: true // 🚨 추가됨: 가로로 펴기
     },
     {
       type: 'reverseMotor',
@@ -179,7 +175,8 @@ export function initMotorBlocks(arduinoGenerator: any) {
       ],
       previousStatement: null,
       nextStatement: null,
-      colour: 230
+      colour: 230,
+      inputsInline: true // 🚨 추가됨: 가로로 펴기
     },
     {
       type: 'stopMotor',
@@ -264,7 +261,8 @@ export function initMotorBlocks(arduinoGenerator: any) {
       ],
       previousStatement: null,
       nextStatement: null,
-      colour: 180
+      colour: 180,
+      inputsInline: true // 🚨 추가됨: 가로로 펴기
     },
     {
       type: 'setupServo',
@@ -285,7 +283,8 @@ export function initMotorBlocks(arduinoGenerator: any) {
       ],
       previousStatement: null,
       nextStatement: null,
-      colour: 180
+      colour: 180,
+      inputsInline: true // 🚨 추가됨: 가로로 펴기
     },
     {
       type: 'slowServo',
@@ -308,7 +307,8 @@ export function initMotorBlocks(arduinoGenerator: any) {
       ],
       previousStatement: null,
       nextStatement: null,
-      colour: 180
+      colour: 180,
+      inputsInline: true // 🚨 추가됨: 가로로 펴기
     }
   ])
 

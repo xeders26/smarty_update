@@ -341,16 +341,12 @@ function getBaseToolbox() {
           { kind: 'block', type: 'smarty_adv_sensor_init' },
           { kind: 'block', type: 'smarty_adv_sensor_read' },
           { kind: 'block', type: 'smarty_gyro_action' },
-          { kind: 'block', type: 'smarty_bumper_read' },
           { kind: 'block', type: 'initBump' },
+          { kind: 'block', type: 'smarty_bumper_read' },
           { kind: 'block', type: 'findBumpLine' },
-          { kind: 'block', type: 'findBumpLine_addr' },
           { kind: 'block', type: 'findBumpObject' },
-          { kind: 'block', type: 'findBumpObject_addr' },
           { kind: 'block', type: 'getBumpDistance' },
-          { kind: 'block', type: 'getBumpDistance_addr' },
-          { kind: 'block', type: 'getBumpLine' },
-          { kind: 'block', type: 'getBumpLine_addr' }
+          { kind: 'block', type: 'getBumpLine' }
         ]
       },
       {
@@ -502,6 +498,7 @@ export function initCategorySidebar(workspace: any) {
   // =================================================================
   // 🚨 1. [함수 정의 블록 패치] 드롭다운 메뉴 추가 및 좀비 텍스트 완전 제거
   // =================================================================
+  /*
   if (!(window as any).__smartyProcTextPatched && typeof Blockly !== 'undefined') {
     const patchBlockText = (blockType: string, prefixText: string) => {
       if (!Blockly.Blocks[blockType]) return;
@@ -569,7 +566,6 @@ export function initCategorySidebar(workspace: any) {
                if (field && typeof field.getValue === 'function' && typeof field.setValue === 'function') {
                    const text = field.getValue();
                    if (typeof text === 'string') {
-                       if (text.includes('아래 정보를 사용해서')) field.setValue('');
                        if (text.includes('- 정보') && !text.includes('- 입력정보')) {
                            field.setValue(text.replace('- 정보', '- 입력정보'));
                        }
@@ -588,7 +584,6 @@ export function initCategorySidebar(workspace: any) {
                    if (field && typeof field.getValue === 'function' && typeof field.setValue === 'function') {
                        const text = field.getValue();
                        if (typeof text === 'string') {
-                           if (text.includes('아래 정보를 사용해서')) field.setValue('');
                            if (text.includes('- 정보') && !text.includes('- 입력정보')) {
                                field.setValue(text.replace('- 정보', '- 입력정보'));
                            }
@@ -695,7 +690,7 @@ export function initCategorySidebar(workspace: any) {
     (window as any).__smartyProcCallPatched = true;
   }
   // =================================================================
-
+*/
   const sidebar = document.getElementById('category-sidebar')
   if (!sidebar) return
   sidebar.innerHTML = ''
@@ -873,7 +868,19 @@ export function initCategorySidebar(workspace: any) {
             if (funcName && !addedFuncs.has(funcName)) {
               addedFuncs.add(funcName);
               const isReturn = (block.type === 'procedures_defreturn');
-              flatContents.push({ kind: 'block', type: isReturn ? 'procedures_callreturn' : 'procedures_callnoreturn', extraState: { name: funcName } });
+              
+              // [수정됨] 파라미터(구멍) 정보를 가져와서 extraState에 무조건 포함!
+              const args = block.getVars ? block.getVars() : (block.arguments_ || []);
+              const extraState: any = { name: funcName };
+              if (args && args.length > 0) {
+                 extraState.params = args; 
+              }
+
+              flatContents.push({ 
+                kind: 'block', 
+                type: isReturn ? 'procedures_callreturn' : 'procedures_callnoreturn', 
+                extraState: extraState 
+              });
             }
           }
         });
@@ -1020,7 +1027,7 @@ export function initCategorySidebar(workspace: any) {
           ? (msg: string, def: string, cb: any) => Blockly.dialog.prompt(msg, def, cb) 
           : (msg: string, def: string, cb: any) => cb(prompt(msg, def));
 
-        promptFunc(promptText, '이름', (funcName: string) => {
+        promptFunc(promptText, '함수이름', (funcName: string) => {
           if (!funcName) return;
           const block = targetWorkspace.newBlock(blockType);
           block.setFieldValue(funcName, 'NAME');
@@ -1144,21 +1151,22 @@ export function initCategorySidebar(workspace: any) {
     window.addEventListener('appThemeChanged', () => initCategorySidebar(workspace))
     ;(window as any).__categorySidebarThemeListenerInstalled = true
   }
-
   // 🚨 3. 무한루프 방지 & 블록 모양 실시간 동기화 감시자!
   if (!(window as any).__smartyProcRefreshListener) {
     workspace.addChangeListener((e: any) => {
       if (e.workspaceId !== workspace.id) return;
-      let isFuncEvent = false;
-      let shapeChanged = false;
+      if (e.isUiEvent) return; // [수정됨] 마우스 클릭 등 불필요한 UI 이벤트 무시 (무한루프 방어)
 
-      // 3-1. 함수 자체의 수정/삭제 감지
+      let isFuncEvent = false;
+
+      // 3-1. 함수 자체의 생성/수정 감지
       if (e.type === Blockly.Events.BLOCK_CREATE || e.type === Blockly.Events.BLOCK_CHANGE) {
         const block = workspace.getBlockById(e.blockId);
         if (block && block.type && block.type.startsWith('procedures_def')) {
            isFuncEvent = true;
         }
       } 
+      // 3-2. 함수 블록 삭제 감지
       else if (e.type === Blockly.Events.BLOCK_DELETE) {
         if (e.oldJson && e.oldJson.type && e.oldJson.type.startsWith('procedures_def')) {
            isFuncEvent = true;
@@ -1170,22 +1178,8 @@ export function initCategorySidebar(workspace: any) {
         }
       }
 
-      // 3-2. 다른 블록을 끼워 넣거나 뺐을 때 모양(육각형/둥근형) 즉시 변환 감지
-      if (e.type === Blockly.Events.BLOCK_MOVE || e.type === Blockly.Events.BLOCK_CHANGE || e.type === Blockly.Events.BLOCK_CREATE) {
-          const callBlocks = workspace.getBlocksByType('procedures_callreturn', false);
-          callBlocks.forEach((cBlock: any) => {
-              if (cBlock.syncSmartyShape && cBlock.syncSmartyShape()) {
-                  shapeChanged = true;
-                  if (cBlock.rendered) {
-                      try { cBlock.initSvg(); } catch(err) {}
-                      cBlock.render();
-                  }
-              }
-          });
-      }
-
-      // 3-3. 모양이 바뀌었으면 왼쪽 툴박스(플라이아웃) 메뉴에도 육각형으로 띄워주기!
-      if (isFuncEvent || shapeChanged) {
+      // 3-3. 변경이 감지되면 툴박스만 조용히 다시 그림 (스크롤 유지)
+      if (isFuncEvent) {
          if (!(window as any).__isUpdatingSidebar) {
              (window as any).__isUpdatingSidebar = true;
              setTimeout(() => {
@@ -1197,7 +1191,7 @@ export function initCategorySidebar(workspace: any) {
                     if (newFlyout && newFlyout.scrollbar) newFlyout.scrollbar.set(currentScroll);
                     (window as any).__isUpdatingSidebar = false;
                  }, 50);
-             }, 400); 
+             }, 100); 
          }
       }
     });

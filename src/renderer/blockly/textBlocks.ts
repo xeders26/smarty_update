@@ -4,6 +4,17 @@ export function initTextBlocks(arduinoGenerator: any) {
   // =========================================================================
   // [모양 정의]
   // =========================================================================
+
+  // 🚨 [패치] 블록리 내장 기본 블록인 '글자에 글자 합하기(text_join)'를 강제로 가로로 펴기
+  if (!(Blockly.Blocks['text_join'] as any).__inlinePatched) {
+    const origTextJoinInit = Blockly.Blocks['text_join'].init;
+    Blockly.Blocks['text_join'].init = function(this: any) {
+      if (origTextJoinInit) origTextJoinInit.call(this);
+      this.setInputsInline(true); // 👈 여기서 무조건 가로로 강제!
+    };
+    (Blockly.Blocks['text_join'] as any).__inlinePatched = true;
+  }
+
   Blockly.Blocks['wait_until_text_different'] = { init: function(this: any) { this.appendDummyInput().appendField("⏳"); this.appendValueInput("TEXT_A").setCheck(["String", "Number"]); this.appendDummyInput().appendField("글자와"); this.appendValueInput("TEXT_B").setCheck(["String", "Number"]); this.appendDummyInput().appendField("글자가 달라질 때까지 기다리기"); this.setInputsInline(true); this.setPreviousStatement(true, null); this.setNextStatement(true, null); this.setColour(45); } };
   Blockly.Blocks['wait_until_text_same'] = { init: function(this: any) { this.appendDummyInput().appendField("⏳"); this.appendValueInput("TEXT_A").setCheck(["String", "Number"]); this.appendDummyInput().appendField("글자와"); this.appendValueInput("TEXT_B").setCheck(["String", "Number"]); this.appendDummyInput().appendField("글자가 같아질 때까지 기다리기"); this.setInputsInline(true); this.setPreviousStatement(true, null); this.setNextStatement(true, null); this.setColour(45); } };
 
