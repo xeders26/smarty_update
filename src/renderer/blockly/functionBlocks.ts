@@ -401,14 +401,13 @@ export function initFunctionBlocks(arduinoGenerator: any) {
   };
 
   
-    // =========================================================
-  // ⚙️ 3. 호출 블록(Caller) - 입력 0개 버그 완벽 해결판
+  // =========================================================
+  // ⚙️ 3. 호출 블록(Caller)
   // =========================================================
   const patchCaller = (blockName: string, hasReturn: boolean) => {
     const blockDef = Blockly.Blocks[blockName];
     if (!blockDef) return;
 
-    // 🚨 툴박스 블록 모양 강제 동기화 함수
     const updateShapeFromDef = function(block: any) {
       let funcName = block.getFieldValue('NAME');
       if (!funcName && block.getProcedureCall) funcName = block.getProcedureCall();
@@ -417,7 +416,9 @@ export function initFunctionBlocks(arduinoGenerator: any) {
       const mainWs = block.workspace.targetWorkspace || block.workspace;
       if (!mainWs) return;
 
-      let defBlock = null;
+      // 🚨 TypeScript 에러 해결: ': any' 타입을 명시적으로 지정
+      let defBlock: any = null; 
+      
       const topBlocks = mainWs.getTopBlocks(false);
       for (let i = 0; i < topBlocks.length; i++) {
         if ((topBlocks[i].type === 'procedures_defreturn' || topBlocks[i].type === 'procedures_defnoreturn') &&
@@ -439,7 +440,6 @@ export function initFunctionBlocks(arduinoGenerator: any) {
           }
         }
 
-        // 🚨 결과값이 있는 함수만 전체 모양 변신! (없는 함수는 무시됨)
         if (hasReturn) {
           const rType = defBlock.getFieldValue('RETURN_TYPE') || 'INT';
           if (rType === 'BOOLEAN') {
@@ -453,7 +453,6 @@ export function initFunctionBlocks(arduinoGenerator: any) {
       }
     };
 
-    // 1. 파라미터가 바뀔 때 실행
     const origSetParams = blockDef.setProcedureParameters_;
     blockDef.setProcedureParameters_ = function(this: any, paramNames: any, paramIds: any) { 
       if (origSetParams) origSetParams.call(this, paramNames, paramIds);
@@ -461,32 +460,23 @@ export function initFunctionBlocks(arduinoGenerator: any) {
       updateShapeFromDef(this);
     };
 
-    // 2. 파라미터가 1개 이상일 때 툴박스에서 실행
     const origDomToMut = blockDef.domToMutation;
     blockDef.domToMutation = function(this: any, xml: any) {
       if (origDomToMut) origDomToMut.call(this, xml);
       updateShapeFromDef(this);
     };
 
-    // 🚨 3. [핵심 패치] 파라미터가 0개라서 위 함수들이 무시될 때를 대비한 강제 초기화!
-    // 블록이 툴박스나 화면에 나타나는 순간 무조건 0.05초 뒤에 모양을 잡아줍니다.
     const origInit = blockDef.init;
     blockDef.init = function(this: any) {
       if (origInit) origInit.call(this);
-      
-      // 블록이 그려진 직후 찰나의 순간을 노려 강제 동기화
       setTimeout(() => {
          updateShapeFromDef(this);
-         // 모양을 강제로 바꾼 뒤 화면 찌그러짐을 방지하기 위해 다시 그림
          if (this.render) this.render();
       }, 50);
     };
   };
 
-  // 결과값 없는 함수는 false (안전장치)
   patchCaller('procedures_callnoreturn', false); 
-  
-  // 결과값 있는 함수는 true (모양 변경 허용)
   patchCaller('procedures_callreturn', true);
 
   // =========================================================
