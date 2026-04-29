@@ -164,9 +164,18 @@ arduinoGenerator.finish = function(code: string) {
 };
 
 // ==========================================
-// 🚀 [핵심] 모든 블록 모듈 장착!
+// 🚀 [핵심] 모든 블록 모듈 장착! (비동기화 완료)
 // ==========================================
-initSmartyBlocks(arduinoGenerator);
-//initArduinoBlocks(arduinoGenerator); // 👈 [추가됨] 드디어 아두이노 블록들이 정상적으로 연결됩니다!
+// 🚨 외부에서 이 함수를 부르고, 끝날 때까지 기다릴 수 있도록 async 함수로 감싸서 내보냅니다!
+export async function loadAllBlocklyModules() {
+  console.log("⏳ 블록 모듈 장전을 시작합니다...");
+  
+  // 서버에서 속성값을 다 받아오고 블록이 만들어질 때까지 기다림
+  await initSmartyBlocks(arduinoGenerator);
+  
+  // initArduinoBlocks(arduinoGenerator); // 👈 아두이노 블록도 필요시 여기서 호출
+  
+  console.log("✅ 모든 블록 및 Git 서버 설정 장전 완료!");
+}
 
 export { arduinoPort, isSerialOpen };

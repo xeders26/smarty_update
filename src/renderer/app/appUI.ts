@@ -19,11 +19,227 @@ function getAppAutoSeason() {
   return 'winter';
 }
 
+// =========================================================
+// 🚀 [신규 마법] 관리자 전용 Git 연동 모달 (엔터키 & 불러오기 지원)
+// =========================================================
+function openAdminGitSyncModal() {
+  if (document.getElementById('smarty-admin-git-modal')) return;
+
+  // 🚨 대장님의 GitHub 아이디와 저장소 이름 유지!
+  const GITHUB_OWNER = 'xeders26'; 
+  const GITHUB_REPO = 'smarty_update';   
+  const FILE_PATH = 'smarty-config.json'; 
+
+  const overlay = document.createElement('div');
+  overlay.id = 'smarty-admin-git-modal';
+  overlay.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: rgba(0, 0, 0, 0.8); z-index: 999999;
+    display: flex; justify-content: center; align-items: center;
+    font-family: 'Pretendard', sans-serif;
+  `;
+
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    background: #fff; padding: 25px; border-radius: 12px;
+    width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    color: #333; position: relative;
+  `;
+
+  const savedToken = localStorage.getItem('smarty_admin_token') || '';
+
+  modal.innerHTML = `
+    <h3 style="margin: 0 0 15px 0; font-size: 18px; color: #E91E63; text-align: center;">⚙️ 관리자 원격 제어소</h3>
+    
+    <div id="adminStep1">
+      <p style="font-size: 13px; color: #666; margin-bottom: 10px; text-align:center;">관리자 권한을 인증해주세요.</p>
+      <input type="password" id="adminPwd" placeholder="비밀번호 입력" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; text-align:center;">
+      <p id="adminErrMsg" style="color: red; font-size: 12px; text-align: center; height: 14px; margin: 8px 0;"></p>
+      <button id="btnAuth" style="width: 100%; padding: 10px; background: #E91E63; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">인증하기</button>
+    </div>
+
+    <div id="adminStep2" style="display: none;">
+      <div style="margin-bottom: 15px; background: #ffebee; padding: 10px; border-radius: 6px; border: 1px solid #ffcdd2;">
+        <label style="font-size: 11px; color: #d32f2f; font-weight: bold;">🔑 GitHub 관리자 토큰 (이 PC에만 안전하게 저장됨)</label>
+        
+        <!-- 🚨 [변경됨] 토큰 입력칸 옆에 '가져오기' 버튼 추가 -->
+        <div style="display: flex; gap: 5px; margin-top: 5px;">
+          <input type="password" id="adminTokenInput" value="${savedToken}" placeholder="토큰 입력 후 엔터(Enter)" style="flex: 1; padding: 6px; border:1px solid #ccc; border-radius:4px; box-sizing: border-box;">
+          <button id="btnFetchGit" style="padding: 0 12px; background: #d32f2f; color: white; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">🔄 가져오기</button>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 5px;">
+        ${['moveBlueHand', 'moveRedHand', 'moveBlueSlide', 'moveRedSlide'].map(id => `
+          <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px solid #eee;">
+            <div style="font-size: 13px; font-weight: bold; margin-bottom: 5px;">${id}</div>
+            <div style="display: flex; gap: 10px;">
+              <label style="font-size: 12px; flex: 1;">Min: <input type="number" id="min_${id}" style="width: 100%; padding: 5px; border:1px solid #ccc; border-radius:4px;"></label>
+              <label style="font-size: 12px; flex: 1;">Max: <input type="number" id="max_${id}" style="width: 100%; padding: 5px; border:1px solid #ccc; border-radius:4px;"></label>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <p id="gitStatusMsg" style="color: #2196F3; font-size: 12px; text-align: center; height: 14px; margin: 15px 0; font-weight:bold;"></p>
+      
+      <div style="display: flex; gap: 10px;">
+        <button id="btnAdminCancel" style="flex: 1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">❌ 취소</button>
+        <button id="btnGitPush" style="flex: 2; padding: 12px; background: #2196F3; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">🚀 Git 저장 및 배포</button>
+      </div>
+    </div>
+
+    <button id="btnAdminClose" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 18px; cursor: pointer; color: #999;">✖</button>
+  `;
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  document.getElementById('btnAdminClose')?.addEventListener('click', () => overlay.remove());
+  document.getElementById('btnAdminCancel')?.addEventListener('click', () => overlay.remove());
+
+  // 🌟 [추가됨] 데이터를 가져오는 공통 마법 함수
+  const fetchSettings = async () => {
+    const statusMsg = document.getElementById('gitStatusMsg')!;
+    const token = (document.getElementById('adminTokenInput') as HTMLInputElement).value;
+    
+    if (!token) {
+       statusMsg.style.color = '#FF9800';
+       statusMsg.innerText = "⚠️ 위에 GitHub 토큰을 먼저 입력해주세요!";
+       return;
+    }
+
+    // 토큰을 입력하고 엔터를 치거나 가져오기를 누르면 내 PC에 몰래 저장!
+    localStorage.setItem('smarty_admin_token', token);
+
+    statusMsg.style.color = '#2196F3';
+    statusMsg.innerText = "⏳ 서버에서 최신 설정값을 실시간으로 불러오는 중...";
+    
+    try {
+      const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
+      const res = await fetch(apiUrl, {
+        headers: { 'Authorization': `token ${token}`, 'Cache-Control': 'no-cache' }
+      });
+      
+      if (res.ok) {
+        const apiData = await res.json();
+        const decodedStr = decodeURIComponent(escape(atob(apiData.content)));
+        const data = JSON.parse(decodedStr);
+        
+        ['moveBlueHand', 'moveRedHand', 'moveBlueSlide', 'moveRedSlide'].forEach(id => {
+          if (data[id]) {
+            (document.getElementById(`min_${id}`) as HTMLInputElement).value = data[id].min;
+            (document.getElementById(`max_${id}`) as HTMLInputElement).value = data[id].max;
+          }
+        });
+        statusMsg.style.color = '#4CAF50';
+        statusMsg.innerText = "✅ 최신 데이터 로드 완료!";
+      } else {
+        statusMsg.style.color = '#FF9800';
+        statusMsg.innerText = "⚠️ Git에 설정 파일이 없습니다. 빈 값으로 시작합니다.";
+      }
+    } catch (e) {
+      statusMsg.style.color = 'red';
+      statusMsg.innerText = "❌ 토큰 권한이 없거나 불러오지 못했습니다.";
+    }
+  };
+
+  // 1단계 인증 로직
+  document.getElementById('btnAuth')?.addEventListener('click', async () => {
+    const pwd = (document.getElementById('adminPwd') as HTMLInputElement).value;
+    const errMsg = document.getElementById('adminErrMsg')!;
+    
+    if (pwd === 'smartygood') {
+      document.getElementById('adminStep1')!.style.display = 'none';
+      document.getElementById('adminStep2')!.style.display = 'block';
+      
+      // 이미 저장된 토큰이 있으면 바로 불러오기 실행
+      if ((document.getElementById('adminTokenInput') as HTMLInputElement).value) {
+        fetchSettings();
+      } else {
+        document.getElementById('gitStatusMsg')!.innerText = "⚠️ 위에 GitHub 토큰을 먼저 입력해주세요!";
+        document.getElementById('gitStatusMsg')!.style.color = '#FF9800';
+      }
+    } else {
+      errMsg.innerText = "비밀번호가 틀렸습니다.";
+    }
+  });
+
+  // 🌟 [추가됨] 엔터키(Enter)를 누를 때 이벤트
+  document.getElementById('adminTokenInput')?.addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') fetchSettings();
+  });
+
+  // 🌟 [추가됨] '가져오기' 버튼을 클릭할 때 이벤트
+  document.getElementById('btnFetchGit')?.addEventListener('click', fetchSettings);
+
+  // Git Push 처리 로직
+  document.getElementById('btnGitPush')?.addEventListener('click', async () => {
+    const statusMsg = document.getElementById('gitStatusMsg')!;
+    const btnPush = document.getElementById('btnGitPush') as HTMLButtonElement;
+    const token = (document.getElementById('adminTokenInput') as HTMLInputElement).value;
+    
+    if (!token) {
+      statusMsg.style.color = 'red';
+      statusMsg.innerText = "❌ GitHub 토큰을 입력해야 배포할 수 있습니다.";
+      return;
+    }
+
+    localStorage.setItem('smarty_admin_token', token);
+
+    const newConfig: any = {};
+    ['moveBlueHand', 'moveRedHand', 'moveBlueSlide', 'moveRedSlide'].forEach(id => {
+      const minVal = parseInt((document.getElementById(`min_${id}`) as HTMLInputElement).value) || 0;
+      const maxVal = parseInt((document.getElementById(`max_${id}`) as HTMLInputElement).value) || 180;
+      newConfig[id] = { min: minVal, max: maxVal };
+    });
+
+    btnPush.disabled = true;
+    btnPush.style.background = '#999';
+    statusMsg.style.color = '#2196F3';
+    statusMsg.innerText = "🔄 Git 저장소에 배포하는 중...";
+
+    try {
+      const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
+      const headers = { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' };
+
+      let fileSha = '';
+      const getRes = await fetch(apiUrl, { headers });
+      if (getRes.ok) {
+        const getJson = await getRes.json();
+        fileSha = getJson.sha;
+      }
+
+      const contentStr = JSON.stringify(newConfig, null, 2);
+      const contentB64 = btoa(unescape(encodeURIComponent(contentStr)));
+
+      const putBody: any = { message: '🚀 관리자: 스마티 로봇 블록 설정 업데이트', content: contentB64 };
+      if (fileSha) putBody.sha = fileSha;
+
+      const putRes = await fetch(apiUrl, { method: 'PUT', headers: headers, body: JSON.stringify(putBody) });
+
+      if (putRes.ok) {
+        statusMsg.style.color = '#4CAF50';
+        statusMsg.innerText = "🎉 성공적으로 배포되었습니다!";
+        setTimeout(() => overlay.remove(), 2000); 
+      } else {
+        throw new Error('Upload Failed');
+      }
+    } catch (e) {
+      statusMsg.style.color = 'red';
+      statusMsg.innerText = "❌ 배포 실패! 토큰이 만료되었거나 권한이 없습니다.";
+      btnPush.disabled = false;
+      btnPush.style.background = '#2196F3';
+    }
+  });
+}
+// =========================================================
+// 기본 UI 초기화 함수
+// =========================================================
 export function initAppUI(workspace: Blockly.WorkspaceSvg) {
   (window as any).__blockColorMap = {};
   (window as any).__currentSeason = 'auto';
 
-  // 🌙 1. 다크모드 엔진 충돌 방지 & 영구 기억 장치
   const savedTheme = localStorage.getItem('smarty_theme'); 
   const themeToggleBtn = document.getElementById('themeToggleBtn');
 
@@ -45,7 +261,6 @@ export function initAppUI(workspace: Blockly.WorkspaceSvg) {
     }
   }
 
-  // 🚨 [진범 체포 및 수술 완료] 감시자(MutationObserver) 방어막 추가!
   let lastIsDark = document.body.classList.contains('dark-mode'); 
 
   const themeObserver = new MutationObserver(() => {
@@ -84,22 +299,18 @@ export function initAppUI(workspace: Blockly.WorkspaceSvg) {
       body:not(.dark-mode) #minimapArea { background-color: #ecf0f1 !important; }
       body.dark-mode #serialMonitorContent { background-color: #21252b !important; color: #bdc3c7 !important; }
       
-      /* 🌙 모달 창(환경설정 등) 다크모드 지원 */
       body.dark-mode .modal-content { background-color: #282c34 !important; color: #ecf0f1 !important; border: 1px solid #3e4451; box-shadow: 0 10px 25px rgba(0,0,0,0.8); }
       body.dark-mode .modal-content h2, body.dark-mode .modal-content h3 { color: #ffffff !important; border-bottom: 2px dashed #4b5363 !important; }
       body.dark-mode .modal-content label, body.dark-mode .modal-content p { color: #abb2bf !important; }
       
-      /* 🌙 제더스 로고 및 버전 뱃지 다크모드 지원 */
       body.dark-mode #smartyBrandSettingsFooter { border-top: 2px dashed #4b5363 !important; }
       body.dark-mode .smarty-brand-text { color: #61afef !important; }
       body.dark-mode .smarty-version-badge { background-color: #3e4451 !important; color: #98c379 !important; }
-      /* 다크모드일 때 로고 이미지가 잘 보이도록 뽀샤시 하얀 배경 추가 */
       body.dark-mode #smartyBrandSettingsFooter img { background-color: rgba(255, 255, 255, 0.85); padding: 5px 10px; border-radius: 8px; }
     `;
     document.head.appendChild(style);
   }
   
-  // 🎨 2. 블록 테마 색상 패치 유지
   try {
     if (!(window as any).__blocklyColorPatched) {
       const origSetColour = Blockly.Block.prototype.setColour;
@@ -287,9 +498,6 @@ export function initAppUI(workspace: Blockly.WorkspaceSvg) {
       appMonitorRadios.forEach(r => r.checked = (r.value === 'show' ? appIsMonitorVisible : !appIsMonitorVisible));
       appThemeRadios.forEach(r => r.checked = (r.value === appCurrentTheme));
       
-      // ========================================================
-      // 🌟 [최종 마법 적용] 설정 창이 켜질 때 로고와 버전을 박아넣습니다!
-      // ========================================================
       if (!document.getElementById('smartyBrandSettingsFooter')) {
         const modalBox = (appSettingsModal.querySelector('.modal-content') || appSettingsModal.firstElementChild || appSettingsModal) as HTMLElement;
         
@@ -297,34 +505,36 @@ export function initAppUI(workspace: Blockly.WorkspaceSvg) {
         footer.id = 'smartyBrandSettingsFooter';
         footer.style.marginTop = '25px';
         footer.style.paddingTop = '15px';
-        footer.style.borderTop = '2px dashed #ecf0f1'; // 다크모드시 위에서 설정한 CSS로 자동 변경됨
+        footer.style.borderTop = '2px dashed #ecf0f1';
         footer.style.display = 'flex';
         footer.style.flexDirection = 'column';
         footer.style.alignItems = 'center';
         footer.style.gap = '12px';
         
-        // 🌟 다크모드/라이트모드 자동 대응 클래스(smarty-brand-text, smarty-version-badge) 적용!
         footer.innerHTML = `
           <img src="${brandLogo}" alt="Play Creativity" style="max-width: 100%; height: auto; max-height: 55px;">
           <div style="display: flex; justify-content: space-between; width: 100%; font-size: 13px; color: #7f8c8d; align-items: center;">
-            
-            <!-- ⬅️ 왼쪽 영역: 회사 이름과 링크만 남김 -->
             <div>
-              <b class="smarty-brand-text" style="color:#2c3e50;">XEDERS</b>(제더스) 
+              <b class="smarty-brand-text" style="color:#2c3e50;">XEDERS</b> 
               <a href="https://www.xeders.com" target="_blank" style="color:#3498db; text-decoration:none;">www.xeders.com</a> 
             </div>
-
-            <!-- ➡️ 오른쪽 영역: Smarty 글씨와 버전 뱃지를 하나로 묶음 -->
             <div style="display: flex; align-items: center; gap: 8px;">
+              <!-- 🚨 여기에 작고 귀여운 [관리자 아이콘]을 숨겨두었습니다 -->
+              <div id="btnOpenAdmin" style="cursor: pointer; font-size: 16px; padding: 0 5px;" title="관리자 설정">⚙️</div>
               <b class="smarty-brand-text" style="color:#2c3e50;">Smarty</b>
               <div class="smarty-version-badge" style="font-weight:bold; background:#ecf0f1; padding:4px 10px; border-radius:6px; color:#2c3e50;">
                 v${pkg.version}
               </div>
             </div>
-
           </div>
         `;
         modalBox.appendChild(footer);
+
+        // 🚨 관리자 톱니바퀴 클릭 시 모달 띄우기
+        document.getElementById('btnOpenAdmin')?.addEventListener('click', () => {
+          appSettingsModal.style.display = 'none'; // 설정창은 닫고
+          openAdminGitSyncModal();                 // 관리자 창을 연다
+        });
       }
       
       appSettingsModal.style.display = 'flex';
@@ -374,16 +584,15 @@ export function initMascotAnimation(workspace: Blockly.WorkspaceSvg) {
   const mascot = document.getElementById('smarty-mascot');
   if (!mascot) return;
 
-  // 👻 [추가된 마법] CSS 파일을 건드리지 않고 TS에서 즉시 투명화 적용!
-  mascot.style.pointerEvents = 'auto'; // 마우스를 무시하던 속성(none)을 강제로 해제!
-  mascot.style.transition = 'transform 0.2s, opacity 0.3s ease-in-out'; // 스르륵 변하는 애니메이션
+  mascot.style.pointerEvents = 'auto'; 
+  mascot.style.transition = 'transform 0.2s, opacity 0.3s ease-in-out'; 
   
   mascot.addEventListener('mouseenter', () => {
-    mascot.style.opacity = '0.1'; // 마우스가 스마티 위에 올라가면 스르륵 투명해짐!
+    mascot.style.opacity = '0.1'; 
   });
   
   mascot.addEventListener('mouseleave', () => {
-    mascot.style.opacity = '1'; // 마우스가 빠져나가면 다시 스르륵 선명해짐!
+    mascot.style.opacity = '1'; 
   });
 
   let sleepTimer: any = null;
@@ -448,4 +657,3 @@ export function initMascotAnimation(workspace: Blockly.WorkspaceSvg) {
     }
   });
 }
-

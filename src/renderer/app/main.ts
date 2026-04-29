@@ -3,7 +3,9 @@
 =================*/
 import * as Blockly from 'blockly';
 
-import { initSmartyBlocks } from '../blockly/smartyBlocks';
+//import { initSmartyBlocks } from '../blockly/smartyBlocks';
+import { loadAllBlocklyModules, arduinoGenerator, getSafeVarName, smartyTheme } from './blocklySetup';
+
 import { installBlocklyDialogs, showCuteModal } from '../ui/modal';
 import { arduinoGenerator, getSafeVarName, smartyTheme } from './blocklySetup';
 import { getMergedToolbox, initCategorySidebar } from './toolbox';
@@ -138,14 +140,14 @@ if (!(window as any).__flyoutCorePatched) {
   (window as any).__flyoutCorePatched = true;
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => { // 👈 async 추가!
   Blockly.Msg['MATH_RANDOM_INT_TITLE'] = '🎲 %1 부터 %2 사이의 무작위 수 (랜덤)';
   Blockly.Msg['CONTROLS_REPEAT_TITLE'] = '🔁 %1 번 반복하기';
   Blockly.Msg['LOGIC_BOOLEAN_TRUE'] = '참 (맞음)';
   Blockly.Msg['LOGIC_BOOLEAN_FALSE'] = '거짓 (틀림)';
 
   installBlocklyDialogs();
-  initSmartyBlocks(arduinoGenerator);
+  await loadAllBlocklyModules();
 
   const workspace = Blockly.inject('blocklyDiv', {
     toolbox: { kind: 'flyoutToolbox', contents:[] },

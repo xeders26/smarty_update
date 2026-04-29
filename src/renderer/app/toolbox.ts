@@ -437,7 +437,21 @@ function getBaseToolbox() {
           { kind: 'block', type: 'smarty_p2p_read' }
         ]
       },
-      { kind: 'sep', gap: 300 },
+      {
+        "kind": "category",
+        "name": "로봇",
+        "colour": "#FF6680",
+        "cssConfig": {
+          "iconClassName": "my-robot-icon" // 👈 커스텀 CSS 클래스 이름 지정
+        },
+        "contents": [
+          { "kind": "block", "type": "moveBlueHand" },
+          { "kind": "block", "type": "moveRedHand" },
+          { "kind": "block", "type": "moveBlueSlide" },
+          { "kind": "block", "type": "moveRedSlide" }
+        ]
+      },
+      { kind: 'sep', gap: 500 },
       {
         kind: 'category',
         id: normalizeCategoryId('📁 예제 모음'),
