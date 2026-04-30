@@ -1,7 +1,7 @@
 {
   "moveBlueHand": {
-    "min": 90,
-    "max": 100
+    "min": 30,
+    "max": 60
   },
   "moveRedHand": {
     "min": 10,
