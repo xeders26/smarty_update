@@ -12,7 +12,7 @@
     "max": 40
   },
   "moveRedSlide": {
-    "min": 10,
+    "min": 80,
     "max": 90
   }
 }
