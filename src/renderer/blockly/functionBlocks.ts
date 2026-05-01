@@ -392,7 +392,7 @@ export function initFunctionBlocks(arduinoGenerator: any) {
 
       this.appendStatementInput('STACK').appendField('실행할 내용');
       this.appendValueInput('RETURN')
-          .setAlign((Blockly as any).ALIGN_RIGHT || 1)
+          .setAlign(1) // ALIGN_RIGHT
           .appendField('➔ 결과 반환');
 
       this.setColour(290);
@@ -487,17 +487,15 @@ export function initFunctionBlocks(arduinoGenerator: any) {
           if (rType === 'BOOLEAN') {
              block.setOutput(true, ['Boolean']);
              // 🛡️ [추가됨: 반환 타입에 따른 호출 블록 모양 육각형으로 변경]
-             if ((Blockly as any).OUTPUT_SHAPE_HEXAGONAL !== undefined) block.outputShape_ = (Blockly as any).OUTPUT_SHAPE_HEXAGONAL;
+             block.outputShape_ = 2; // OUTPUT_SHAPE_HEXAGONAL
           } else if (rType === 'STRING') {
              block.setOutput(true, ['String']);
              // 🛡️ [추가됨: 문자열이면 다시 둥근 모양 복구]
-             if ((Blockly as any).OUTPUT_SHAPE_ROUND !== undefined) block.outputShape_ = (Blockly as any).OUTPUT_SHAPE_ROUND;
-             else block.outputShape_ = null;
+             block.outputShape_ = 3; // OUTPUT_SHAPE_ROUND
           } else {
              block.setOutput(true, ['Number']);
              // 🛡️ [추가됨: 숫자면 다시 둥근 모양 복구]
-             if ((Blockly as any).OUTPUT_SHAPE_ROUND !== undefined) block.outputShape_ = (Blockly as any).OUTPUT_SHAPE_ROUND;
-             else block.outputShape_ = null;
+             block.outputShape_ = 3; // OUTPUT_SHAPE_ROUND
           }
 
           // 🛡️ [추가됨: 함수 결과 타입이 바뀌어서 현재 끼워진 부모 공간과 안 맞으면 스스로 튕겨나옴]

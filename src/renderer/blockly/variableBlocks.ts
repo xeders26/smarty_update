@@ -282,10 +282,9 @@ export function initVariableBlocks(arduinoGenerator: any) {
             this.setOutput(true, targetType);
 
             if (targetType && targetType[0] === 'Boolean') {
-              if ((Blockly as any).OUTPUT_SHAPE_HEXAGONAL !== undefined) this.outputShape_ = (Blockly as any).OUTPUT_SHAPE_HEXAGONAL;
+              this.outputShape_ = 2; // OUTPUT_SHAPE_HEXAGONAL
             } else {
-              if ((Blockly as any).OUTPUT_SHAPE_ROUND !== undefined) this.outputShape_ = (Blockly as any).OUTPUT_SHAPE_ROUND;
-              else this.outputShape_ = null;
+              this.outputShape_ = 3; // OUTPUT_SHAPE_ROUND
             }
 
             // 부모 블록에 꽂혀있는데 타입이 안 맞게 변했다면 스스로 떨어짐!
