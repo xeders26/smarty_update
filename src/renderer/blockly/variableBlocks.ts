@@ -280,12 +280,13 @@ export function initVariableBlocks(arduinoGenerator: any) {
           if (JSON.stringify(this.outputConnection.check_) !== JSON.stringify(targetType)) {
             
             this.setOutput(true, targetType);
-
+            /*
             if (targetType && targetType[0] === 'Boolean') {
               this.outputShape_ = 2; // OUTPUT_SHAPE_HEXAGONAL
             } else {
               this.outputShape_ = 3; // OUTPUT_SHAPE_ROUND
-            }
+            }*/
+            this.outputShape_ = null;
 
             // 부모 블록에 꽂혀있는데 타입이 안 맞게 변했다면 스스로 떨어짐!
             const parentBlock = this.getParent();

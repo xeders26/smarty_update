@@ -229,6 +229,10 @@ export function initSettingsModal(callbacks: {
   getState: () => { code: boolean; monitor: boolean; theme: string };
 }) {
 
+  const versionElement = document.getElementById('smartyVersionText');
+  if (versionElement) {
+    versionElement.innerText = `v${pkg.version}`; // ex) "v2.6.7" 로 자동 변경
+  }
   const appSettingsBtn = document.getElementById('settingsBtn');
   const appSettingsModal = document.getElementById('settingsModal');
   const appSaveSettingsBtn = document.getElementById('saveSettingsBtn');
