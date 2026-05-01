@@ -1,7 +1,7 @@
 /*=========================================================
 🤖 스마티 AI 예제 설명서 자동 생성기 (OpenAI API 연동)
 ==========================================================*/
-mport * as Blockly from 'blockly';
+import * as Blockly from 'blockly';
 import { arduinoGenerator } from './blocklySetup';
 
 // =========================================================
