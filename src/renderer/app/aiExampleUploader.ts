@@ -1,3 +1,8 @@
+/*=========================================
+  AI 예제 업로더 모달 구현
+  - AI가 생성한 도움말을 GitHub에 예제로 배포하는 기능
+  - 3단계로 구성된 모달 UI와 단계별 로직 포함
+===========================================*/
 import * as Blockly from 'blockly';
 import { arduinoGenerator } from './blocklySetup';
 
