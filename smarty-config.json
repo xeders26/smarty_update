@@ -8,11 +8,11 @@
     "max": 60
   },
   "moveBlueSlide": {
-    "min": 30,
-    "max": 40
+    "min": 0,
+    "max": 180
   },
   "moveRedSlide": {
-    "min": 80,
-    "max": 90
+    "min": 0,
+    "max": 180
   }
 }
