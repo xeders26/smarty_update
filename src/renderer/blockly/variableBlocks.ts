@@ -21,15 +21,13 @@ export function initVariableBlocks(arduinoGenerator: any) {
     (window as any).__patchedConnectionChecker = true;
 
     // 워크스페이스가 생성될 때마다 커스텀 체커를 주입하기 위해 패치
-    const origInit = Blockly.WorkspaceSvg.prototype.init;
-    Blockly.WorkspaceSvg.prototype.init = function(...args: any[]) {
+    const origInit = (Blockly.WorkspaceSvg.prototype as any).init;
+    (Blockly.WorkspaceSvg.prototype as any).init = function(...args: any[]) {
       origInit.apply(this, args);
       
       // 블록리 기본 체커를 덮어씁니다.
-      const originalCanConnect = this.connectionChecker.canConnect.bind(this.connectionChecker);
-      const originalDoTypeCheck = this.connectionChecker.doTypeCheck.bind(this.connectionChecker);
-
-      this.connectionChecker.doTypeCheck = function(a: Blockly.Connection, b: Blockly.Connection) {
+       const originalDoTypeCheck = (this.connectionChecker as any).doTypeChecks.bind(this.connectionChecker);
+      (this.connectionChecker as any).doTypeChecks = function(a: Blockly.Connection, b: Blockly.Connection) {
         // 기존 블록리 타입 체크 로직 실행
         const baseCheck = originalDoTypeCheck(a, b);
         if (!baseCheck) return false;
@@ -76,8 +74,8 @@ export function initVariableBlocks(arduinoGenerator: any) {
 
       setTimeout(() => {
         const ws = Blockly.getMainWorkspace();
-        if (ws && typeof ws.getToolbox === 'function') {
-          const toolbox = ws.getToolbox();
+        if (ws && typeof (ws as any).getToolbox === 'function') {
+          const toolbox = (ws as any).getToolbox();
           if (toolbox && typeof toolbox.refreshSelection === 'function') toolbox.refreshSelection();
         }
       }, 50);
@@ -371,7 +369,7 @@ export function initVariableBlocks(arduinoGenerator: any) {
   const originalFinish = arduinoGenerator.finish;
   arduinoGenerator.finish = function(this: any, code: string) {
     if (this.definitions_) {
-      const rogueKeys = [];
+      const rogueKeys: string[] = []; 
       for (const key in this.definitions_) {
         if (key !== 'smarty_perfect_vars') {
           const defStr = this.definitions_[key];

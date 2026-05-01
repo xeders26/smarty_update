@@ -41,11 +41,11 @@ export function initFunctionBlocks(arduinoGenerator: any) {
   // =========================================================================
   if (!(window as any).__patchedConnectionChecker) {
     (window as any).__patchedConnectionChecker = true;
-    const origInit = Blockly.WorkspaceSvg.prototype.init;
-    Blockly.WorkspaceSvg.prototype.init = function(...args: any[]) {
+    const origInit = (Blockly.WorkspaceSvg.prototype as any).init;
+    (Blockly.WorkspaceSvg.prototype as any).init = function(...args: any[]) {
       origInit.apply(this, args);
-      const originalDoTypeCheck = this.connectionChecker.doTypeCheck.bind(this.connectionChecker);
-      this.connectionChecker.doTypeCheck = function(a: Blockly.Connection, b: Blockly.Connection) {
+      const originalDoTypeCheck = (this.connectionChecker as any).doTypeChecks.bind(this.connectionChecker);
+      (this.connectionChecker as any).doTypeChecks = function(a: Blockly.Connection, b: Blockly.Connection) {
         const baseCheck = originalDoTypeCheck(a, b);
         if (!baseCheck) return false;
 
