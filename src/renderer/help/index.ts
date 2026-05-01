@@ -9,6 +9,7 @@ import { MotorBlocksHelp } from './motorBlocksHelp';
 import { SensorBlocksHelp } from './sensorBlocksHelp';
 import { TextBlocksHelp } from './textBlocksHelp';
 import { TimeBlocksHelp } from './timeBlocksHelp';
+import { RobotBlocksHelp } from './robotBlocksHelp';
 
 // 🌟 마지막 퍼즐! 변수 블록 도움말을 불러옵니다! (.ts 없음)
 import { VariableBlocksHelp } from './variableBlocksHelp';
@@ -26,6 +27,7 @@ export const HelpData: Record<string, string> = {
   ...SensorBlocksHelp,
   ...TextBlocksHelp,
   ...TimeBlocksHelp,
+ ...RobotBlocksHelp,
 
   // 🌟 변수 블록 도움말 최종 합체 완료!
   ...VariableBlocksHelp,

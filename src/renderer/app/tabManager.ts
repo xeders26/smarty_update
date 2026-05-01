@@ -2,6 +2,7 @@
   src/renderer/app/tabManager.ts
 =================*/
 import * as Blockly from 'blockly';
+import { openExampleUploadModal } from './aiExampleUploader';
 
 export interface ProgramData {
   id: string;
@@ -30,14 +31,77 @@ export function initTabManager(workspace: Blockly.Workspace) {
     }
   }
 
+  // 🌟 [신규 추가] 커스텀 우클릭 팝업 메뉴 생성 함수
+  function showContextMenu(x: number, y: number, program: ProgramData) {
+    // 혹시 이미 열려있는 메뉴가 있다면 닫기
+    const existingMenu = document.getElementById('smarty-tab-context-menu');
+    if (existingMenu) existingMenu.remove();
+
+    const isDark = document.body.classList.contains('dark-mode');
+    
+    // 메뉴 생성
+    const menu = document.createElement('div');
+    menu.id = 'smarty-tab-context-menu';
+    menu.style.cssText = `
+      position: absolute;
+      top: ${y}px;
+      left: ${x}px;
+      background: ${isDark ? '#2c313a' : '#ffffff'};
+      border: 1px solid ${isDark ? '#1a252f' : '#bdc3c7'};
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border-radius: 6px;
+      padding: 5px 0;
+      z-index: 999999;
+      min-width: 160px;
+      font-family: 'Pretendard', sans-serif;
+    `;
+
+    // 메뉴 아이템 생성
+    const menuItem = document.createElement('div');
+    menuItem.innerHTML = '🚀 예제로 배포하기 (AI)';
+    menuItem.style.cssText = `
+      padding: 10px 15px;
+      font-size: 13px;
+      color: ${isDark ? '#e5c07b' : '#d35400'};
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    `;
+
+    // 호버 효과
+    menuItem.onmouseenter = () => { menuItem.style.background = isDark ? '#3e4451' : '#f0f3f4'; };
+    menuItem.onmouseleave = () => { menuItem.style.background = 'transparent'; };
+
+    // 클릭 시 실행 로직
+    menuItem.onclick = () => {
+      menu.remove(); // 메뉴 닫기
+      if (currentProgramId !== program.id) {
+        switchTab(program.id);
+      }
+      openExampleUploadModal(workspace as Blockly.WorkspaceSvg, program.name);
+    };
+
+    menu.appendChild(menuItem);
+    document.body.appendChild(menu);
+
+    // 바탕화면 아무 곳이나 클릭하면 메뉴가 닫히도록 이벤트 추가
+    const closeMenu = () => {
+      menu.remove();
+      document.removeEventListener('click', closeMenu);
+    };
+    
+    // setTimeout을 주지 않으면, 지금 클릭한 우클릭 이벤트 때문에 바로 닫혀버림
+    setTimeout(() => {
+      document.addEventListener('click', closeMenu);
+    }, 10);
+  }
+
   function renderTabs() {
     const tabListDiv = document.getElementById('tab-list');
     if (!tabListDiv) return;
     
-    // 🚀 테마 체크: 라이트모드/다크모드 인지 확인!
     const isDark = document.body.classList.contains('dark-mode');
     
-    // 배경색 동적 변경 (에러 없는 인라인 스타일 방식)
     tabListDiv.style.cssText = `
       display: flex;
       background: ${isDark ? '#21252b' : '#ecf0f1'};
@@ -51,7 +115,6 @@ export function initTabManager(workspace: Blockly.Workspace) {
       const isActive = program.id === currentProgramId;
       
       const btn = document.createElement('div');
-      // ✅ 원래 이름인 'tab-btn'으로 완벽 복구!!! (이게 핵심입니다)
       btn.className = `tab-btn ${isActive ? 'active' : ''}`;
       
       const bgActive = isDark ? '#1a252f' : '#ffffff';
@@ -101,7 +164,15 @@ export function initTabManager(workspace: Blockly.Workspace) {
       closeBtn.onmouseenter = () => { closeBtn.style.background = 'rgba(231, 76, 60, 0.2)'; };
       closeBtn.onmouseleave = () => { closeBtn.style.background = 'transparent'; };
 
+      // [왼쪽 클릭] 탭 전환
       btn.onclick = () => switchTab(program.id);
+      
+      // 🌟 [수정됨: 오른쪽 클릭] 커스텀 팝업 메뉴 띄우기
+      btn.oncontextmenu = (e) => {
+        e.preventDefault(); 
+        showContextMenu(e.pageX, e.pageY, program);
+      };
+
       closeBtn.onclick = (event) => {
         event.stopPropagation();
         if (programs.length <= 1) {

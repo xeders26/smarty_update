@@ -7,10 +7,77 @@ export function initMathBlocks(arduinoGenerator: any) {
   // ==========================================
   // 1. Math 블록 모양 정의 (Custom Blocks)
   // ==========================================
-  Blockly.Blocks['arduino_math_abs'] = { init: function(this: any) { this.appendValueInput("NUM").setCheck("Number").appendField("절댓값"); this.setInputsInline(true); this.setOutput(true, "Number"); this.setColour("%{BKY_MATH_HUE}"); } };
-  Blockly.Blocks['arduino_math_map'] = { init: function(this: any) { this.appendValueInput("VAL").setCheck("Number").appendField("값"); this.appendValueInput("FROMLOW").setCheck("Number").appendField("을(를)["); this.appendValueInput("FROMHIGH").setCheck("Number").appendField("~"); this.appendValueInput("TOLOW").setCheck("Number").appendField("] 에서["); this.appendValueInput("TOHIGH").setCheck("Number").appendField("~"); this.appendDummyInput().appendField("] (으)로 변환 (map)"); this.setInputsInline(true); this.setOutput(true, "Number"); this.setColour("%{BKY_MATH_HUE}"); } };
-  Blockly.Blocks['smarty_math_in_range'] = { init: function(this: any) { this.jsonInit({ "type": "smarty_math_in_range", "message0": "📏 %1 이(가) %2 부터 %3 사이인가?", "args0":[ { "type": "input_value", "name": "VAL", "check": "Number" }, { "type": "input_value", "name": "MIN", "check": "Number" }, { "type": "input_value", "name": "MAX", "check": "Number" } ], "inputsInline": true, "output": "Boolean", "colour": "%{BKY_MATH_HUE}" }); } };
-  Blockly.Blocks['arduino_math_minmax'] = { init: function(this: any) { this.jsonInit({ "type": "arduino_math_minmax", "message0": "⚖️ %1 와(과) %2 중 %3", "args0":[ { "type": "input_value", "name": "A", "check": "Number" }, { "type": "input_value", "name": "B", "check": "Number" }, { "type": "field_dropdown", "name": "OP", "options": [["더 큰 값 (최댓값)", "max"],["더 작은 값 (최솟값)", "min"]] } ], "inputsInline": true, "output": "Number", "colour": "%{BKY_MATH_HUE}" }); } };
+  
+  // 1) 절댓값: 'NUM'은 변수이므로 빈 공간 유지
+  Blockly.Blocks['arduino_math_abs'] = { 
+    init: function(this: any) { 
+      this.appendValueInput("NUM").setCheck("Number").appendField("절댓값"); 
+      this.setInputsInline(true); 
+      this.setOutput(true, "Number"); 
+      this.setColour("%{BKY_MATH_HUE}"); 
+    } 
+  };
+  
+  // 2) 변환(map): 'VAL'은 변수(빈 공간), 나머지는 상수(기본값 섀도우)
+  Blockly.Blocks['arduino_math_map'] = { 
+    init: function(this: any) { 
+      this.appendValueInput("VAL").setCheck("Number").appendField("값"); 
+      
+      this.appendValueInput("FROMLOW").setCheck("Number").appendField("을(를)[")
+          .connection.setShadowDom(Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">0</field></shadow>')); 
+      this.appendValueInput("FROMHIGH").setCheck("Number").appendField("~")
+          .connection.setShadowDom(Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">1023</field></shadow>')); 
+      this.appendValueInput("TOLOW").setCheck("Number").appendField("] 에서[")
+          .connection.setShadowDom(Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">0</field></shadow>')); 
+      this.appendValueInput("TOHIGH").setCheck("Number").appendField("~")
+          .connection.setShadowDom(Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">255</field></shadow>')); 
+          
+      this.appendDummyInput().appendField("] (으)로 변환 (map)"); 
+      this.setInputsInline(true); 
+      this.setOutput(true, "Number"); 
+      this.setColour("%{BKY_MATH_HUE}"); 
+    } 
+  };
+  
+  // 3) 사이인가?: 'VAL'은 변수(빈 공간), MIN/MAX는 상수(0, 100 기본값 섀도우)
+  Blockly.Blocks['smarty_math_in_range'] = { 
+    init: function(this: any) { 
+      this.jsonInit({ 
+        "type": "smarty_math_in_range", 
+        "message0": "📏 %1 이(가) %2 부터 %3 사이인가?", 
+        "args0":[ 
+          { "type": "input_value", "name": "VAL", "check": "Number" }, 
+          { "type": "input_value", "name": "MIN", "check": "Number" }, 
+          { "type": "input_value", "name": "MAX", "check": "Number" } 
+        ], 
+        "inputsInline": true, 
+        "output": "Boolean", 
+        "colour": "%{BKY_MATH_HUE}" 
+      }); 
+      
+      // JSON 초기화 후 상수 부분에만 섀도우 블록 연결
+      this.getInput('MIN').connection.setShadowDom(Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">0</field></shadow>'));
+      this.getInput('MAX').connection.setShadowDom(Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">100</field></shadow>'));
+    } 
+  };
+  
+  // 4) 최댓값/최솟값: 'A', 'B' 모두 비교 대상인 변수이므로 빈 공간 유지 (원본 그대로)
+  Blockly.Blocks['arduino_math_minmax'] = { 
+    init: function(this: any) { 
+      this.jsonInit({ 
+        "type": "arduino_math_minmax", 
+        "message0": "⚖️ %1 와(과) %2 중 %3", 
+        "args0":[ 
+          { "type": "input_value", "name": "A", "check": "Number" }, 
+          { "type": "input_value", "name": "B", "check": "Number" }, 
+          { "type": "field_dropdown", "name": "OP", "options": [["더 큰 값 (최댓값)", "max"],["더 작은 값 (최솟값)", "min"]] } 
+        ], 
+        "inputsInline": true, 
+        "output": "Number", 
+        "colour": "%{BKY_MATH_HUE}" 
+      }); 
+    } 
+  };
   
   // (math_number, math_arithmetic, math_random_int 등은 Blockly 내장 블록이므로 모양 정의 생략)
 

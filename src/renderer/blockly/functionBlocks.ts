@@ -36,6 +36,35 @@ export function initFunctionBlocks(arduinoGenerator: any) {
     }
   }
 
+  // =========================================================================
+  // 🛡️ [추가됨: 강력한 보안 검색대] 숫자/문자열/불리안 타입 교차 대입 원천 차단!
+  // =========================================================================
+  if (!(window as any).__patchedConnectionChecker) {
+    (window as any).__patchedConnectionChecker = true;
+    const origInit = Blockly.WorkspaceSvg.prototype.init;
+    Blockly.WorkspaceSvg.prototype.init = function(...args: any[]) {
+      origInit.apply(this, args);
+      const originalDoTypeCheck = this.connectionChecker.doTypeCheck.bind(this.connectionChecker);
+      this.connectionChecker.doTypeCheck = function(a: Blockly.Connection, b: Blockly.Connection) {
+        const baseCheck = originalDoTypeCheck(a, b);
+        if (!baseCheck) return false;
+
+        const checkA = a.getCheck();
+        const checkB = b.getCheck();
+
+        if (checkA && checkB) {
+          const strictTypes = ['Number', 'String', 'Boolean'];
+          let aStrict = checkA.find((t: string) => strictTypes.includes(t));
+          let bStrict = checkB.find((t: string) => strictTypes.includes(t));
+
+          // 둘 다 명확한 타입이 있는데 서로 다르다면 결합 거부!
+          if (aStrict && bStrict && aStrict !== bStrict) return false; 
+        }
+        return true; 
+      };
+    };
+  }
+
   if ((window as any).__smartyFuncPatched) return;
   (window as any).__smartyFuncPatched = true;
 
@@ -328,14 +357,20 @@ export function initFunctionBlocks(arduinoGenerator: any) {
         ["결과: 논리값", "BOOLEAN"]
       ], function(option: string) {
         
-        // 🚨 1. 하단 '결과 반환' 공간 모양을 즉시 육각형으로!
         const returnInput = block.getInput('RETURN');
         if (returnInput) {
           if (option === 'BOOLEAN') returnInput.setCheck(['Boolean']);
           else if (option === 'STRING') returnInput.setCheck(['String']);
           else returnInput.setCheck(['Number']);
+
+          // 🛡️ [추가됨: 타입 불일치 튕겨내기] - 반환 타입이 바뀌었을 때 맞지 않는 값이 꽂혀있으면 뱉어냄
+          const targetBlock = returnInput.connection.targetBlock();
+          if (targetBlock && targetBlock.outputConnection) {
+            if (!returnInput.connection.checkType(targetBlock.outputConnection)) {
+              returnInput.connection.disconnect();
+            }
+          }
         }
-        // 🚨 모양을 바꾼 후 즉시 강제로 화면을 갱신! (둥근 모양으로 남는 버그 해결)
         if (block.render) block.render();
 
         const oldMut = block.mutationToDom();
@@ -366,7 +401,6 @@ export function initFunctionBlocks(arduinoGenerator: any) {
       this.argumentTypes_ = [];
       this.paramIds_ = [];
 
-      // 🚨 블록이 처음 나타날 때도 모양 맞추기
       setTimeout(() => {
         const rType = this.getFieldValue('RETURN_TYPE');
         const returnInput = this.getInput('RETURN');
@@ -381,7 +415,6 @@ export function initFunctionBlocks(arduinoGenerator: any) {
     updateParams_: updateParamsFn,
     mutationToDom: Blockly.Blocks['procedures_defnoreturn'].mutationToDom,
     domToMutation: function(xml: any) {
-      // 🚨 블록을 불러올 때 하단 구멍 모양 덮어쓰기
       Blockly.Blocks['procedures_defnoreturn'].domToMutation.call(this, xml);
       const rType = this.getFieldValue('RETURN_TYPE');
       const returnInput = this.getInput('RETURN');
@@ -416,7 +449,6 @@ export function initFunctionBlocks(arduinoGenerator: any) {
       const mainWs = block.workspace.targetWorkspace || block.workspace;
       if (!mainWs) return;
 
-      // 🚨 TypeScript 에러 해결: ': any' 타입을 명시적으로 지정
       let defBlock: any = null; 
       
       const topBlocks = mainWs.getTopBlocks(false);
@@ -437,6 +469,16 @@ export function initFunctionBlocks(arduinoGenerator: any) {
             if (t === 'BOOLEAN') input.setCheck(['Boolean']);
             else if (t === 'STRING') input.setCheck(['String']);
             else input.setCheck(['Number']);
+
+            // 🛡️ [추가됨: 타입 불일치 튕겨내기] 파라미터 타입이 바뀌었을 때 맞지 않는 블록을 뱉어냄
+            if (input.connection) {
+              const targetBlock = input.connection.targetBlock();
+              if (targetBlock && targetBlock.outputConnection) {
+                if (!input.connection.checkType(targetBlock.outputConnection)) {
+                  input.connection.disconnect();
+                }
+              }
+            }
           }
         }
 
@@ -444,12 +486,37 @@ export function initFunctionBlocks(arduinoGenerator: any) {
           const rType = defBlock.getFieldValue('RETURN_TYPE') || 'INT';
           if (rType === 'BOOLEAN') {
              block.setOutput(true, ['Boolean']);
+             // 🛡️ [추가됨: 반환 타입에 따른 호출 블록 모양 육각형으로 변경]
+             if ((Blockly as any).OUTPUT_SHAPE_HEXAGONAL !== undefined) block.outputShape_ = (Blockly as any).OUTPUT_SHAPE_HEXAGONAL;
           } else if (rType === 'STRING') {
              block.setOutput(true, ['String']);
+             // 🛡️ [추가됨: 문자열이면 다시 둥근 모양 복구]
+             if ((Blockly as any).OUTPUT_SHAPE_ROUND !== undefined) block.outputShape_ = (Blockly as any).OUTPUT_SHAPE_ROUND;
+             else block.outputShape_ = null;
           } else {
              block.setOutput(true, ['Number']);
+             // 🛡️ [추가됨: 숫자면 다시 둥근 모양 복구]
+             if ((Blockly as any).OUTPUT_SHAPE_ROUND !== undefined) block.outputShape_ = (Blockly as any).OUTPUT_SHAPE_ROUND;
+             else block.outputShape_ = null;
+          }
+
+          // 🛡️ [추가됨: 함수 결과 타입이 바뀌어서 현재 끼워진 부모 공간과 안 맞으면 스스로 튕겨나옴]
+          if (block.outputConnection) {
+            const parentBlock = block.getParent();
+            if (parentBlock) {
+               const parentConnection = block.outputConnection.targetConnection;
+               if (parentConnection && !block.outputConnection.checkType(parentConnection)) {
+                  block.unplug(); 
+               }
+            }
           }
         }
+      }
+
+      // 🛡️ [추가됨: 모양이 바뀌면 즉시 화면 다시 그리기]
+      if (block.rendered) {
+         if (typeof block.queueRender === 'function') block.queueRender();
+         else if (typeof block.render === 'function') block.render();
       }
     };
 

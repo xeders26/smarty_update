@@ -21,15 +21,22 @@ export function initLedBlocks(arduinoGenerator: any) {
     } 
   };
   
-  // 💡 8 & 9. 내장LED깜빡이기 (이름 붙임 & 모두 추가)
+  // 💡 8 & 9. 내장LED깜빡이기 (기본값 추가)
   Blockly.Blocks['smarty_led_blink'] = { 
     init: function(this: any) { 
       this.appendDummyInput()
           .appendField("💡 내장LED깜빡이기")
           .appendField(new Blockly.FieldDropdown([["LED1","LED1"], ["LED2","LED2"], ["모두","ALL"]]), "ID"); 
-      this.appendValueInput("ON_T").setCheck("Number").appendField("켜짐(ms)"); 
-      this.appendValueInput("OFF_T").setCheck("Number").appendField("꺼짐(ms)"); 
-      this.appendValueInput("CNT").setCheck("Number").appendField("반복횟수(0은 무한)"); 
+      
+      const onTimeInput = this.appendValueInput("ON_T").setCheck("Number").appendField("켜짐(ms)"); 
+      onTimeInput.connection.setShadowDom(Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">500</field></shadow>')); // 기본값 500
+      
+      const offTimeInput = this.appendValueInput("OFF_T").setCheck("Number").appendField("꺼짐(ms)"); 
+      offTimeInput.connection.setShadowDom(Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">500</field></shadow>')); // 기본값 500
+      
+      const cntInput = this.appendValueInput("CNT").setCheck("Number").appendField("반복횟수(0은 무한)"); 
+      cntInput.connection.setShadowDom(Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">0</field></shadow>')); // 기본값 0
+      
       this.setInputsInline(true); 
       this.setPreviousStatement(true, null); 
       this.setNextStatement(true, null); 
@@ -37,7 +44,7 @@ export function initLedBlocks(arduinoGenerator: any) {
     } 
   };
  
-  // 🚨 3. 범퍼 LED 깜빡이기 (동작 옵션 추가)
+  // 🚨 3. 범퍼 LED 깜빡이기 (기본값 추가)
   Blockly.Blocks['smarty_bumper_blink'] = {
     init: function(this: any) {
       this.appendDummyInput()
@@ -58,9 +65,10 @@ export function initLedBlocks(arduinoGenerator: any) {
             ["켜기", "1"], 
             ["끄기", "0"]
           ]), "STATE");
-      this.appendValueInput("TIME")
-          .setCheck("Number")
-          .appendField("간격(ms):");
+          
+      const timeInput = this.appendValueInput("TIME").setCheck("Number").appendField("간격(ms):");
+      timeInput.connection.setShadowDom(Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">500</field></shadow>')); // 기본값 500
+      
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
@@ -68,6 +76,7 @@ export function initLedBlocks(arduinoGenerator: any) {
       this.setTooltip("범퍼 센서의 LED를 원하는 방향/색상으로 깜빡이게 하거나 깜빡임을 끕니다.");
     }
   };
+
   // 🚨 4. 범퍼 빨강색 LED 동작 추가
   Blockly.Blocks['smarty_bumper_red'] = {
     init: function(this: any) {
@@ -81,7 +90,7 @@ export function initLedBlocks(arduinoGenerator: any) {
     }
   };
 
-  // 🚨 5. 범퍼 빨강색 LED 깜빡이기 (켜기/끄기 추가)
+  // 🚨 5. 범퍼 빨강색 LED 깜빡이기 (기본값 추가)
   Blockly.Blocks['smarty_bumper_red_blink'] = {
     init: function(this: any) {
       this.appendDummyInput()
@@ -91,9 +100,10 @@ export function initLedBlocks(arduinoGenerator: any) {
             ["켜기", "1"], 
             ["끄기", "0"]
           ]), "STATE");
-      this.appendValueInput("TIME")
-          .setCheck("Number")
-          .appendField("간격(ms):");
+          
+      const timeInput = this.appendValueInput("TIME").setCheck("Number").appendField("간격(ms):");
+      timeInput.connection.setShadowDom(Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">500</field></shadow>')); // 기본값 500
+      
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
@@ -276,6 +286,7 @@ export function initLedBlocks(arduinoGenerator: any) {
 
     return code;
   };
+  
   // 🔘 10. 스위치 대기 C++ 제너레이터 (C++ 논리 완벽 구현!)
   arduinoGenerator.forBlock['smarty_switch_wait'] = function(block: any) {
     const sw = block.getFieldValue('SW');

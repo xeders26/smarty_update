@@ -1,7 +1,7 @@
 import * as Blockly from 'blockly';
 
 // =========================================================
-// 🌐 1. 전역 설정 변수 (기본값 설정)
+// 🌐 1. 전역 설정 변수 (기본값)
 // =========================================================
 let blockSettings: Record<string, { min: number, max: number }> = {
   moveBlueHand: { min: 0, max: 180 },
@@ -10,91 +10,219 @@ let blockSettings: Record<string, { min: number, max: number }> = {
   moveRedSlide: { min: 0, max: 180 }
 };
 
+// 🌟 업데이트된 값을 작업 공간의 블록에 강제로 즉시 반영하는 함수
+function updateBlocksInWorkspace() {
+  const workspace = Blockly.getMainWorkspace();
+  if (workspace) {
+    const blocks = workspace.getAllBlocks(false);
+    blocks.forEach(block => {
+      // 로봇 제어 블록들만 필터링
+      if (['moveBlueHand', 'moveRedHand', 'moveBlueSlide', 'moveRedSlide'].includes(block.type)) {
+        
+        let currentMin = Number(blockSettings[block.type]?.min ?? 0);
+        let currentMax = Number(blockSettings[block.type]?.max ?? 180);
+
+        // 1. 블록 라벨 값 즉시 교체
+        const minLabel = block.getField('MIN_LABEL');
+        if (minLabel) minLabel.setValue(String(currentMin));
+
+        const maxLabel = block.getField('MAX_LABEL');
+        if (maxLabel) maxLabel.setValue(String(currentMax));
+
+        // 2. 툴팁 업데이트
+        block.setTooltip(`현재 설정된 허용 범위: ${currentMin}도 ~ ${currentMax}도`);
+
+        // 3. 내부 상태 및 경고 아이콘 재계산을 위해 onchange 강제 호출
+        if (block.onchange) {
+          block.onchange(null as any);
+        }
+      }
+    });
+  }
+}
+
+// 이벤트 리스너: 다른 곳(예: 수동 업데이트 버튼 등)에서 이벤트가 날아올 때 반영
+window.addEventListener('smartyConfigUpdated', (e: any) => {
+  if (e.detail) {
+    blockSettings = { ...blockSettings, ...e.detail };
+    updateBlocksInWorkspace(); // 🌟 강제 업데이트 함수 호출
+  }
+});
+
 // =========================================================
 // 🚀 2. Git에서 최신 속성값을 다운로드하는 함수
 // =========================================================
 export async function fetchSettingsFromGit() {
   try {
-    // 🚨 대장님의 실제 GitHub Raw URL을 여기에 붙여넣으세요!
-    // ?t=... 파라미터는 브라우저 캐시를 무시하고 무조건 최신 파일을 가져오게 합니다.
-    const url = `https://raw.githubusercontent.com/대장님아이디/저장소/main/smarty-config.json?t=${new Date().getTime()}`;
-    
+    const url = `https://raw.githubusercontent.com/xeders26/smarty_update/main/smarty-config.json?t=${Date.now()}`;
     const response = await fetch(url);
     if (response.ok) {
       const gitData = await response.json();
-      blockSettings = { ...blockSettings, ...gitData };
-      console.log("✅ Git에서 로봇 속성값 다운로드 성공!", blockSettings);
-    } else {
-      console.warn("⚠️ Git 파일을 찾을 수 없어 기본 설정을 사용합니다.");
+      
+      // 값이 실제로 변했는지 확인 (선택 사항이지만 불필요한 렌더링 방지)
+      const isChanged = JSON.stringify(blockSettings) !== JSON.stringify({ ...blockSettings, ...gitData });
+      
+      if (isChanged) {
+        blockSettings = { ...blockSettings, ...gitData };
+        console.log("🔄 로봇 블록 설정이 최신화되었습니다:", blockSettings);
+        
+        // 🌟 Git에서 새로 받아왔으면 화면에 있는 블록도 즉시 업데이트!
+        updateBlocksInWorkspace();
+      }
     }
   } catch (error) {
-    console.warn("⚠️ 인터넷이 끊겨 오프라인 기본 설정을 사용합니다.", error);
+    console.warn("⚠️ 오프라인 모드: 기존 설정을 유지합니다.");
   }
 }
 
+// (선택 사항) 주기적으로 서버에서 값을 확인하려면 아래 주석을 해제하세요.
+// setInterval(fetchSettingsFromGit, 60000); // 1분마다 설정 확인
+
 // =========================================================
-// 🧱 3. 로봇 블록 초기화 함수
+// 🎨 3. 커스텀 CSS 및 아이콘 SVG (기존과 동일)
+// =========================================================
+if (!document.getElementById('smarty-robot-custom-css')) {
+  const style = document.createElement('style');
+  style.id = 'smarty-robot-custom-css';
+  style.innerHTML = `
+    text.smarty-text-blue, .smarty-text-blue > tspan { fill: #2196F3 !important; font-weight: bold !important; }
+    text.smarty-text-red,  .smarty-text-red > tspan  { fill: #F44336 !important; font-weight: bold !important; }
+  `;
+  document.head.appendChild(style);
+}
+
+const ICON_HAND_BLUE = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMjE5NkYzIiBkPSJNMjg4IDMyYzAtMTcuNy0xNC4zLTMyLTMyLTMycy0zMiAxNC4zLTMyIDMyVjI1NmMwIDEuNy0uMSAzLjQtLjMgNUwyMDggMjQ1LjNjLTcuMi0xMS4yLTE5LjgtMTcuMy0zMi0xNy4zYy0yMi4xIDAtNDAgMTcuOS00MCA0MGMwIDUgLjkgOS44IDIuNSAxNC4ybC0zMi01MGMtMTEuNi0xOC4xLTM2LjItMjMuNC01NC4zLTExLjhzLTIzLjQgMzYuMi0xMS44IDU0LjNsOTYgMTUwYzI2LjkgNDIuMSA3Mi44IDY4LjMgMTIzIDY4LjNoNjRjNTMgMCA5Ni00MyA5Ni05NlYxMjhjMC0xNy43LTE0LjMtMzItMzItMzJzLTMyIDE0LjMtMzIgMzJWMjQwYzAgOC44LTcuMiAxNi0xNiAxNnMtMTYtNy4yLTE2LTE2VjY0YzAtMTcuNy0xNC4zLTMyLTMyLTMycy0zMiAxNC4zLTMyIDMyVjI0MGMwIDguOC03LjIgMTYtMTYgMTZzLTE2LTcuMi0xNi0xNlYzMnoiLz48L3N2Zz4=";
+const ICON_HAND_RED = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjRjQ0MzM2IiBkPSJNMjg4IDMyYzAtMTcuNy0xNC4zLTMyLTMyLTMycy0zMiAxNC4zLTMyIDMyVjI1NmMwIDEuNy0uMSAzLjQtLjMgNUwyMDggMjQ1LjNjLTcuMi0xMS4yLTE5LjgtMTcuMy0zMi0xNy4zYy0yMi4xIDAtNDAgMTcuOS00MCA0MGMwIDUgLjkgOS44IDIuNSAxNC4ybC0zMi01MGMtMTEuNi0xOC4xLTM2LjItMjMuNC01NC4zLTExLjhzLTIzLjQgMzYuMi0xMS44IDU0LjNsOTYgMTUwYzI2LjkgNDIuMSA3Mi44IDY4LjMgMTIzIDY4LjNoNjRjNTMgMCA5Ni00MyA5Ni05NlYxMjhjMC0xNy43LTE0LjMtMzItMzItMzJzLTMyIDE0LjMtMzIgMzJWMjQwYzAgOC44LTcuMiAxNi0xNiAxNnMtMTYtNy4yLTE2LTE2VjY0YzAtMTcuNy0xNC4zLTMyLTMyLTMycy0zMiAxNC4zLTMyIDMyVjI0MGMwIDguOC03LjIgMTYtMTYgMTZzLTE2LTcuMi0xNi0xNlYzMnoiLz48L3N2Zz4=";
+const ICON_SLIDE_BLUE = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzIxOTZFMyIgZD0iTTMgMTl2LTJoMnYtNEgzdi0yaDR2LTRINVY1aDZ2MTRoMTB2Mkgzem04LTEyaDNMMTkgMTZoLTNsLTUtOXoiLz48L3N2Zz4=";
+const ICON_SLIDE_RED = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI0Y0NDMzNiIgZD0iTTMgMTl2LTJoMnYtNEgzdi0yaDR2LTRINVY1aDZ2MTRoMTB2Mkgzem04LTEyaDNMMTkgMTZoLTNsLTUtOXoiLz48L3N2Zz4=";
+const WARNING_ICON_RIGHT = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI0ZGQzEwNyIgc3Ryb2tlPSIjRTY1MTAwIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZD0iTTEyIDJMMSAyMWgyMkwxMiAyem0xIDE2aC0ydi0yaDJ2MnptMC00aC0ydi00aDJ2NHoiLz48L3N2Zz4=";
+
+// =========================================================
+// 🧱 4. 로봇 블록 초기화 함수 (기존과 동일)
 // =========================================================
 export function initRobotBlocks(arduinoGenerator: any) {
   
-  // 블록 공통 생성 로직 (중복 코드 최소화)
-  const createBlockDef = (blockType: string, label: string, color: string) => {
+  const createBlockDef = (blockType: string, iconB64: string, keyword: string, labelTarget: string, color: string) => {
     return {
       init: function(this: any) {
-        // 🚨 이 블록이 생성되는 순간, 전역 blockSettings 변수에 있는 값을 읽어옵니다!
-        this.minAngle_ = blockSettings[blockType]?.min ?? 0;
-        this.maxAngle_ = blockSettings[blockType]?.max ?? 180;
+        
+        let defaultMin = blockSettings[blockType]?.min ?? 0;
+        let defaultMax = blockSettings[blockType]?.max ?? 180;
 
         this.appendDummyInput()
-            .appendField(label)
+            .appendField(new Blockly.FieldImage(`data:image/svg+xml;base64,${iconB64}`, 18, 18, "*"))
+            .appendField(new Blockly.FieldLabel(keyword, `smarty-text-${keyword === '블루' ? 'blue' : 'red'}`))
+            .appendField(labelTarget + ' ') 
             .appendField(new Blockly.FieldDropdown([
               ['S1', 'S1'], ['S2', 'S2'], ['S3', 'S3'], ['S4', 'S4']
             ]), 'PORT');
             
-        this.appendValueInput('ANGLE')
+        const angleInput = this.appendValueInput('ANGLE')
             .setCheck('Number')
-            .appendField('각도');
+            .appendField('각도 ')
+            .appendField(new Blockly.FieldLabel(String(defaultMin)), 'MIN_LABEL')
+            .appendField(' ≤');
+
+        this.appendDummyInput('WARN_DUMMY')
+            .appendField('≤ ')
+            .appendField(new Blockly.FieldLabel(String(defaultMax)), 'MAX_LABEL');
+
+        const shadowXml = Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">0</field></shadow>');
+        angleInput.connection.setShadowDom(shadowXml);
 
         this.setInputsInline(true);
-        this.setOutput(true, ['Number', 'Boolean']); 
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
         this.setColour(color); 
-        this.setTooltip(`현재 설정된 허용 범위: ${this.minAngle_}도 ~ ${this.maxAngle_}도`);
       },
-      // 프로젝트 저장/불러오기 시 속성값을 유지하기 위한 부분
-      mutationToDom: function(this: any) {
-        const container = document.createElement('mutation');
-        container.setAttribute('min', this.minAngle_.toString());
-        container.setAttribute('max', this.maxAngle_.toString());
-        return container;
-      },
-      domToMutation: function(this: any, xmlElement: any) {
-        this.minAngle_ = parseInt(xmlElement.getAttribute('min'), 10);
-        this.maxAngle_ = parseInt(xmlElement.getAttribute('max'), 10);
-        this.setTooltip(`현재 설정된 허용 범위: ${this.minAngle_}도 ~ ${this.maxAngle_}도`);
+      
+      onchange: function(this: any, event?: any) {
+        if (this.isInFlyout) return;
+
+        let currentMin = Number(blockSettings[blockType]?.min);
+        let currentMax = Number(blockSettings[blockType]?.max);
+        if (isNaN(currentMin)) currentMin = 0;
+        if (isNaN(currentMax)) currentMax = 180;
+        
+        const minLabel = this.getField('MIN_LABEL');
+        if (minLabel && minLabel.getValue() !== String(currentMin)) {
+          minLabel.setValue(String(currentMin));
+        }
+
+        const maxLabel = this.getField('MAX_LABEL');
+        if (maxLabel && maxLabel.getValue() !== String(currentMax)) {
+          maxLabel.setValue(String(currentMax));
+        }
+
+        this.setTooltip(`현재 설정된 허용 범위: ${currentMin}도 ~ ${currentMax}도`);
+        this.setWarningText(null); 
+
+        const angleBlock = this.getInputTargetBlock('ANGLE');
+        
+        if (angleBlock && angleBlock.type === 'math_number') {
+          let val = Number(angleBlock.getFieldValue('NUM'));
+          if (isNaN(val)) val = 0;
+          
+          let hasError = (val < currentMin || val > currentMax);
+
+          setTimeout(() => {
+            if (angleBlock.svgGroup_) {
+              const paths = angleBlock.svgGroup_.querySelectorAll('path.blocklyPath');
+              if (hasError) {
+                paths.forEach((path: SVGPathElement) => {
+                  path.style.fill = '#FFC107'; 
+                  path.style.stroke = '#E65100'; 
+                });
+              } else {
+                paths.forEach((path: SVGPathElement) => {
+                  path.style.fill = ''; 
+                  path.style.stroke = ''; 
+                });
+              }
+            }
+          }, 10);
+
+          if (hasError) {
+            if (!this.getField('WARN_IMG')) {
+              const warnIcon = new Blockly.FieldImage(`data:image/svg+xml;base64,${WARNING_ICON_RIGHT}`, 22, 22, "오류");
+              this.getInput('WARN_DUMMY').appendField(warnIcon, 'WARN_IMG');
+            }
+            const errMsg = `⚠️ 제한 범위를 벗어났습니다!\n(허용 범위: ${currentMin}° ~ ${currentMax}°)`;
+            this.getField('WARN_IMG').setTooltip(errMsg);
+          } else {
+            if (this.getField('WARN_IMG')) {
+              this.getInput('WARN_DUMMY').removeField('WARN_IMG');
+            }
+          }
+
+        } else {
+          if (this.getField('WARN_IMG')) {
+            this.getInput('WARN_DUMMY').removeField('WARN_IMG');
+          }
+        }
       }
     };
   };
 
-  // 블록 정의 등록
-  Blockly.Blocks['moveBlueHand'] = createBlockDef('moveBlueHand', '✋ 블루 핸드 제어', '#2196F3');
-  Blockly.Blocks['moveRedHand'] = createBlockDef('moveRedHand', '✋ 레드 핸드 제어', '#F44336');
-  Blockly.Blocks['moveBlueSlide'] = createBlockDef('moveBlueSlide', '🏗️ 블루 슬라이드 제어', '#2196F3');
-  Blockly.Blocks['moveRedSlide'] = createBlockDef('moveRedSlide', '🏗️ 레드 슬라이드 제어', '#F44336');
+  Blockly.Blocks['moveBlueHand'] = createBlockDef('moveBlueHand', ICON_HAND_BLUE, '블루', '핸드 제어', '#2196F3');
+  Blockly.Blocks['moveRedHand'] = createBlockDef('moveRedHand', ICON_HAND_RED, '레드', '핸드 제어', '#F44336');
+  Blockly.Blocks['moveBlueSlide'] = createBlockDef('moveBlueSlide', ICON_SLIDE_BLUE, '블루', '슬라이드 제어', '#2196F3');
+  Blockly.Blocks['moveRedSlide'] = createBlockDef('moveRedSlide', ICON_SLIDE_RED, '레드', '슬라이드 제어', '#F44336');
 
   // =========================================================
-  // 💻 4. C++ 코드 제너레이터
+  // 💻 5. C++ 코드 제너레이터 (기존과 동일)
   // =========================================================
   const generateProtectedServoCode = function(block: any) {
     const port = block.getFieldValue('PORT');
-    const angleCode = arduinoGenerator.valueToCode(block, 'ANGLE', 0) || '90';
+    const angleCode = arduinoGenerator.valueToCode(block, 'ANGLE', 0) || '0';
     
-    const min = block.minAngle_ !== undefined ? block.minAngle_ : 0;
-    const max = block.maxAngle_ !== undefined ? block.maxAngle_ : 180;
+    let currentMin = Number(blockSettings[block.type]?.min);
+    let currentMax = Number(blockSettings[block.type]?.max);
+    if (isNaN(currentMin)) currentMin = 0;
+    if (isNaN(currentMax)) currentMax = 180;
 
-    // 만약 사용자가 제한 범위를 벗어난 값을 넣어도 모터가 터지지 않게 보호하는 C++ 코드 생성
-    const code = `([&]() -> int { int a = ${angleCode}; if(a >= ${min} && a <= ${max}) { runServo(${port}, a); return 1; } return 0; })()`;
-    
-    return [code, 0]; 
+    const code = `if (${angleCode} >= ${currentMin} && ${angleCode} <= ${currentMax}) {\n  runServo(${port}, ${angleCode});\n}\n`;
+    return code; 
   };
 
   arduinoGenerator.forBlock['moveBlueHand'] = generateProtectedServoCode;

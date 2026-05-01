@@ -1225,7 +1225,7 @@ body.dark-mode .blocklyFlyoutBackground {
             <!-- 🌟 [1] 도움말 -->
             <div id="helpArea" style="display: block; width: 100%; height: 100%; overflow-y: auto;">
               <div style="text-align: center; margin-top: 50px;">
-                <h2>💡 블록 도움말</h2>
+                <h3 style="color: #3498db; margin-top:0; font-size: 1.02rem; font-weight: normal;">블록 도움말</h3>
                 <p>블록을 <b>클릭</b>하거나 <b>마우스를 올리면</b><br>여기에 사용법이 자동으로 표시됩니다.</p>
               </div>
             </div>
@@ -1441,43 +1441,115 @@ body.dark-mode .blocklyFlyoutBackground {
 
     </div>
   
-  <!-- 🌟 [수정] 환경 설정 모달창 폰트 굵기 조절 (bold -> 700/600) -->
+  <!-- 🌟 [수정] 환경 설정 모달창 (제목 줄바꿈 완벽 해결) -->
   <div id="settingsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
-    <div style="background: white; padding: 30px; border-radius: 12px; width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-      <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; font-weight: 700;">⚙️ 환경 설정</h2>
+    
+    <div class="modal-content" style="background: white; padding: 20px 25px; border-radius: 12px; width: 550px; max-width: 95vw; box-sizing: border-box; position: relative; display: flex; flex-direction: column; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+      
+      <!-- 헤더 영역 -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; width: 100%;">
+        <h2 style="margin: 0; color: #2c3e50; font-weight: 700; font-size: 17px;">⚙️ 환경 설정</h2>
+        <button id="smartyCloseModalBtn" onclick="document.getElementById('settingsModal').style.display='none'" style="background: transparent; border: none; font-size: 19px; color: #888; cursor: pointer; padding: 0; line-height: 1; transition: color 0.2s; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color='#888'">✖</button>
+      </div>
 
       <style>
-        .hidden-radio { display: none; } 
-        .color-btn {
-          display: inline-flex; align-items: center; justify-content: center;
-          padding: 8px 16px; margin-right: 6px; margin-bottom: 8px;
-          border: 2px solid #ddd; border-radius: 8px;
-          background-color: #f8f9fa; color: #7f8c8d;
-          cursor: pointer; font-weight: 600; font-size: 15px;
-          transition: all 0.2s ease-in-out;
+        #settingsModal .modal-content button:not(#smartyCloseModalBtn),
+        #settingsModal .modal-content .color-btn {
+          height: 30px !important;
+          line-height: 28px !important;
+          padding: 0 8px !important; 
+          font-size: 13px !important; 
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          box-sizing: border-box !important;
+          white-space: nowrap !important;
+          margin: 0 !important;
+          font-weight: 600 !important;
+          border-radius: 6px !important;
         }
+
+        .hidden-radio { display: none; } 
+        .color-btn { border: 2px solid #ddd; background-color: #f8f9fa; color: #7f8c8d; cursor: pointer; transition: all 0.2s ease; }
         .color-btn:hover { background-color: #e2e6ea; color: #333; }
         
-        .hidden-radio[value="show"]:checked + .color-btn { background-color: #4CAF50; border-color: #4CAF50; color: white; }
-        .hidden-radio[value="hide"]:checked + .color-btn { background-color: #E53935; border-color: #E53935; color: white; }
-        .hidden-radio[name="themeToggle"]:checked + .color-btn { background-color: #2196F3; border-color: #2196F3; color: white; }
+        .hidden-radio[value="show"]:checked + .color-btn { background-color: #4CAF50 !important; border-color: #4CAF50 !important; color: white !important; }
+        .hidden-radio[value="hide"]:checked + .color-btn { background-color: #E53935 !important; border-color: #E53935 !important; color: white !important; }
+        .hidden-radio[name="themeToggle"]:checked + .color-btn { background-color: #2196F3 !important; border-color: #2196F3 !important; color: white !important; }
+
+        .action-btn { background-color: transparent; color: #333; border: 1px solid #bdc3c7; cursor: pointer; width: auto !important; }
+        .action-btn:hover { background-color: #e2e6ea; }
+        
+        body.dark-mode .action-btn { background-color: transparent !important; color: #abb2bf !important; border-color: #5c6370 !important; }
+        body.dark-mode .action-btn:hover { background-color: #4b5363 !important; color: #fff !important; }
+
+        .smarty-setting-row {
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: space-between !important; 
+          margin-bottom: 16px !important;
+          width: 100% !important;
+        }
+        
+        /* 💡 제목 칸 가로 폭을 늘리고 줄바꿈을 절대 금지시킴! */
+        .unified-setting-title {
+          width: 185px !important; /* 160px -> 185px 로 넉넉하게 확장 */
+          min-width: 185px !important;
+          flex-shrink: 0 !important;
+          font-size: 14px !important; 
+          color: #a0aabf !important;
+          font-weight: bold !important;
+          text-align: left !important;
+          white-space: nowrap !important; /* 글씨가 떨어지는 것 원천 차단 */
+        }
+        body:not(.dark-mode) .unified-setting-title { color: #555555 !important; }
+        
+        .setting-right-group {
+          display: flex !important;
+          justify-content: flex-end !important;
+          align-items: center !important;
+          flex-wrap: nowrap !important;
+          gap: 5px !important;
+          flex-grow: 1 !important;
+        }
+        #settingsModal label { margin: 0 !important; }
+
+        #smartyBrandSettingsFooter {
+          background: #f8f9fa;
+          border: 1px solid #e9ecef;
+          border-radius: 12px;
+          padding: 20px;
+          margin-top: 30px;
+          width: 100%;
+          box-sizing: border-box;
+          transition: background 0.3s, border 0.3s;
+        }
+        body.dark-mode #smartyBrandSettingsFooter {
+          background: #1c1e24 !important; 
+          border-color: #333 !important;   
+        }
       </style>
 
-      <div style="margin-bottom: 20px;">
-        <p style="margin: 0 0 10px 0; font-size: 17px; font-weight: 700; color: #34495e;">📄 C++ 코드 뷰어</p>
-        <label><input type="radio" name="codeToggle" value="show" class="hidden-radio"><span class="color-btn">👀 보이기</span></label>
-        <label><input type="radio" name="codeToggle" value="hide" class="hidden-radio"><span class="color-btn">🙈 숨기기</span></label>
+      <div class="smarty-setting-row">
+        <span class="unified-setting-title">📄 C++ 코드 뷰어</span>
+        <div class="setting-right-group">
+          <label><input type="radio" name="codeToggle" value="show" class="hidden-radio"><span class="color-btn">👀 보이기</span></label>
+          <label><input type="radio" name="codeToggle" value="hide" class="hidden-radio"><span class="color-btn">🙈 숨기기</span></label>
+        </div>
       </div>
 
-      <div style="margin-bottom: 20px;">
-        <p style="margin: 0 0 10px 0; font-size: 17px; font-weight: 700; color: #34495e;">🖥️ 시리얼 모니터</p>
-        <label><input type="radio" name="monitorToggle" value="show" class="hidden-radio"><span class="color-btn">👀 보이기</span></label>
-        <label><input type="radio" name="monitorToggle" value="hide" class="hidden-radio"><span class="color-btn">🙈 숨기기</span></label>
+      <div class="smarty-setting-row">
+        <span class="unified-setting-title">🖥️ 시리얼 모니터</span>
+        <div class="setting-right-group">
+          <label><input type="radio" name="monitorToggle" value="show" class="hidden-radio"><span class="color-btn">👀 보이기</span></label>
+          <label><input type="radio" name="monitorToggle" value="hide" class="hidden-radio"><span class="color-btn">🙈 숨기기</span></label>
+        </div>
       </div>
 
-      <div style="margin-bottom: 30px;">
-        <p style="margin: 0 0 10px 0; font-size: 17px; font-weight: 700; color: #34495e;">🎨 블록 테마 색상</p>
-        <div style="display: flex; flex-wrap: wrap;">
+      <div class="smarty-setting-row">
+        <span class="unified-setting-title">🎨 블록 테마 색상</span>
+        <div class="setting-right-group">
           <label><input type="radio" name="themeToggle" value="spring" class="hidden-radio"><span class="color-btn">🌸 봄</span></label>
           <label><input type="radio" name="themeToggle" value="summer" class="hidden-radio"><span class="color-btn">🏖️ 여름</span></label>
           <label><input type="radio" name="themeToggle" value="autumn" class="hidden-radio"><span class="color-btn">🍁 가을</span></label>
@@ -1485,18 +1557,42 @@ body.dark-mode .blocklyFlyoutBackground {
           <label><input type="radio" name="themeToggle" value="auto" class="hidden-radio"><span class="color-btn">🔄 자동</span></label>
         </div>
       </div>
-        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.05); padding: 10px 15px; border-radius: 12px; margin-bottom: 20px;">
-          <span style="font-weight: 600; color: #555;">업데이트 확인</span>
-          <button id="manualUpdateBtn" style="padding: 8px 16px; background: #3498db; color: white; border: none; border-radius: 8px; font-family: 'Pretendard Variable', sans-serif; font-weight: 700; cursor: pointer; transition: 0.2s;">
-            업데이트 확인
-          </button>
+
+      <div class="smarty-setting-row">
+        <span class="unified-setting-title">🔄 업데이트 확인</span>
+        <div class="setting-right-group">
+          <button id="manualUpdateBtn" class="action-btn">🔄 업데이트 확인</button>
         </div>
-      <div style="display: flex; justify-content: flex-end; gap: 10px;">
-        <button id="cancelSettingsBtn" style="padding: 10px 20px; border: none; border-radius: 5px; background: #e74c3c; color: white; cursor: pointer; font-weight: 700; font-size: 15px;">❌ 취소</button>
-        <button id="saveSettingsBtn" style="padding: 10px 20px; border: none; border-radius: 5px; background: #2ecc71; color: white; cursor: pointer; font-weight: 700; font-size: 15px;">✅ 확인</button>
       </div>
+
+      <div class="smarty-setting-row">
+        <span class="unified-setting-title">🌟 스마티 최신 데이터 동기화</span>
+        <div class="setting-right-group">
+          <button id="btnFetchLatest" class="action-btn">🔄 가져오기</button>
+        </div>
+      </div>
+
+      <!-- 취소/확인 버튼 -->
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 25px; width: 100%;">
+        <button id="cancelSettingsBtn" onclick="document.getElementById('settingsModal').style.display='none'" style="background: #4b5363; color: white; border: none; cursor: pointer;">❌ 취소</button>
+        <button id="saveSettingsBtn" style="background: #2ecc71; color: white; border: none; cursor: pointer;">✅ 확인</button>
+      </div>
+
+      <!-- 브랜드 로고 영역 -->
+      <div id="smartyBrandSettingsFooter">
+        <img src="./play-creativity.png" alt="Play Creativity" style="max-width: 100%; height: auto; max-height: 45px; display:block; margin: 0 auto 15px auto;">
+        <div style="display: flex; justify-content: space-between; width: 100%; font-size: 14px; color: #7f8c8d; align-items: center;">
+          <div><b style="color:#2c3e50;" class="smarty-brand-text">XEDERS</b> <a href="https://www.xeders.com" target="_blank" style="color:#3498db; text-decoration:none;">www.xeders.com</a></div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div id="btnOpenAdmin" style="cursor: pointer; font-size: 17px; padding: 0 5px;">⚙️</div>
+            <b style="color:#2c3e50;" class="smarty-brand-text">Smarty</b>
+            <div class="smarty-version-badge" style="font-weight:bold; background:#ecf0f1; padding:5px 11px; border-radius:6px; color:#2c3e50;">v2.6.5</div>
+          </div>
+        </div>
+      </div>
+
     </div>
-  </div>    
+  </div>
 
     <script>
       window.Blockly = window.Blockly || {};

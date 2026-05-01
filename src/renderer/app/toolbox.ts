@@ -143,10 +143,11 @@ function getBaseToolbox() {
             type: 'smarty_math_in_range',
             inputs: {
               MIN: { shadow: { type: 'math_number', fields: { NUM: 10 } } },
-              MAX: { shadow: { type: 'math_number', fields: { NUM: 50 } } }
+              MAX: { shadow: { type: 'math_number', fields: { NUM: 100 } } }
             }
           },
-          { kind: 'block', type: 'math_random_int' ,            
+          { 
+            kind: 'block', type: 'math_random_int',            
             inputs: {
               FROM: { shadow: { type: 'math_number', fields: { NUM: 1 } } },
               TO: { shadow: { type: 'math_number', fields: { NUM: 100 } } }
@@ -154,22 +155,16 @@ function getBaseToolbox() {
           },
           {
             kind: 'block',
-            type: 'arduino_math_minmax',
-            inputs: {
-              A: { shadow: { type: 'math_number', fields: { NUM: 10 } } },
-              B: { shadow: { type: 'math_number', fields: { NUM: 100 } } }
-            }
+            type: 'arduino_math_minmax'
           },
           {
             kind: 'block',
-            type: 'arduino_math_abs',
-            inputs: { NUM: { shadow: { type: 'math_number', fields: { NUM: -50 } } } }
+            type: 'arduino_math_abs'
           },
           {
             kind: 'block',
             type: 'arduino_math_map',
             inputs: {
-              VAL: { shadow: { type: 'math_number', fields: { NUM: 512 } } },
               FROMLOW: { shadow: { type: 'math_number', fields: { NUM: 0 } } },
               FROMHIGH: { shadow: { type: 'math_number', fields: { NUM: 1023 } } },
               TOLOW: { shadow: { type: 'math_number', fields: { NUM: 0 } } },
@@ -185,22 +180,8 @@ function getBaseToolbox() {
         contents: [
           { kind: 'block', type: 'text' },
           { kind: 'block', type: 'text_join' },
-          {
-            kind: 'block',
-            type: 'smarty_text_contains',
-            inputs: {
-              TEXT_A: { shadow: { type: 'text', fields: { TEXT: '사과나무' } } },
-              TEXT_B: { shadow: { type: 'text', fields: { TEXT: '사과' } } }
-            }
-          },
-          {
-            kind: 'block',
-            type: 'smarty_text_equals',
-            inputs: {
-              TEXT_A: { shadow: { type: 'text', fields: { TEXT: 'hello' } } },
-              TEXT_B: { shadow: { type: 'text', fields: { TEXT: 'hello' } } }
-            }
-          }
+          { kind: 'block', type: 'smarty_text_contains', inputs: {} },
+          { kind: 'block', type: 'smarty_text_equals', inputs: {} }
         ]
       },
       {
@@ -212,7 +193,7 @@ function getBaseToolbox() {
       {
         kind: 'category',
         name: '함수',
-        colour: '#995ba5',//'%{BKY_PROCEDURES_HUE}',
+        colour: '#995ba5',
         custom: 'PROCEDURE'
       },
       { kind: 'sep', gap: 50 },
@@ -275,10 +256,7 @@ function getBaseToolbox() {
               INTERVAL: { shadow: { type: 'math_number', fields: { NUM: 15 } } }
             }
           },
-          {
-            kind: 'block',
-            type: 'offServo'
-          },
+          { kind: 'block', type: 'offServo' },
           {
             kind: 'block',
             type: 'setupServo',
@@ -294,7 +272,6 @@ function getBaseToolbox() {
         name: 'LED / 스위치',
         colour: '60',
         contents:[
-          // 💡 내장 LED 블록들
           { kind: 'block', type: 'smarty_led' },
           {
             kind: 'block',
@@ -305,15 +282,11 @@ function getBaseToolbox() {
               CNT: { shadow: { type: 'math_number', fields: { NUM: 5 } } }
             }
           },
-          
-          // 🔘 스위치 블록들
           { kind: 'block', type: 'readSw' },
           { kind: 'block', type: 'getSw' },
-          { kind: 'block', type: 'smarty_switch_wait' }, // 새로 변경된 스위치 기다리기 블록 적용!
-          
-          // 🚨 범퍼 LED 블록들
-          { kind: 'block', type: 'turnBumpLED' }, // 범퍼 LED 켜기/끄기 (전부/노랑/흰색)
-          { kind: 'block', type: 'smarty_bumper_red' }, // 범퍼 빨강색 LED 켜기/끄기
+          { kind: 'block', type: 'smarty_switch_wait' },
+          { kind: 'block', type: 'turnBumpLED' },
+          { kind: 'block', type: 'smarty_bumper_red' },
           {
             kind: 'block',
             type: 'smarty_bumper_red_blink',
@@ -328,7 +301,7 @@ function getBaseToolbox() {
               TIME: { shadow: { type: 'math_number', fields: { NUM: 500 } } }
             }
           },
-          { kind: 'block', type: 'smarty_bumper_all_off' } // 범퍼 LED 모두 끄기
+          { kind: 'block', type: 'smarty_bumper_all_off' }
         ]
       },
       {
@@ -388,13 +361,10 @@ function getBaseToolbox() {
         name: '블루투스',
         colour: '290',
         contents: [
-          // 🗑️ 삭제된 smarty_rc_command 제거 완료
           { kind: 'block', type: 'turnBt' },
           { kind: 'block', type: 'availableBt' },
           { kind: 'block', type: 'smarty_bt_wait_cmd' },
           { kind: 'block', type: 'smarty_bt_wait_val' },
-          
-          // 🚀 [신규 추가] BT 송수신 블록들 (기본 입력값 포함!)
           { 
             kind: 'block', 
             type: 'smarty_bt_send_int',
@@ -415,10 +385,8 @@ function getBaseToolbox() {
             type: 'smarty_bt_read_string',
             inputs: { BYTES: { shadow: { type: 'math_number', fields: { NUM: 1 } } } }
           },
-
           { kind: 'block', type: 'getStateBt' },
           { kind: 'block', type: 'getByteBt' },
-                    // 🤖 [군집 통신 전용 블록]
           { 
             kind: 'block', 
             type: 'smarty_p2p_setup_master',
@@ -441,9 +409,6 @@ function getBaseToolbox() {
         "kind": "category",
         "name": "로봇",
         "colour": "#FF6680",
-        "cssConfig": {
-          "iconClassName": "my-robot-icon" // 👈 커스텀 CSS 클래스 이름 지정
-        },
         "contents": [
           { "kind": "block", "type": "moveBlueHand" },
           { "kind": "block", "type": "moveRedHand" },
@@ -509,202 +474,6 @@ export function getMergedToolbox() {
 }
 
 export function initCategorySidebar(workspace: any) {
-  // =================================================================
-  // 🚨 1. [함수 정의 블록 패치] 드롭다운 메뉴 추가 및 좀비 텍스트 완전 제거
-  // =================================================================
-  /*
-  if (!(window as any).__smartyProcTextPatched && typeof Blockly !== 'undefined') {
-    const patchBlockText = (blockType: string, prefixText: string) => {
-      if (!Blockly.Blocks[blockType]) return;
-
-      const originalInit = Blockly.Blocks[blockType].init;
-      Blockly.Blocks[blockType].init = function() {
-        if (originalInit) originalInit.call(this);
-        
-        if (this.inputList && this.inputList.length > 0) {
-          const topInput = this.inputList[0];
-          let nameIdx = topInput.fieldRow.findIndex((f: any) => f.name === 'NAME');
-          
-          if (nameIdx !== -1) {
-            while (topInput.fieldRow.length > 0 && topInput.fieldRow[0].name !== 'NAME') {
-              const f = topInput.fieldRow[0];
-              if (!f.name) f.name = 'GARBAGE_FIELD_' + Math.random();
-              topInput.removeField(f.name);
-            }
-            
-            topInput.insertFieldAt(0, new Blockly.FieldLabel(prefixText), 'CUSTOM_PREFIX');
-            nameIdx = topInput.fieldRow.findIndex((f: any) => f.name === 'NAME');
-            const hasSuffix1 = topInput.fieldRow.find((f: any) => f.name === 'CUSTOM_SUFFIX_1');
-            
-            if (!hasSuffix1) {
-              const suffixField1 = new Blockly.FieldLabel(' 만들기   ');
-              const suffixField2 = new Blockly.FieldLabel('입력정보 추가+');
-              
-              const origInitView = (suffixField2 as any).initView;
-              (suffixField2 as any).initView = function() {
-                if (origInitView) origInitView.call(this);
-                if (this.textElement_) {
-                  this.textElement_.style.fill = '#FFEB3B';
-                  this.textElement_.style.fontWeight = 'bold';
-                  this.textElement_.style.cursor = 'pointer';
-                }
-              };
-              
-              (suffixField2 as any).EDITABLE = true; 
-              (suffixField2 as any).showEditor_ = function() {
-                const block = this.sourceBlock_;
-                if (!block) return;
-                if (typeof block.plus === 'function') block.plus();
-                else if (block.mutator) block.mutator.setVisible(!block.mutator.isVisible());
-              };
-              
-              topInput.insertFieldAt(nameIdx + 1, suffixField1, 'CUSTOM_SUFFIX_1');
-              topInput.insertFieldAt(nameIdx + 2, suffixField2, 'CUSTOM_SUFFIX_2');
-
-              // 🚨 핵심: 결과값이 있는 함수일 경우 끝에 '모양 선택' 드롭다운 추가!
-              if (blockType === 'procedures_defreturn') {
-                 const suffixField3 = new Blockly.FieldLabel('   모양:');
-                 const typeDropdown = new Blockly.FieldDropdown([
-                     ['둥근형(일반)', 'ANY'],
-                     ['육각형(논리)', 'Boolean']
-                 ]);
-                 topInput.insertFieldAt(nameIdx + 3, suffixField3, 'CUSTOM_SUFFIX_3');
-                 topInput.insertFieldAt(nameIdx + 4, typeDropdown, 'SMARTY_RETURN_TYPE');
-              }
-            }
-          }
-        }
-        
-        this.inputList.forEach((input: any) => {
-           input.fieldRow.forEach((field: any) => {
-               if (field && typeof field.getValue === 'function' && typeof field.setValue === 'function') {
-                   const text = field.getValue();
-                   if (typeof text === 'string') {
-                       if (text.includes('- 정보') && !text.includes('- 입력정보')) {
-                           field.setValue(text.replace('- 정보', '- 입력정보'));
-                       }
-                   }
-               }
-           });
-        });
-      };
-
-      const originalUpdateParams = Blockly.Blocks[blockType].updateParams_;
-      if (originalUpdateParams) {
-        Blockly.Blocks[blockType].updateParams_ = function() {
-           originalUpdateParams.apply(this, arguments);
-           this.inputList.forEach((input: any) => {
-               input.fieldRow.forEach((field: any) => {
-                   if (field && typeof field.getValue === 'function' && typeof field.setValue === 'function') {
-                       const text = field.getValue();
-                       if (typeof text === 'string') {
-                           if (text.includes('- 정보') && !text.includes('- 입력정보')) {
-                               field.setValue(text.replace('- 정보', '- 입력정보'));
-                           }
-                       }
-                   }
-               });
-           });
-        };
-      }
-    };
-    try {
-      patchBlockText('procedures_defnoreturn', '결과값이 없는 함수 ');
-      patchBlockText('procedures_defreturn', '결과값이 있는 함수 ');
-    } catch (e) { console.warn(e); }
-    (window as any).__smartyProcTextPatched = true;
-  }
-
-  // =================================================================
-  // 🚨 2. [함수 호출 블록 패치] 불리안일 경우 육각형 모양으로 자동 변신!
-  // =================================================================
-  if (!(window as any).__smartyProcCallPatched && typeof Blockly !== 'undefined') {
-    const blockType = 'procedures_callreturn';
-    if (Blockly.Blocks[blockType]) {
-        const origInit = Blockly.Blocks[blockType].init;
-        Blockly.Blocks[blockType].init = function() {
-            if (origInit) origInit.call(this);
-            
-            this.syncSmartyShape = function() {
-                const mainWs = this.workspace.isFlyout ? this.workspace.targetWorkspace : this.workspace;
-                if (!mainWs) return false;
-                
-                let funcName = this.getFieldValue('NAME');
-                if (!funcName && this.getProcedureCall) funcName = this.getProcedureCall();
-                if (!funcName) return false;
-
-                let defBlock = null;
-                const topBlocks = mainWs.getTopBlocks(false);
-                for (let i = 0; i < topBlocks.length; i++) {
-                    if (topBlocks[i].type === 'procedures_defreturn' && topBlocks[i].getFieldValue('NAME') === funcName) {
-                        defBlock = topBlocks[i];
-                        break;
-                    }
-                }
-
-                let isBoolean = false;
-                if (defBlock) {
-                    // 1. 수동으로 드롭다운에서 육각형을 선택했는지 확인
-                    const explicitType = (defBlock as any).getFieldValue('SMARTY_RETURN_TYPE');
-                    if (explicitType === 'Boolean') {
-                        isBoolean = true;
-                    } else {
-                        // 2. 자동으로 리턴홈에 끼워진 블록이 불리안(육각형)인지 확인
-                        const returnTarget = (defBlock as any).getInputTargetBlock('RETURN');
-                        if (returnTarget && returnTarget.outputConnection) {
-                            const check = returnTarget.outputConnection.getCheck();
-                            if (check && (check.includes('Boolean') || check.includes('boolean'))) {
-                                isBoolean = true;
-                            }
-                        }
-                    }
-                }
-
-                const SHAPE_HEX = (Blockly as any).OUTPUT_SHAPE_HEXAGONAL !== undefined ? (Blockly as any).OUTPUT_SHAPE_HEXAGONAL : 2;
-                const SHAPE_ROUND = (Blockly as any).OUTPUT_SHAPE_ROUND !== undefined ? (Blockly as any).OUTPUT_SHAPE_ROUND : 1;
-
-                let changed = false;
-                const oldShape = this.outputConnection ? this.outputConnection.shape_ : null;
-                
-                // 모양과 연결 타입 변경 적용
-                if (isBoolean) {
-                    this.setOutput(true, 'Boolean');
-                    if (this.outputConnection && this.outputConnection.shape_ !== SHAPE_HEX) {
-                        this.setOutputShape(SHAPE_HEX);
-                    }
-                } else {
-                    this.setOutput(true, null);
-                    if (this.outputConnection && this.outputConnection.shape_ !== SHAPE_ROUND) {
-                        this.setOutputShape(SHAPE_ROUND);
-                    }
-                }
-                
-                const newShape = this.outputConnection ? this.outputConnection.shape_ : null;
-                if (oldShape !== newShape) changed = true;
-                return changed;
-            };
-        };
-
-        const origDomToMut = Blockly.Blocks[blockType].domToMutation;
-        if (origDomToMut) {
-            Blockly.Blocks[blockType].domToMutation = function(xml: any) {
-                origDomToMut.call(this, xml);
-                if (this.syncSmartyShape) this.syncSmartyShape();
-            };
-        }
-        
-        const origLoadExtra = Blockly.Blocks[blockType].loadExtraState;
-        if (origLoadExtra) {
-            Blockly.Blocks[blockType].loadExtraState = function(state: any) {
-                origLoadExtra.call(this, state);
-                if (this.syncSmartyShape) this.syncSmartyShape();
-            };
-        }
-    }
-    (window as any).__smartyProcCallPatched = true;
-  }
-  // =================================================================
-*/
   const sidebar = document.getElementById('category-sidebar')
   if (!sidebar) return
   sidebar.innerHTML = ''
@@ -853,21 +622,39 @@ export function initCategorySidebar(workspace: any) {
     flatContents.push({ kind: 'label', text: `🚩 ${cleanName}`, 'web-class': `smarty-theme-label-${categoryCount} blockly-custom-label` })
 
     if (category.custom === 'VARIABLE' || cleanName === '정보' || cleanName === '변수' || cleanName === 'Variables') {
-        flatContents.push({ kind: 'button', text: '🔢 정수 정보 만들기...', callbackKey: 'CREATE_VAR_INT', 'web-class': 'smarty-var-btn' })
-        flatContents.push({ kind: 'button', text: '📊 실수 정보 만들기...', callbackKey: 'CREATE_VAR_FLOAT', 'web-class': 'smarty-var-btn' })
-        flatContents.push({ kind: 'button', text: '🔤 문자 정보 만들기...', callbackKey: 'CREATE_VAR_CHAR', 'web-class': 'smarty-var-btn' })
-        flatContents.push({ kind: 'button', text: '📝 문자열 정보 만들기...', callbackKey: 'CREATE_VAR_STRING', 'web-class': 'smarty-var-btn' })
-        flatContents.push({ kind: 'button', text: '✅ 불리안 정보 만들기...', callbackKey: 'CREATE_VAR_BOOLEAN', 'web-class': 'smarty-var-btn' })
+      flatContents.push({ kind: 'button', text: '🔢 정수 정보 만들기...', callbackKey: 'CREATE_VAR_INT', 'web-class': 'smarty-var-btn' })
+      flatContents.push({ kind: 'button', text: '📊 실수 정보 만들기...', callbackKey: 'CREATE_VAR_FLOAT', 'web-class': 'smarty-var-btn' })
+      flatContents.push({ kind: 'button', text: '🔤 문자 정보 만들기...', callbackKey: 'CREATE_VAR_CHAR', 'web-class': 'smarty-var-btn' })
+      flatContents.push({ kind: 'button', text: '📝 문자열 정보 만들기...', callbackKey: 'CREATE_VAR_STRING', 'web-class': 'smarty-var-btn' })
+      flatContents.push({ kind: 'button', text: '✅ 불리안 정보 만들기...', callbackKey: 'CREATE_VAR_BOOLEAN', 'web-class': 'smarty-var-btn' })
 
-        blockStyles['variable_blocks'] = { colourPrimary: baseHexColor }
-        categoryStyles['variable_category'] = { colour: baseHexColor }
-        ;['smarty_variables_get', 'smarty_variables_set', 'smarty_variables_change'].forEach((t) => (blockTypeToColor[t] = baseHexColor))
-        dynamicCssRules += `.smarty-var-btn .blocklyFlyoutButtonBackground { fill: ${baseHexColor} !important; stroke: none !important; rx: 12px !important; ry: 12px !important; } .smarty-var-btn:hover .blocklyFlyoutButtonBackground { fill: ${baseHexColor} !important; filter: brightness(1.15) !important; } .smarty-var-btn text { fill: #ffffff !important; font-weight: 700 !important; }`
-        
-        flatContents.push({ kind: 'block', type: 'smarty_variables_set' })
-        flatContents.push({ kind: 'block', type: 'smarty_variables_get' })
-        flatContents.push({ kind: 'block', type: 'smarty_variables_change', inputs: { DELTA: { shadow: { type: 'math_number', fields: { NUM: 1 } } } } })
+      blockStyles['variable_blocks'] = { colourPrimary: baseHexColor }
+      categoryStyles['variable_category'] = { colour: baseHexColor }
+      ;['smarty_variables_get', 'smarty_variables_set'].forEach((t) => (blockTypeToColor[t] = baseHexColor))
+      dynamicCssRules += `.smarty-var-btn .blocklyFlyoutButtonBackground { fill: ${baseHexColor} !important; stroke: none !important; rx: 12px !important; ry: 12px !important; } .smarty-var-btn:hover .blocklyFlyoutButtonBackground { fill: ${baseHexColor} !important; filter: brightness(1.15) !important; } .smarty-var-btn text { fill: #ffffff !important; font-weight: 700 !important; }`
+      
+      let latestVarId: string | null = null;
+      if (workspace) {
+        // 구식 함수 대신 최신 getVariableMap() 사용
+        const map = workspace.getVariableMap();
+        const vars = map ? map.getAllVariables() : workspace.getAllVariables();
+        const realVars = vars.filter((v: any) => v.name !== '선택' && v.name !== '항목' && v.name !== 'item');
+        if (realVars.length > 0) {
+          latestVarId = realVars[realVars.length - 1].getId(); 
+        }
       }
+
+      const setBlock: any = { kind: 'block', type: 'smarty_variables_set' };
+      const getBlock: any = { kind: 'block', type: 'smarty_variables_get' };
+
+      if (latestVarId) {
+        setBlock.fields = { VAR: { id: latestVarId } };
+        getBlock.fields = { VAR: { id: latestVarId } };
+      }
+
+      flatContents.push(setBlock);
+      flatContents.push(getBlock);
+    }
 
     if (category.custom === 'PROCEDURE' || cleanName === '함수' || cleanName === 'Functions') {
       flatContents.push({ kind: 'button', text: '함수 만들기...', callbackKey: 'CREATE_PROCEDURE_NO_RETURN', 'web-class': 'smarty-func-btn' });
@@ -883,7 +670,6 @@ export function initCategorySidebar(workspace: any) {
               addedFuncs.add(funcName);
               const isReturn = (block.type === 'procedures_defreturn');
               
-              // [수정됨] 파라미터(구멍) 정보를 가져와서 extraState에 무조건 포함!
               const args = block.getVars ? block.getVars() : (block.arguments_ || []);
               const extraState: any = { name: funcName };
               if (args && args.length > 0) {
@@ -926,11 +712,17 @@ export function initCategorySidebar(workspace: any) {
 
     if (category.contents) category.contents.forEach(processNode)
 
+    // 🚨 [추가됨] 이 카테고리가 '예제'인지 확인합니다.
+    const isExampleCategory = category.custom === 'EXAMPLES_CATEGORY' || cleanName.includes('예제');
+
     const chip = document.createElement('button')
     chip.type = 'button'
-    chip.className = 'smarty-category-btn waterdrop-chip'
+    // 🚨 예제 버튼이면 동그란 물방울 대신 'example-folder-btn' 모양을 씌웁니다.
+    chip.className = isExampleCategory ? 'smarty-category-btn example-folder-btn' : 'smarty-category-btn waterdrop-chip'
     chip.setAttribute('data-category-name', cleanName)
     chip.style.setProperty('--glass-base', shades.base)
+
+
     chip.style.setProperty('--glass-light', shades.light)
     chip.style.setProperty('--glass-dark', shades.dark)
     chip.style.setProperty('--glass-shadow', shades.shadow)
@@ -1003,6 +795,10 @@ export function initCategorySidebar(workspace: any) {
 
   dynamicLabelStyleEl.innerHTML = dynamicCssRules
 
+  // ==========================================================
+  // 🚨 [가장 안전한 버튼 콜백 등록 방식]
+  // 이미 등록된 콜백이면 등록 안 함 (에러 발생 원천 차단)
+  // ==========================================================
   const registerVarCreator = (key: string, type: string, title: string) => {
     if (!workspace.getButtonCallback(key)) {
       workspace.registerButtonCallback(key, () => {
@@ -1076,6 +872,7 @@ export function initCategorySidebar(workspace: any) {
   registerFuncCreator('CREATE_PROCEDURE_NO_RETURN', 'procedures_defnoreturn', '🛠️ 새로운 함수의 이름을 입력하세요:');
   registerFuncCreator('CREATE_PROCEDURE_RETURN', 'procedures_defreturn', '🔄 결과값이 있는 새로운 함수의 이름을 입력하세요:');
   
+  // 🚨 콜백 등록이 무사히 끝나야 아래 updateToolbox가 정상 실행됨!
   workspace.updateToolbox({ kind: 'flyoutToolbox', contents: flatContents })
 
   const flyout = workspace.getFlyout()
@@ -1165,22 +962,20 @@ export function initCategorySidebar(workspace: any) {
     window.addEventListener('appThemeChanged', () => initCategorySidebar(workspace))
     ;(window as any).__categorySidebarThemeListenerInstalled = true
   }
-  // 🚨 3. 무한루프 방지 & 블록 모양 실시간 동기화 감시자!
+
   if (!(window as any).__smartyProcRefreshListener) {
     workspace.addChangeListener((e: any) => {
       if (e.workspaceId !== workspace.id) return;
-      if (e.isUiEvent) return; // [수정됨] 마우스 클릭 등 불필요한 UI 이벤트 무시 (무한루프 방어)
+      if (e.isUiEvent) return; 
 
       let isFuncEvent = false;
 
-      // 3-1. 함수 자체의 생성/수정 감지
       if (e.type === Blockly.Events.BLOCK_CREATE || e.type === Blockly.Events.BLOCK_CHANGE) {
         const block = workspace.getBlockById(e.blockId);
         if (block && block.type && block.type.startsWith('procedures_def')) {
            isFuncEvent = true;
         }
       } 
-      // 3-2. 함수 블록 삭제 감지
       else if (e.type === Blockly.Events.BLOCK_DELETE) {
         if (e.oldJson && e.oldJson.type && e.oldJson.type.startsWith('procedures_def')) {
            isFuncEvent = true;
@@ -1192,7 +987,10 @@ export function initCategorySidebar(workspace: any) {
         }
       }
 
-      // 3-3. 변경이 감지되면 툴박스만 조용히 다시 그림 (스크롤 유지)
+      if (e.type === 'var_create' || e.type === 'var_delete' || e.type === 'var_rename') {
+         isFuncEvent = true; 
+      }
+
       if (isFuncEvent) {
          if (!(window as any).__isUpdatingSidebar) {
              (window as any).__isUpdatingSidebar = true;
@@ -1211,7 +1009,42 @@ export function initCategorySidebar(workspace: any) {
     });
     ;(window as any).__smartyProcRefreshListener = true;
   }
-} // <-- initCategorySidebar 끝
+
+  if (!(window as any).__smartyConfigRefreshListener) {
+    window.addEventListener('smartyConfigUpdated', (e: any) => {
+      if (!(window as any).__isUpdatingSidebar) {
+        (window as any).__isUpdatingSidebar = true;
+        setTimeout(() => {
+          const flyout = workspace.getFlyout();
+          const currentScroll = flyout && flyout.scrollbar ? flyout.scrollbar.get() : 0;
+          initCategorySidebar(workspace); 
+          setTimeout(() => {
+            const newFlyout = workspace.getFlyout();
+            if (newFlyout && newFlyout.scrollbar) newFlyout.scrollbar.set(currentScroll);
+            if (newFlyout && typeof newFlyout.getWorkspace === 'function') {
+              const flyoutWorkspace = newFlyout.getWorkspace();
+              const flyoutBlocks = flyoutWorkspace.getAllBlocks(false);
+              const newSettings = e.detail || {}; 
+              flyoutBlocks.forEach((block: any) => {
+                if (['moveBlueHand', 'moveRedHand', 'moveBlueSlide', 'moveRedSlide'].includes(block.type)) {
+                  const targetSetting = newSettings[block.type] || (window as any).blockSettings?.[block.type];
+                  if (targetSetting) {
+                    const minLabel = block.getField('MIN_LABEL');
+                    if (minLabel) minLabel.setValue(String(targetSetting.min ?? 0));
+                    const maxLabel = block.getField('MAX_LABEL');
+                    if (maxLabel) maxLabel.setValue(String(targetSetting.max ?? 180));
+                  }
+                }
+              });
+            }
+            (window as any).__isUpdatingSidebar = false;
+          }, 150); 
+        }, 100); 
+      }
+    });
+    (window as any).__smartyConfigRefreshListener = true;
+  }
+}
 
 function getCategorySvgIcon(categoryName: string): string {
   const icons: Record<string, string> = {
@@ -1230,13 +1063,11 @@ function getCategorySvgIcon(categoryName: string): string {
     '스위치': '<path d="M12 6v12c3.31 0 6-2.69 6-6s-2.69-6-6-6zm-2 1H4v2h6V7zm-2 4H2v2h6v-2zm2 4H4v2h6v-2z"/>',
     'LED': '<path d="M12 6v12c3.31 0 6-2.69 6-6s-2.69-6-6-6zm-2 1H4v2h6V7zm-2 4H2v2h6v-2zm2 4H4v2h6v-2z"/>',
     '센서': '<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>', 
-    '입력': '<path d="M4 6h2v12H4zm8-2l-3 16h2l3-16zm6 2c-2.2 0-4 1.8-4 4v4c0 2.2 1.8 4 4 4s4-1.8 4-4v-4c0-2.2-1.8-4-4-4zm2 8c0 1.1-.9 2-2 2s-2-.9-2-2v-4c0-1.1.9-2 2-2s2 .9 2 2v4z"/>', 
-    '출력': '<path d="M4 6h2v12H4zm8-2l-3 16h2l3-16zm6 2c-2.2 0-4 1.8-4 4v4c0 2.2 1.8 4 4 4s4-1.8 4-4v-4c0-2.2-1.8-4-4-4zm2 8c0 1.1-.9 2-2 2s-2-.9-2-2v-4c0-1.1.9-2 2-2s2 .9 2 2v4z"/>', 
     '타이머': '<path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42A8.962 8.962 0 0 0 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9a8.994 8.994 0 0 0 7.53-14.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>',
     '블루투스': '<path d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/>',
     '예제': '<path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>',
-    'PC': '<path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/>',
-    '스마티': '<path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a5 5 0 0 1 5 5v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7a5 5 0 0 1 5-5h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2zM9 13a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>'
+    '스마티': '<path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a5 5 0 0 1 5 5v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7a5 5 0 0 1 5-5h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2zM9 13a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm6 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>',
+    '로봇': '<path d="M12 2a2 2 0 0 0-2 2h4a2 2 0 0 0-2-2zM5 5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2H5zm2 2h10v8H7V7zm-2 11a2 2 0 1 0 4 0 2 2 0 0 0-4 0zm10 0a2 2 0 1 0 4 0 2 2 0 0 0-4 0z"/>'
   };
   const defaultIcon = '<path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z"/>';
   const matchedKey = Object.keys(icons).find((key) => categoryName.includes(key));
@@ -1248,31 +1079,13 @@ function injectWaterdropCSS() {
   const style = document.createElement('style')
   style.id = 'waterdrop-sidebar-style'
   style.innerHTML = `
-    .blocklyFlyoutBackground { 
-      fill: transparent !important; 
-      fill-opacity: 0 !important; 
-      stroke: none !important; 
-    }
+    .blocklyFlyoutBackground { fill: transparent !important; fill-opacity: 0 !important; stroke: none !important; }
     .blocklyFlyout > g { clip-path: none !important; }
     .blocklyFlyout .blocklyBlockCanvas > g.blocklyDraggable, .blocklyFlyout .blocklyBlockCanvas > g.blockly-custom-label, .blocklyFlyout .blocklyBlockCanvas > g.blocklyFlyoutButton { clip-path: polygon(-1000px -5000px, 250px -5000px, 250px 5000px, -1000px 5000px) !important; transition: clip-path 0.15s ease, filter 0.15s ease !important; cursor: pointer !important; }
     .blocklyFlyout .blocklyBlockCanvas > g.blocklyDraggable:hover, .blocklyFlyout .blocklyBlockCanvas > g.blockly-custom-label:hover, .blocklyFlyout .blocklyBlockCanvas > g.blocklyFlyoutButton:hover { clip-path: polygon(-1000px -5000px, 3000px -5000px, 3000px 5000px, -1000px 5000px) !important; filter: drop-shadow(4px 4px 10px rgba(0,0,0,0.5)) !important; }
     .blockly-custom-label text { font-weight: 900 !important; font-size: 13.5pt !important; }
     .blocklyToolboxDiv { display: none !important; }
-    #category-sidebar { 
-      border-radius: 0 !important; 
-      width: 54px !important; 
-      min-width: 54px !important; 
-      max-width: 54px !important; 
-      padding: 10px 0 !important; 
-      background: transparent !important; 
-      border-right: none !important; 
-      margin-right: 0 !important; 
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
-      overflow-x: hidden; 
-      z-index: 10; 
-    }
+    #category-sidebar { border-radius: 0 !important; width: 54px !important; min-width: 54px !important; max-width: 54px !important; padding: 10px 0 !important; background: transparent !important; border-right: none !important; margin-right: 0 !important; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; z-index: 10; }
     .smarty-category-btn::before, .waterdrop-chip::before { content: none !important; display: none !important; }
     #category-sidebar .waterdrop-chip { position: relative; border-radius: 14px !important; opacity: 1 !important; filter: none !important; background: radial-gradient(circle at 30% 30%, var(--glass-light) 0%, var(--glass-base) 45%, var(--glass-dark) 100%) !important; box-shadow: inset 0px -4px 8px rgba(255, 255, 255, 0.4), inset 0px 4px 6px rgba(255, 255, 255, 0.3), 0px 6px 10px var(--glass-shadow) !important; margin: 1px auto !important; width: 38px !important; height: 38px !important; border: none !important; display: flex; align-items: center; justify-content: center; transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important; outline: none; cursor: pointer; }
     #category-sidebar .waterdrop-chip::after { content: ''; position: absolute; top: 2px; left: 15%; width: 70%; height: 35%; background: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 100%); border-radius: 10px 10px 16px 16px; pointer-events: none; z-index: 2; }
@@ -1281,7 +1094,76 @@ function injectWaterdropCSS() {
     #category-sidebar .waterdrop-chip .chip-icon { z-index: 3; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: #ffffff; }
     #category-sidebar .waterdrop-chip .chip-icon svg { width: 100% !important; height: 100% !important; fill: currentColor !important; filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.3)); }
     #smarty-global-tooltip { position: fixed; transform: translateY(-50%); background: rgba(30, 30, 30, 0.85); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); font-size: 16px; font-weight: 700; white-space: nowrap; padding: 8px 14px; border-radius: 6px; box-shadow: 0px 4px 12px rgba(0,0,0,0.2); pointer-events: none; opacity: 0; visibility: hidden; z-index: 999999; transition: opacity 0.15s ease, visibility 0.15s ease; }
-  `
+
+    /* 🚨 [신규 추가] 예제 모음 전용 버튼 스타일 (위쪽 여백, 구분선 및 사각형 폴더 모양) */
+    #category-sidebar .example-folder-btn {
+      position: relative;
+      margin-top: 36px !important; /* 위쪽 블록들과 넓은 여백 띄우기 */
+      margin-bottom: 12px !important;
+      width: 44px !important;
+      height: 38px !important;
+      border-radius: 10px !important; /* 깔끔한 직사각형 폴더 느낌 */
+      
+      /* 🌟 계절 테마의 기본 색상(--glass-base)을 활용하여 은은하게 적용! */
+      background: linear-gradient(135deg, var(--glass-light), var(--glass-dark)) !important;
+      opacity: 0.8; /* 평소에는 살짝 투명하게 */
+      border: 1px solid rgba(255, 255, 255, 0.4) !important;
+      box-shadow: 0 4px 10px var(--glass-shadow) !important;
+      
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+      outline: none;
+      cursor: pointer;
+    }
+    
+    /* 버튼 위쪽에 은은한 가로 구분선 추가 */
+    #category-sidebar .example-folder-btn::before {
+      content: '';
+      position: absolute;
+      top: -18px;
+      left: 10%;
+      width: 80%;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 1px;
+    }
+
+    /* 마우스 올렸을 때 (테마 색상 100% 발현) */
+    #category-sidebar .example-folder-btn:hover {
+      opacity: 1 !important; /* 쨍하게 만들기 */
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 14px var(--glass-shadow), 0 0 12px var(--glass-base) !important;
+      border-color: rgba(255, 255, 255, 0.9) !important;
+    }
+
+    /* 클릭(활성화) 되었을 때 */
+    #category-sidebar .example-folder-btn.selected {
+      opacity: 1 !important;
+      transform: scale(1.1);
+      box-shadow: 0 0 15px var(--glass-base), 0 6px 15px var(--glass-shadow) !important;
+      border-color: #ffffff !important;
+    }
+
+    /* 아이콘 흰색 고정 */
+    #category-sidebar .example-folder-btn .chip-icon {
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      color: #ffffff; 
+    }
+    #category-sidebar .example-folder-btn .chip-icon svg {
+      width: 100% !important;
+      height: 100% !important;
+      fill: currentColor !important;
+      filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.5));
+    }
+   
+   `
   document.head.appendChild(style)
 }
 
@@ -1315,5 +1197,4 @@ export function decorateToolboxRows() {
 }
 
 export function scrollSelectedToolboxRowIntoView() {
-  // main.ts의 호출 크래시를 막기 위한 더미 함수입니다.
 }

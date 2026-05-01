@@ -114,7 +114,6 @@ export function initLogicLoopBlocks(arduinoGenerator: any) {
         if (tDo) { tDo.unplug(); doBlocks.push(tDo); } else { doBlocks.push(null); }
       }
       
-      // 🚀 [핵심 수정] let elseBlock: any = null; 로 변경하여 TS 'never' 에러 완벽 해결!
       let elseBlock: any = null; 
       if (this.getInput('ELSE')) {
         let eT = this.getInputTargetBlock('ELSE');
@@ -147,7 +146,6 @@ export function initLogicLoopBlocks(arduinoGenerator: any) {
         i++;
       }
       
-      // 🚀 [핵심 수정] 여기도 동일하게 any 추가!
       let elseBlock: any = null;
       if (this.getInput('ELSE')) {
         let eT = this.getInputTargetBlock('ELSE');
@@ -189,6 +187,24 @@ export function initLogicLoopBlocks(arduinoGenerator: any) {
       }
     }
   };
+
+  // ==========================================
+  // 🌟 [추가] "횟수만큼 반복하기" 블록에 기본값 10 강제 주입!
+  // ==========================================
+  if (Blockly.Blocks['controls_repeat_ext']) {
+    const originalRepeatInit = Blockly.Blocks['controls_repeat_ext'].init;
+    Blockly.Blocks['controls_repeat_ext'].init = function(this: any) {
+      if (originalRepeatInit) {
+        originalRepeatInit.call(this); // 기존 Blockly 로직 100% 실행 (번역/색상 유지)
+      }
+      // 블록 생성 직후에 TIMES 입력칸을 찾아서 숫자 10을 꽂아 넣습니다.
+      const timesInput = this.getInput('TIMES');
+      if (timesInput && !timesInput.connection.getShadowDom()) {
+        const shadowXml = Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">10</field></shadow>');
+        timesInput.connection.setShadowDom(shadowXml);
+      }
+    };
+  }
 
   // ==========================================
   // ⚙️ 블록리 기본 논리/제어 블록 (C++ 제너레이터)

@@ -7,7 +7,6 @@ import * as Blockly from 'blockly';
 import { loadAllBlocklyModules, arduinoGenerator, getSafeVarName, smartyTheme } from './blocklySetup';
 
 import { installBlocklyDialogs, showCuteModal } from '../ui/modal';
-import { arduinoGenerator, getSafeVarName, smartyTheme } from './blocklySetup';
 import { getMergedToolbox, initCategorySidebar } from './toolbox';
 import { initTabManager } from './tabManager';
 import { initSerialMonitor } from './serialAndBoard';

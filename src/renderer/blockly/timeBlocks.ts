@@ -9,17 +9,27 @@ export function initTimeBlocks(arduinoGenerator: any) {
   // ==========================================
 
   Blockly.Blocks['arduino_delay'] = { init: function(this: any) { this.appendValueInput("MS").setCheck("Number").appendField("⏱️"); this.appendDummyInput().appendField("밀리초(ms) 기다리기"); this.setInputsInline(true); this.setPreviousStatement(true, null); this.setNextStatement(true, null); this.setColour(45); } };
+  
   Blockly.Blocks['smarty_timer'] = {
     init: function (this: any) {
       this.appendDummyInput()
         .appendField('⏱️ 타이머')
         .appendField(new Blockly.FieldDropdown([['T1', 'T1'],['T2', 'T2']]), 'TID')
-        .appendField(new Blockly.FieldDropdown([['시작 (간격설정)', 'RUN'],['정지', 'STOP']]), 'ACT')
-      this.appendValueInput('INTERVAL').setCheck('Number').appendField('간격(ms)')
-      this.setInputsInline(true)
-      this.setPreviousStatement(true, null)
-      this.setNextStatement(true, null)
-      this.setColour(200)
+        .appendField(new Blockly.FieldDropdown([['시작 (간격설정)', 'RUN'],['정지', 'STOP']]), 'ACT');
+      
+      // 🌟 [수정] 간격 입력 칸을 변수에 담아서 섀도우 블록을 연결할 수 있게 설정
+      const intervalInput = this.appendValueInput('INTERVAL')
+        .setCheck('Number')
+        .appendField('간격(ms)');
+      
+      // 💡 [추가] 1000 숫자를 기본 섀도우 블록으로 삽입
+      const shadowXml = Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">1000</field></shadow>');
+      intervalInput.connection.setShadowDom(shadowXml);
+
+      this.setInputsInline(true);
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(200);
     }
   }
 

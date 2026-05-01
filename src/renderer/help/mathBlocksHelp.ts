@@ -8,7 +8,7 @@ export const MathBlocksHelp: Record<string, string> = {
   'math_number': `
     <h3 style="color: #3498db; margin-top:0; font-size: 1.0rem; font-weight: normal;">🔢 숫자</h3>
     <hr style="border-color: rgba(255,255,255,0.1);">
-    <p style="font-weight: normal;">원하는 숫자(정수 또는 실수)를 직접 입력할 수 있는 가장 기본적인 수학 블록입니다.</p>
+    <p style="font-weight: normal;">원하는 숫자(정수 또는 실수)를 직접 입력하는 블록입니다.</p>
     <ul style="font-weight: normal;">
       <li>마우스로 블록 안의 숫자를 클릭하여 원하는 값으로 바꿀 수 있습니다.</li>
       <li>핀 번호, 기다리는 시간(딜레이), 모터 속도, 밝기 값 등을 설정할 때 다양한 블록과 결합하여 사용합니다.</li>
@@ -129,7 +129,7 @@ export const MathBlocksHelp: Record<string, string> = {
   'arduino_math_map': `
     <h3 style="color: #3498db; margin-top:0; font-size: 1.0rem; font-weight: normal;">🗺️ 값 범위 변환하기 (map)</h3>
     <hr style="border-color: rgba(255,255,255,0.1);">
-    <p style="font-weight: normal;">어떤 숫자의 범위를 내가 원하는 새로운 범위의 비율로 쫙 늘리거나 압축해서 변환해 주는 마법 같은 블록입니다.</p>
+    <p style="font-weight: normal;">어떤 정보의 범위를 내가 원하는 새로운 범위의 비율로 쫙 늘리거나 압축해서 변환해 주는 블록입니다.</p>
     <ul style="font-weight: normal;">
       <li>사용 예시: 빛 센서에서 읽은 값의 범위가 0 ~ 1023인데, 이 값을 LED의 밝기 값인 0 ~ 255에 맞춰서 줄이고 싶을 때 사용합니다.</li>
       <li>비례식을 컴퓨터가 알아서 계산해 주므로, 아날로그 센서 값을 모터 속도나 불빛 밝기로 바꿀 때 가장 많이 쓰이는 필수 블록입니다.</li>
@@ -138,7 +138,7 @@ export const MathBlocksHelp: Record<string, string> = {
     <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-left:4px solid #f39c12 !important; padding:8px 12px; border-radius:4px; font-size:0.95em; line-height:1.6;">
       <div style="margin-bottom: 4px;"><span style="color:#2ecc71;">📥</span> <span style="color:#bdc3c7; font-weight:bold;">입력 정보</span></div>
       <div style="padding-left: 20px;">
-        <span style="color:#f5b041;">• 원본 데이터 : </span><span style="color:#e67e22;">비율을 변환할 대상 숫자 (예: 센서값)</span><br>
+        <span style="color:#f5b041;">• 원본 데이터 : </span><span style="color:#e67e22;">변환할 대상(예: 센서값)</span><br>
         <span style="color:#f5b041;">• 현재 범위 : </span><span style="color:#e67e22;">원본 값의 최솟값과 최댓값 지정</span><br>
         <span style="color:#f5b041;">• 바꿀 범위 : </span><span style="color:#e67e22;">새롭게 적용할 비율의 최솟값과 최댓값 지정</span>
       </div>

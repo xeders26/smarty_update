@@ -15,7 +15,7 @@ function getMainWindow(): BrowserWindow | undefined {
   return BrowserWindow.getAllWindows().find(w => !w.isDestroyed() && w.isVisible());
 }
 
-// 🌟 다운로드 미니 창 생성
+// 🌟 다운로드 미니 창 생성 (로고 이미지 포함)
 function createProgressWindow() {
   if (progressWindow) return; 
   
@@ -25,7 +25,7 @@ function createProgressWindow() {
     parent: mainWindow, 
     modal: true,        
     width: 450,
-    height: 180,
+    height: 250, // 👈 로고가 들어가므로 높이를 살짝 키웠습니다.
     resizable: false,
     minimizable: false,
     maximizable: false,
@@ -38,20 +38,54 @@ function createProgressWindow() {
     }
   });
 
+  // 🌟 로고 이미지를 읽어서 Base64 문자열로 변환 (경로 오류 원천 차단!)
+  let logoBase64 = '';
+  try {
+    // 빌드된 후의 경로를 추적합니다. (asar 패키징 내부에서도 작동하도록)
+    const logoPath = path.join(__dirname, '../renderer/assets/logo.png');
+    
+    if (fs.existsSync(logoPath)) {
+      const imgData = fs.readFileSync(logoPath);
+      logoBase64 = `data:image/png;base64,${imgData.toString('base64')}`;
+    } else {
+      // 혹시 경로가 다를 경우를 대비한 대체 경로 탐색
+      const altPath = path.join(app.getAppPath(), 'out', 'renderer', 'assets', 'logo.png');
+      if (fs.existsSync(altPath)) {
+        const imgData = fs.readFileSync(altPath);
+        logoBase64 = `data:image/png;base64,${imgData.toString('base64')}`;
+      }
+    }
+  } catch (err) {
+    console.error("로고 이미지 로드 실패:", err);
+  }
+
+  // 로고가 있으면 img 태그 생성, 없으면 빈 문자열
+  const logoHtml = logoBase64 ? `<img src="${logoBase64}" alt="Smarty Logo" style="max-height: 50px; margin-bottom: 15px;">` : '';
+
   const html = `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="UTF-8">
       <style>
-        body { font-family: 'Malgun Gothic', 'Noto Sans KR', sans-serif; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        h2 { font-size: 18px; color: #333; margin-bottom: 20px; }
+        body { 
+          font-family: 'Pretendard', 'Malgun Gothic', sans-serif; 
+          background: #ffffff; 
+          display: flex; 
+          flex-direction: column; 
+          align-items: center; 
+          justify-content: center; 
+          height: 100vh; 
+          margin: 0; 
+        }
+        h2 { font-size: 17px; color: #333; margin-top: 0; margin-bottom: 20px; }
         .progress-container { width: 85%; background: #e0e0e0; border-radius: 12px; overflow: hidden; height: 24px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
         .progress-bar { width: 0%; background: linear-gradient(90deg, #4CAF50, #8BC34A); height: 100%; transition: width 0.3s ease-in-out; border-radius: 12px; }
-        .progress-text { margin-top: 15px; font-weight: bold; font-size: 16px; color: #555; }
+        .progress-text { margin-top: 15px; font-weight: bold; font-size: 15px; color: #555; }
       </style>
     </head>
     <body>
+      ${logoHtml}
       <h2>📦 새 버전을 다운로드하고 있습니다...</h2>
       <div class="progress-container">
         <div id="bar" class="progress-bar"></div>
@@ -91,7 +125,6 @@ export function registerUpdateHandlers(): void {
       if (isManualCheck) { 
         let cleanErrorMsg = error.message || String(error);
         
-        // 🌟 [수정됨] 수동 검사 에러 처리에도 HTML 필터링 적용!
         if (cleanErrorMsg.includes('<!DOCTYPE html>') || cleanErrorMsg.includes('Unicorn')) {
           cleanErrorMsg = "서버(GitHub)에서 버전을 찾을 수 없습니다.\n(저장소가 비공개이거나, 배포된 릴리즈(Release)가 없습니다.)";
         } else if (cleanErrorMsg.length > 200) {
