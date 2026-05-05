@@ -54,7 +54,6 @@ export function registerStudyRoomHandlers(): void {
     return scanDirectory(studyRoomPath)
   })
 
-  // 🌟 모든 event 파라미터를 _event로 변경하여 TS 에러 해결!
   ipcMain.handle('delete-study-item', async (_event, itemPath) => {
     if (fs.existsSync(itemPath)) {
       fs.rmSync(itemPath, { recursive: true, force: true });
@@ -159,14 +158,17 @@ export function registerStudyRoomHandlers(): void {
     return true;
   })
 
+  // 🌟 [수정됨] 다운로드(Pull) 시 부모 폴더 기준 적용
   ipcMain.handle('sync-studyroom-git', async () => {
     try {
-      const targetDir = getStudyRoomPath();
-      if (!fs.existsSync(join(targetDir, '.git'))) return { updated: false, version: "오프라인 (Git 미설정)" };
+      const studyRoomDir = getStudyRoomPath();
+      const gitRootDir = dirname(studyRoomDir); // 부모 폴더 기준
 
-      const { stdout } = await execPromise('git pull origin main', { cwd: targetDir });
+      if (!fs.existsSync(join(gitRootDir, '.git'))) return { updated: false, version: "오프라인 (Git 미설정)" };
+
+      const { stdout } = await execPromise('git pull origin main', { cwd: gitRootDir });
       
-      const infoPath = join(targetDir, 'studyRoom_info.json');
+      const infoPath = join(studyRoomDir, 'studyRoom_info.json');
       let version = "1.0.0";
       if (fs.existsSync(infoPath)) version = JSON.parse(fs.readFileSync(infoPath, 'utf-8')).version || "1.0.0";
 
@@ -177,15 +179,35 @@ export function registerStudyRoomHandlers(): void {
     }
   })
 
+  // 🌟 [수정됨] 배포(Push) 시 부모 폴더 기준 적용 및 충돌 방지 로직
   ipcMain.handle('push-studyroom-git', async (_event, token) => {
     try {
-      const targetDir = getStudyRoomPath();
+      const studyRoomDir = getStudyRoomPath();
+      const gitRootDir = dirname(studyRoomDir); // 🌟 여기가 핵심! (smarty-config.json이 있는 부모 폴더)
       const remoteUrl = `https://${token}@github.com/xeders26/smarty_update.git`;
+
+      // 1. 혹시 이전에 StudyRoom 폴더 안에 잘못 만들어진 .git이 있다면 삭제 (투명 취급 방지)
+      const wrongGitPath = join(studyRoomDir, '.git');
+      if (fs.existsSync(wrongGitPath)) {
+        fs.rmSync(wrongGitPath, { recursive: true, force: true });
+        console.log("잘못된 하위 Git 저장소 삭제 완료");
+      }
+
+      // 2. 부모 폴더에 .git이 없으면 초기화
+      const correctGitPath = join(gitRootDir, '.git');
+      if (!fs.existsSync(correctGitPath)) {
+        await execPromise('git init', { cwd: gitRootDir });
+        await execPromise('git branch -M main', { cwd: gitRootDir });
+        await execPromise('git config user.name "SmartyAdmin"', { cwd: gitRootDir });
+        await execPromise('git config user.email "admin@smarty.com"', { cwd: gitRootDir });
+      }
       
-      await execPromise('git add .', { cwd: targetDir });
-      await execPromise(`git commit -m "🚀 자료실 자동 배포 (버전 업데이트)"`, { cwd: targetDir }).catch(() => console.log("새로운 커밋 없음"));
+      // 3. 부모 폴더 안의 모든 것(smarty-config.json, StudyRoom 폴더 등)을 싹 다 담기!
+      await execPromise('git add .', { cwd: gitRootDir });
+      await execPromise(`git commit -m "🚀 자료실 자동 배포 (버전 업데이트)"`, { cwd: gitRootDir }).catch(() => console.log("새로운 커밋 없음"));
       
-      await execPromise(`git push -f "${remoteUrl}" HEAD:main`, { cwd: targetDir });
+      // 4. 강제 덮어쓰기 배포
+      await execPromise(`git push -f "${remoteUrl}" HEAD:main`, { cwd: gitRootDir });
       
       return true;
     } catch (err) {
