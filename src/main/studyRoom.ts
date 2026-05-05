@@ -11,10 +11,38 @@ const execPromise = util.promisify(exec)
 
 export function registerStudyRoomHandlers(): void {
   
+  // 🌟 [핵심 변경] Windows 권한 문제(Permission denied) 해결
+  // 쓰기가 불가능한 Program Files 대신, 안전한 AppData(userData) 경로를 사용합니다.
   const getStudyRoomPath = () => {
-    return app.isPackaged 
-      ? join(process.resourcesPath, 'StudyRoom') 
-      : join(process.cwd(), 'StudyRoom')
+    if (!app.isPackaged) {
+      return join(process.cwd(), 'StudyRoom'); // 개발 모드
+    }
+
+    // 설치된 앱 모드: C:\Users\사용자\AppData\Roaming\앱이름\SmartyWorkspace
+    const workspacePath = join(app.getPath('userData'), 'SmartyWorkspace');
+    const studyRoomPath = join(workspacePath, 'StudyRoom');
+
+    // 만약 안전 구역(workspacePath)에 폴더가 없다면? (프로그램 최초 실행 시)
+    // Program Files에 있는 원본 자료들을 이곳으로 싹 복사해옵니다.
+    if (!fs.existsSync(studyRoomPath)) {
+      fs.mkdirSync(workspacePath, { recursive: true });
+      
+      const resourceStudyRoom = join(process.resourcesPath, 'StudyRoom');
+      if (fs.existsSync(resourceStudyRoom)) {
+        fs.cpSync(resourceStudyRoom, studyRoomPath, { recursive: true }); // 폴더 전체 복사
+      } else {
+        fs.mkdirSync(studyRoomPath, { recursive: true });
+      }
+
+      // smarty-config.json 도 같이 옮겨줍니다.
+      const resourceConfig = join(process.resourcesPath, 'smarty-config.json');
+      const workspaceConfig = join(workspacePath, 'smarty-config.json');
+      if (fs.existsSync(resourceConfig) && !fs.existsSync(workspaceConfig)) {
+        fs.copyFileSync(resourceConfig, workspaceConfig);
+      }
+    }
+    
+    return studyRoomPath;
   }
 
   ipcMain.handle('get-studyroom-tree', async () => {
@@ -158,11 +186,10 @@ export function registerStudyRoomHandlers(): void {
     return true;
   })
 
-  // 🌟 [수정됨] 다운로드(Pull) 시 부모 폴더 기준 적용
   ipcMain.handle('sync-studyroom-git', async () => {
     try {
       const studyRoomDir = getStudyRoomPath();
-      const gitRootDir = dirname(studyRoomDir); // 부모 폴더 기준
+      const gitRootDir = dirname(studyRoomDir); 
 
       if (!fs.existsSync(join(gitRootDir, '.git'))) return { updated: false, version: "오프라인 (Git 미설정)" };
 
@@ -179,21 +206,17 @@ export function registerStudyRoomHandlers(): void {
     }
   })
 
-  // 🌟 [수정됨] 배포(Push) 시 부모 폴더 기준 적용 및 충돌 방지 로직
   ipcMain.handle('push-studyroom-git', async (_event, token) => {
     try {
       const studyRoomDir = getStudyRoomPath();
-      const gitRootDir = dirname(studyRoomDir); // 🌟 여기가 핵심! (smarty-config.json이 있는 부모 폴더)
+      const gitRootDir = dirname(studyRoomDir); // 이제 이 경로는 AppData 쪽 안전한 경로가 됩니다.
       const remoteUrl = `https://${token}@github.com/xeders26/smarty_update.git`;
 
-      // 1. 혹시 이전에 StudyRoom 폴더 안에 잘못 만들어진 .git이 있다면 삭제 (투명 취급 방지)
       const wrongGitPath = join(studyRoomDir, '.git');
       if (fs.existsSync(wrongGitPath)) {
         fs.rmSync(wrongGitPath, { recursive: true, force: true });
-        console.log("잘못된 하위 Git 저장소 삭제 완료");
       }
 
-      // 2. 부모 폴더에 .git이 없으면 초기화
       const correctGitPath = join(gitRootDir, '.git');
       if (!fs.existsSync(correctGitPath)) {
         await execPromise('git init', { cwd: gitRootDir });
@@ -202,11 +225,9 @@ export function registerStudyRoomHandlers(): void {
         await execPromise('git config user.email "admin@smarty.com"', { cwd: gitRootDir });
       }
       
-      // 3. 부모 폴더 안의 모든 것(smarty-config.json, StudyRoom 폴더 등)을 싹 다 담기!
       await execPromise('git add .', { cwd: gitRootDir });
       await execPromise(`git commit -m "🚀 자료실 자동 배포 (버전 업데이트)"`, { cwd: gitRootDir }).catch(() => console.log("새로운 커밋 없음"));
       
-      // 4. 강제 덮어쓰기 배포
       await execPromise(`git push -f "${remoteUrl}" HEAD:main`, { cwd: gitRootDir });
       
       return true;
