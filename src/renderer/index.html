@@ -1328,13 +1328,43 @@ body.dark-mode .blocklyFlyoutBackground {
                     <div class="bottom-controls" style="flex: 1; width: 100%; display: flex; justify-content: space-evenly; align-items: center; box-sizing: border-box; padding: 0 10px;">
                       
                       <div class="func-keys" style="height: 280px; width: 175px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; gap: 15px;">
-                        <!-- 🚨 !important 를 넣어서 무조건 얇고 크게 나오게 강제 적용! -->
-                        <div class="rc-btn act-btn metal-btn" id="btnQ" data-cmd="q" style="--glow-color: #e67e22;"><span class="metal-text" style="font-weight: normal !important; font-size: 30px !important;">↺</span></div>
-                        <div class="rc-btn act-btn metal-btn" id="btnW" data-cmd="w" style="--glow-color: #e67e22;"><span class="metal-text" style="font-weight: normal !important; font-size: 30px !important;">↻</span></div>
-                        <div class="rc-btn act-btn metal-btn" id="btnA" data-cmd="a" style="--glow-color: #e74c3c;"><span class="metal-text" style="font-weight: normal !important; font-size: 30px !important;">a</span></div>
-                        <div class="rc-btn act-btn metal-btn" id="btnS" data-cmd="s" style="--glow-color: #3498db;"><span class="metal-text" style="font-weight: normal !important; font-size: 30px !important;">s</span></div>
-                        <div class="rc-btn act-btn metal-btn" id="btnZ" data-cmd="z" style="--glow-color: #2ecc71;"><span class="metal-text" style="font-weight: normal !important; font-size: 30px !important;">z</span></div>
-                        <div class="rc-btn act-btn metal-btn" id="btnX" data-cmd="x" style="--glow-color: #f1c40f;"><span class="metal-text" style="font-weight: normal !important; font-size: 30px !important;">x</span></div>
+                        
+                        <!-- 🌟 Q 버튼 (보라색): 2시(우측 상단) -> 10시(좌측 상단) 방향 얇은 화살표 -->
+                        <div class="rc-btn act-btn metal-btn" id="btnQ" data-cmd="q" style="--glow-color: #9b59b6; position: relative;">
+                          <svg viewBox="0 0 100 100" style="position: absolute; width: 100%; height: 100%; pointer-events: none;">
+                            <defs>
+                              <marker id="arrowQ" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                <!-- 작고 선명하게 채워진 삼각형 -->
+                                <polygon points="0,0 10,5 0,10" fill="#e67e22" />
+                              </marker>
+                            </defs>
+                            <!-- 2시(76,35)에서 10시(24,35)로 글자 위쪽을 감싸는 호 -->
+                            <path d="M 76 35 A 30 30 0 0 0 24 35" fill="none" stroke="#e67e22" stroke-width="2" marker-end="url(#arrowQ)"/>
+                          </svg>
+                          <!-- 음각 효과 완벽 통일 -->
+                          <span class="metal-text" style="font-family: 'Pretendard', sans-serif !important; font-size: 26px !important;">Q</span>
+                        </div>
+                        
+                        <!-- 🌟 W 버튼 (민트색): 10시(좌측 상단) -> 2시(우측 상단) 방향 얇은 화살표 -->
+                        <div class="rc-btn act-btn metal-btn" id="btnW" data-cmd="w" style="--glow-color: #00cec9; position: relative;">
+                          <svg viewBox="0 0 100 100" style="position: absolute; width: 100%; height: 100%; pointer-events: none;">
+                            <defs>
+                              <marker id="arrowW" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                <polygon points="0,0 10,5 0,10" fill="#e67e22" />
+                              </marker>
+                            </defs>
+                            <!-- 10시(24,35)에서 2시(76,35)로 글자 위쪽을 감싸는 호 -->
+                            <path d="M 24 35 A 30 30 0 0 1 76 35" fill="none" stroke="#e67e22" stroke-width="2" marker-end="url(#arrowW)"/>
+                          </svg>
+                          <span class="metal-text" style="font-family: 'Pretendard', sans-serif !important; font-size: 26px !important;">W</span>
+                        </div>
+                        
+                        <!-- 🌟 A, S, Z, X 버튼: Q, W와 완전히 동일한 26px, 동일한 음각 효과 -->
+                        <div class="rc-btn act-btn metal-btn" id="btnA" data-cmd="a" style="--glow-color: #e74c3c;"><span class="metal-text" style="font-family: 'Pretendard', sans-serif !important; font-size: 26px !important;">A</span></div>
+                        <div class="rc-btn act-btn metal-btn" id="btnS" data-cmd="s" style="--glow-color: #3498db;"><span class="metal-text" style="font-family: 'Pretendard', sans-serif !important; font-size: 26px !important;">S</span></div>
+                        <div class="rc-btn act-btn metal-btn" id="btnZ" data-cmd="z" style="--glow-color: #2ecc71;"><span class="metal-text" style="font-family: 'Pretendard', sans-serif !important; font-size: 26px !important;">Z</span></div>
+                        <div class="rc-btn act-btn metal-btn" id="btnX" data-cmd="x" style="--glow-color: #f1c40f;"><span class="metal-text" style="font-family: 'Pretendard', sans-serif !important; font-size: 26px !important;">X</span></div>
+                        
                       </div>
 
                       <div class="d-pad" style="height: 280px; width: 280px; background: #111418; border-radius: 50%; padding: 10px; box-sizing: border-box; box-shadow: inset 0 0 20px rgba(0,0,0,1); display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; gap: 5px;">

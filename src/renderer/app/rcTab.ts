@@ -1,3 +1,8 @@
+/*===========================================
+/src/renderer/app/rcTab.ts
+  *  🧑‍✈️ 스마티 원격 조종 탭 UI 초기화
+  *  🚀 주요 기능: 조종 패널 리사이징, 블루투스 포트 관리, 실시간 터미널 모니터링, 상태 표시줄 개선등
+=========================================*/
 export function initRcTabUI() {
   
   const initAll = () => {
@@ -457,7 +462,6 @@ export function initRcTabUI() {
         }
       });
     }
-
     if ((window as any).electron) {
       (window as any).electron.ipcRenderer.removeAllListeners('serial-disconnected');
       (window as any).electron.ipcRenderer.on('serial-disconnected', () => { forceDisconnectUI(); });
@@ -586,12 +590,19 @@ export function initRcTabUI() {
 
     if (lever) { lever.addEventListener('input', () => { updateSpeed(); const val = parseInt(lever.value, 10); send2Bytes(80, val); }); }
 
+    // 🌟 [수정됨] Q와 W 키가 눌렸을 때 버튼에 빛이 들어오도록(active-sim) 매핑
     const toggleButtonHighlight = (key: string, isActive: boolean) => {
       let cmdList = [key];
-      if (key === 'ArrowUp') cmdList =['Up', 'up']; else if (key === 'ArrowDown') cmdList = ['Down', 'down'];
-      else if (key === 'ArrowLeft') cmdList = ['Left', 'left']; else if (key === 'ArrowRight') cmdList =['Right', 'right'];
+      if (key === 'ArrowUp') cmdList =['Up', 'up']; 
+      else if (key === 'ArrowDown') cmdList = ['Down', 'down'];
+      else if (key === 'ArrowLeft') cmdList = ['Left', 'left']; 
+      else if (key === 'ArrowRight') cmdList =['Right', 'right'];
       else if (key === 'PageUp' || key === '.') cmdList =['PgUp', 'pgup', 'PowerUp', 'powerup', '.'];
       else if (key === 'PageDown' || key === ',') cmdList =['PgDn', 'pgdn', 'PowerDown', 'powerdown', ','];
+      
+      // 🌟 Q, W 추가!
+      else if (key === 'q' || key === 'Q') cmdList = ['q', 'Q', 'turnleft', 'TurnLeft'];
+      else if (key === 'w' || key === 'W') cmdList = ['w', 'W', 'turnright', 'TurnRight'];
       
       for (const cmd of cmdList) {
         const btnEl = document.querySelector(`[data-cmd="${cmd}" i]`) as HTMLElement;
@@ -599,11 +610,17 @@ export function initRcTabUI() {
       }
     };
 
+    // 🌟 [수정됨] 마우스로 Q, W 버튼을 클릭했을 때 키보드를 누른 것과 같은 효과를 주도록 매핑
     const mapCmdToKey = (cmd: string | null) => {
       if (!cmd) return ''; const lCmd = cmd.toLowerCase();
       if (lCmd === 'up') return 'ArrowUp'; if (lCmd === 'down') return 'ArrowDown';
       if (lCmd === 'left') return 'ArrowLeft'; if (lCmd === 'right') return 'ArrowRight';
       if (lCmd === 'pgup' || lCmd === 'powerup') return 'PageUp'; if (lCmd === 'pgdn' || lCmd === 'powerdown') return 'PageDown';
+      
+      // 🌟 Q, W 추가!
+      if (lCmd === 'q' || lCmd === 'turnleft') return 'q';
+      if (lCmd === 'w' || lCmd === 'turnright') return 'w';
+      
       return cmd; 
     };
 
