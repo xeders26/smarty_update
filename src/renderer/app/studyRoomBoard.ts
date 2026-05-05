@@ -3,7 +3,7 @@
   * - 예제 파일과 폴더를 트리 구조로 보여주는 사이드 패널입니다.
   * - 파일을 클릭하면 상세 설명과 함께 블록 미리보기가 나타납니다.
   * - 폴더를 클릭하면 해당 폴더의 하위 항목들이 새로운 칼럼으로 표시됩니다.
-  * - 🌟 [추가] 정답 폴더 클릭 시 studyRoom_info.json (또는 visible.json) 연동하여 목록 필터링
+  * - 🌟 [완벽수정] 데이터 로딩 시 visible 상태를 확인하여 폴더/파일 전역 필터링
   * - 🌟 [추가] 자료실 열기 버튼 클릭 시 Git 서버의 버전을 체크하고 자동 업데이트 진행 (OTA)
   =========*/
 
@@ -32,12 +32,40 @@ export async function initStudyRoomBoard(
     document.head.appendChild(style);
   }
 
-  // 2. 초기 로컬 자료실 데이터 로딩
+  // 2. 초기 로컬 자료실 데이터 로딩 (🌟 핵심: 여기서부터 가시성 필터링을 완벽하게 해버립니다)
   const fetchLocalTree = async () => {
     try {
+      let rawTree = [];
       if ((window as any).api && (window as any).api.getStudyRoomTree) {
-        studyRoomData = await (window as any).api.getStudyRoomTree();
+        rawTree = await (window as any).api.getStudyRoomTree();
       }
+
+      // 🌟 가시성(visible) 정보 가져오기
+      let visibleMap: any = {};
+      if ((window as any).api && (window as any).api.readStudyRoomInfo) {
+        const info = await (window as any).api.readStudyRoomInfo();
+        if (info && info.visible) visibleMap = info.visible;
+      } else if ((window as any).api && (window as any).api.readVisibleJson) {
+        visibleMap = await (window as any).api.readVisibleJson() || {};
+      }
+
+      // 🌟 재귀 필터링: false로 설정된 '폴더'와 '파일'을 아예 트리에서 제거합니다.
+      const applyVisibilityFilter = (items: any[]) => {
+        return items.filter(item => {
+          // 관리자 화면에서 눈을 껐다(false)면 삭제!
+          if (visibleMap[item.relPath] === false) return false;
+          
+          // 폴더인 경우 하위 항목들도 똑같이 검사!
+          if (item.type === 'folder' && item.children) {
+            item.children = applyVisibilityFilter(item.children);
+          }
+          return true;
+        });
+      };
+
+      // 원본 데이터에 필터링 적용
+      studyRoomData = applyVisibilityFilter(rawTree);
+      
     } catch (e) {
       console.error("❌ 로컬 자료실 불러오기 실패:", e);
     }
@@ -203,31 +231,8 @@ export async function initStudyRoomBoard(
       neededCols.push({ depth: tempDepth, data: tempDir });
       
       if (activeSelections[tempDepth] && activeSelections[tempDepth].type === 'folder') {
+        // 이미 위에서 필터링이 끝났으므로 복잡한 조건문 없이 바로 자식 폴더를 엽니다!
         let children = activeSelections[tempDepth].children || [];
-
-        // 🚨🚨 [핵심] 폴더 이름이 "정답"인 경우 visible 데이터 연동 필터링
-        if (activeSelections[tempDepth].name === '정답') {
-          try {
-            let visibleData = null;
-            if ((window as any).api && (window as any).api.readStudyRoomInfo) {
-              const info = await (window as any).api.readStudyRoomInfo();
-              visibleData = info.visible;
-            } else if ((window as any).api && (window as any).api.readVisibleJson) {
-              visibleData = await (window as any).api.readVisibleJson();
-            }
-            
-            if (visibleData) {
-              children = children.filter((child: any) => {
-                if (child.type === 'folder') return true; 
-                // 🚨 수정된 부분 (name 대신 relPath 사용) 🚨
-                return visibleData[child.relPath] !== false; 
-              });
-            }
-          } catch (err) {
-            console.warn("⚠️ 가시성 정보를 읽어오는데 실패했습니다.", err);
-          }
-        }
-        
         tempDir = children;
         tempDepth++;
       } else {
