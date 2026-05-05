@@ -1,0 +1,20 @@
+<h2 style="color: #3498db; margin: 0 0 5px 0;">📡 통신 예제: 블루투스로 생존 신호(PING) 보내기</h2>
+<hr style="margin: 5px 0 15px 0; border-color: #555;">
+
+<p style="margin: 0 0 15px 0; line-height: 1.5;">로봇이 스마트폰이나 PC를 향해 <b>주기적으로 "PING"이라는 글자를 전송</b>하는 예제입니다.<br>
+기기가 정상적으로 연결되어 있는지 확인하거나, 나중에 센서 값을 일정 간격으로 스마트폰에 보낼 때 이 구조를 그대로 활용할 수 있습니다.</p>
+
+<h3 style="color: #3498db; margin: 0 0 10px 0;">🧩 블록 동작 흐름</h3>
+<ol style="line-height: 1.5; margin: 0 0 15px 25px; padding: 0;">
+  <li style="margin-bottom: 5px;"><b>초기 설정 (setup):</b> 스마티를 시작하고, 통신을 위해 <b>블루투스 모듈을 켭니다(ON).</b></li>
+  <li style="margin-bottom: 5px;"><b>글자 전송 및 저장:</b> 블루투스를 통해 <b>"PING"</b>이라는 글자를 스마트폰으로 보냅니다. 이때 전송에 성공한 데이터의 크기(바이트)를 <code style="color: #f1c40f;">sByte</code>라는 변수에 저장합니다.</li>
+  <li style="margin-bottom: 5px;"><b>범퍼 LED 켜기:</b> 데이터 전송이 일어났음을 눈으로 확인하기 위해 범퍼 LED를 켭니다.</li>
+  <li style="margin-bottom: 5px;"><b>1000 밀리초(ms) 기다리기:</b> 1초 동안 대기합니다.</li>
+  <li style="margin-bottom: 5px;"><b>범퍼 LED 끄기:</b> 범퍼 LED를 다시 끕니다.</li>
+  <li><b>1000 밀리초(ms) 기다리기:</b> 1초 동안 다시 대기합니다.</li>
+</ol>
+
+<div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #f39c12; border-radius: 4px; margin-top: 15px;">
+  <b style="color: #f39c12;">💡 핵심 포인트</b>
+  <div style="margin-top: 5px; color: #e0e0e0; line-height: 1.5;">스마트폰의 '블루투스 터미널' 앱을 스마티와 연결해 보세요! <b>정확히 2초 간격(켜짐 1초 + 꺼짐 1초)으로 화면에 "PING"이라는 글자가 계속해서 찍히는 것을 볼 수 있습니다.</b> <br>만약 "PING" 대신 센서 값 블록을 넣으면 훌륭한 <b>데이터 모니터링 시스템</b>이 완성됩니다!</div>
+</div>

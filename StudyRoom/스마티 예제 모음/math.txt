@@ -1,0 +1,20 @@
+<h2 style="color: #3498db; margin: 0 0 5px 0;">🎲 수학 예제: 무작위 숫자 뽑기와 범위 변환 (Map)</h2>
+<hr style="margin: 5px 0 15px 0; border-color: #555;">
+
+<p style="margin: 0 0 15px 0; line-height: 1.5;">로봇이 1~100 사이의 숫자를 무작위로 뽑은 뒤, 그 숫자가 <b>특정 범위(10~50) 안에 있는지 검사하고 비율에 맞게 값을 변환(map)</b>하는 예제입니다.<br>
+이 예제를 통해 센서 값을 다룰 때 필수적인 '범위 검사'와 '비례식 변환' 블록의 사용법을 완벽하게 익힐 수 있습니다.</p>
+
+<h3 style="color: #3498db; margin: 0 0 10px 0;">🧩 블록 동작 흐름</h3>
+<ol style="line-height: 1.5; margin: 0 0 15px 25px; padding: 0;">
+  <li style="margin-bottom: 5px;"><b>초기 설정 (setup):</b> 스마티를 시작하고, 변수 <code style="color: #f1c40f;">p</code>에 초기값 1000을 저장해 둡니다.</li>
+  <li style="margin-bottom: 5px;"><b>무작위 숫자 뽑기:</b> 1부터 100 사이의 무작위(랜덤) 정수를 뽑아 변수 <code style="color: #f1c40f;">p</code>에 덮어씁니다.</li>
+  <li style="margin-bottom: 5px;"><b>범위 검사:</b> 뽑힌 숫자 <code style="color: #f1c40f;">p</code>가 <b>10부터 50 사이</b>에 들어있는지 확인합니다.</li>
+  <li style="margin-bottom: 5px;"><b>10~50 사이일 때 (참):</b> 모니터에 "Hello!"와 뽑힌 숫자 <code style="color: #f1c40f;">p</code>를 차례대로 출력합니다. 그 후 <code style="color: #f1c40f;">p</code>의 범위인 10~50을 100~500 범위로 <b>비율 변환(map)</b>하여 변수 <code style="color: #f1c40f;">n</code>에 저장하고 <code style="color: #f1c40f;">n</code>의 값도 출력합니다.</li>
+  <li style="margin-bottom: 5px;"><b>10~50 사이가 아닐 때 (거짓):</b> 모니터에 뽑힌 숫자 <code style="color: #f1c40f;">p</code>만 단순히 출력합니다.</li>
+  <li><b>스위치 대기:</b> 다음 숫자를 뽑기 위해 <b>스위치2(SW2)</b>가 눌릴 때까지 기다렸다가, 눌리면 다시 처음으로 돌아갑니다.</li>
+</ol>
+
+<div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #f39c12; border-radius: 4px; margin-top: 15px;">
+  <b style="color: #f39c12;">💡 핵심 포인트</b>
+  <div style="margin-top: 5px; color: #e0e0e0; line-height: 1.5;">PC의 '시리얼 모니터'를 켜고 스마티의 <b>스위치2(SW2)</b>를 계속 눌러보세요! <br>뽑힌 값이 10~50 사이일 때는 조건문이 참이 되어 <b>비율 변환(map)된 훨씬 큰 숫자</b>가 함께 출력되고, 범위를 벗어나면 원본 숫자만 덩그러니 찍히는 것을 직접 확인할 수 있습니다.</div>
+</div>
