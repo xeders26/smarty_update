@@ -271,8 +271,13 @@ export const BluetoothBlocksHelp: Record<string, string> = {
       </div>
       <div style="height: 12px;"></div>
       <div style="margin-bottom: 4px;"><span style="color:#3498db;">📤</span> <span style="color:#bdc3c7; font-weight:bold;">출력 정보</span></div>
-      <div style="padding-left: 20px;">
-        <span style="color:#f5b041;">• 명령 데이터 (문자형) : </span><span style="color:#e67e22;">데이터 수신 시 1바이트 글자로 반환, 도착 전까지 코드 정지</span>
+      <div style="padding-left: 20px; line-height: 1.5;">
+        <span style="color:#f5b041;">• 명령 데이터 (문자형) : </span><span style="color:#e0e0e0;">눌러진 키에 따라 다음과 같은 문자를 보냅니다.</span>
+        <div style="padding-left: 18px; margin-top: 5px; color:#e67e22;">
+          <b>'D'</b> : 로봇 이동(Drive), 이동 키(화살표) 및 회전 키(Q, W)<br>
+          <b>'P'</b> : 로봇 파워(Power), 속도 조절 키(&lt;, &gt;, PgUp, PgDn)<br>
+          <b>'F'</b> : 로봇 기능(Function), 기능 키(A, S, Z, X)
+        </div>
       </div>
     </div>
     
@@ -296,8 +301,47 @@ export const BluetoothBlocksHelp: Record<string, string> = {
       </div>
       <div style="height: 12px;"></div>
       <div style="margin-bottom: 4px;"><span style="color:#3498db;">📤</span> <span style="color:#bdc3c7; font-weight:bold;">출력 정보</span></div>
-      <div style="padding-left: 20px;">
-        <span style="color:#f5b041;">• 수치 데이터 (정수형) : </span><span style="color:#e67e22;">데이터 수신 시 변환된 숫자 반환, 도착 전까지 코드 정지</span>
+      <div style="padding-left: 20px; line-height: 1.5;">
+        <span style="color:#f5b041;">• 동작 코드값 (정수형) : </span><span style="color:#e0e0e0;">각 키가 눌려지거나 떼어질 때 아래와 같은 정수값을 보냅니다.</span>
+        
+        <div style="padding-left: 12px; margin-top: 8px;">
+          <!-- D 명령 -->
+          <div style="margin-bottom: 12px;">
+            <span style="color:#3498db; font-weight:bold;">- 'D' 명령</span><span style="color:#aaa;"> (로봇 이동 및 회전 키)에 이어서 오는 값:</span>
+            <div style="padding-left: 15px; margin-top: 4px; color:#e67e22; font-size: 13.5px; line-height: 1.6;">
+              위 화살표 키가 눌릴 때 : <b style="color:#fff;">0</b><br>
+              위 + 오른쪽 화살표 키가 눌릴 때 : <b style="color:#fff;">1</b><br>
+              오른쪽 화살표 키가 눌릴 때 : <b style="color:#fff;">2</b><br>
+              오른쪽 + 아래 화살표 키가 눌릴 때 : <b style="color:#fff;">3</b><br>
+              아래 화살표 키가 눌릴 때 : <b style="color:#fff;">4</b><br>
+              아래 + 왼쪽 화살표 키가 눌릴 때 : <b style="color:#fff;">5</b><br>
+              왼쪽 화살표 키가 눌릴 때 : <b style="color:#fff;">6</b><br>
+              왼쪽 + 위 화살표 키가 눌릴 때 : <b style="color:#fff;">7</b><br>
+              반시계 방향 회전 키(Q)가 눌릴 때 : <b style="color:#fff;">8</b><br>
+              시계 방향 회전 키(W)가 눌릴 때 : <b style="color:#fff;">9</b><br>
+              위 각 키가 눌렸다가 떼어질 때 (정지 동작값) : <b style="color:#fff;">10</b>
+            </div>
+          </div>
+
+          <!-- P 명령 -->
+          <div style="margin-bottom: 12px;">
+            <span style="color:#3498db; font-weight:bold;">- 'P' 명령</span><span style="color:#aaa;"> (로봇 파워 조절 키)에 이어서 오는 값:</span>
+            <div style="padding-left: 15px; margin-top: 4px; color:#e67e22; font-size: 13.5px;">
+              위치에 따라 : <b style="color:#fff;">0 ~ 100</b>
+            </div>
+          </div>
+
+          <!-- F 명령 -->
+          <div>
+            <span style="color:#3498db; font-weight:bold;">- 'F' 명령</span><span style="color:#aaa;"> (기능 키)에 이어서 오는 값:</span>
+            <div style="padding-left: 15px; margin-top: 4px; color:#e67e22; font-size: 13.5px; line-height: 1.6;">
+              'A' 가 눌릴 때 <b style="color:#fff;">11</b>, 떼어질 때 <b style="color:#fff;">10</b><br>
+              'S' 가 눌릴 때 <b style="color:#fff;">21</b>, 떼어질 때 <b style="color:#fff;">20</b><br>
+              'Z' 가 눌릴 때 <b style="color:#fff;">31</b>, 떼어질 때 <b style="color:#fff;">30</b><br>
+              'X' 가 눌릴 때 <b style="color:#fff;">41</b>, 떼어질 때 <b style="color:#fff;">40</b>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     

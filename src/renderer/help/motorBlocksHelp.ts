@@ -35,6 +35,36 @@ export const MotorBlocksHelp: Record<string, string> = {
     </div>
   `,
 
+  'mecanumMove': `
+    <h3 style="color: #3498db; margin-top:0; font-size: 1.0rem; font-weight: normal;">🚀 메카넘 휠 고급 주행 (변수/숫자 제어)</h3>
+    <hr style="border-color: rgba(255,255,255,0.1);">
+    <p style="font-weight: normal;">메카넘 휠의 이동 방향과 속도를 고정된 목록이 아닌 <strong>숫자나 변수</strong>로 자유롭게 제어하는 고급 블록입니다.</p>
+    <ul style="font-weight: normal;">
+      <li>동작(방향) 번호 (0~10): 0(앞), 2(우측), 4(뒤), 6(좌측), 8(우회전), 9(좌회전), 10(정지) 등 숫자로 방향을 지정합니다.</li>
+      <li>수학 계산 결과나 변수를 홈에 쏙 넣어서, 상황에 따라 방향과 속도가 실시간으로 바뀌는 복잡한 주행 패턴을 만들 수 있습니다.</li>
+    </ul>
+    
+    <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-left:4px solid #f39c12 !important; padding:8px 12px; border-radius:4px; font-size:0.95em; line-height:1.6;">
+      <div style="margin-bottom: 4px;"><span style="color:#2ecc71;">📥</span> <span style="color:#bdc3c7; font-weight:bold;">입력 정보</span></div>
+      <div style="padding-left: 20px;">
+        <span style="color:#f5b041;">• 동작(방향) : </span><span style="color:#e67e22;">0 ~ 10 사이의 숫자 블록 또는 변수</span><br>
+        <span style="color:#f5b041;">• 속도 : </span><span style="color:#e67e22;">0 ~ 255 사이의 숫자 블록 또는 변수</span>
+      </div>
+      <div style="height: 12px;"></div>
+      <div style="margin-bottom: 4px;"><span style="color:#3498db;">📤</span> <span style="color:#bdc3c7; font-weight:bold;">출력 정보</span></div>
+      <div style="padding-left: 20px;">
+        <span style="color:#f5b041;">• 반환값 없음 : </span><span style="color:#e67e22;">입력받은 방향과 속도로 로봇 구동</span>
+      </div>
+    </div>
+    
+    <div style="height: 8px;"></div>
+    
+    <div style="background:rgba(255,255,255,0.05); padding:6px 12px; border-left:3px solid #9b59b6 !important; font-family: monospace; border-radius: 4px;">
+      <span style="color:#bdc3c7; font-size: 0.85em;">C++ 변환 코드:</span><br>
+      <span style="color:#9aa5a6;">driveMecanum(동작변수, 속도변수);</span>
+    </div>
+  `,
+
   'smarty_servo': `
     <h3 style="color: #3498db; margin-top:0; font-size: 1.0rem; font-weight: normal;">📐 서보모터 제어 (통합)</h3>
     <hr style="border-color: rgba(255,255,255,0.1);">

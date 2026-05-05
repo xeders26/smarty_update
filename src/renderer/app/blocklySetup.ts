@@ -43,6 +43,20 @@ export const smartyTheme = Blockly.Theme.defineTheme('smartyTheme', {
     family: "'Pretendard Variable', Pretendard, sans-serif",
     weight: '600', // 가독성을 위해 살짝 도톰한 SemiBold(600) 추천!
     size: 14       // 16은 조금 클 수 있어서 14 정도로 맞추면 깔끔합니다.
+  },
+
+  // ==========================================
+  // 🚨 [추가됨] 여기서 플라이아웃과 작업공간 색상을 정공법으로 덮어씁니다!
+  // ==========================================
+  componentStyles: {
+    workspaceBackgroundColour: '#1e1e1e', // 블록 조립하는 메인 작업공간 배경색
+    toolboxBackgroundColour: '#333',
+    toolboxForegroundColour: '#fff',
+    flyoutBackgroundColour: '#2d3436',    // 👈 대장님이 원하시던 플라이아웃 다크 배경색!
+    flyoutOpacity: 0.95,                  // 👈 플라이아웃 투명도
+    scrollbarColour: '#718093',           // 👈 작업공간 스크롤바 색상
+    scrollbarOpacity: 1,
+    cursorColour: '#d0d0d0'
   }
 });
 

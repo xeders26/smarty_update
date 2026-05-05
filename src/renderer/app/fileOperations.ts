@@ -15,7 +15,7 @@ export function initFileOperations(workspace: any, tabManager: ReturnType<typeof
   }
 
   // 🌟 [핵심 추가] 화면이 초기화될 때 휴지통과 되돌리기(Ctrl+Z) 기록을 완벽히 비워주는 함수
-  /*
+  
   function cleanUpTrashAndUndo() {
     setTimeout(() => {
       if (workspace.trashcan && typeof workspace.trashcan.emptyContents === 'function') {
@@ -24,7 +24,7 @@ export function initFileOperations(workspace: any, tabManager: ReturnType<typeof
       workspace.clearUndo(); // 되돌리기 기록 지우기
     }, 150); // 블록이 도화지에 완전히 세팅될 때까지 0.15초 기다린 후 싹 비웁니다.
   }
-  */
+  
 
   if (newFileBtn) {
     newFileBtn.onclick = () => {

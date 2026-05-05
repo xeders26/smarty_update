@@ -4,6 +4,8 @@ src/renderer/app/settings.ts
 import * as Blockly from 'blockly';
 import pkg from '../../../package.json'; 
 
+import { openStudyRoomManager } from './studyRoomManager';
+
 const GITHUB_OWNER = 'xeders26'; 
 const GITHUB_REPO = 'smarty_update';   
 const FILE_PATH = 'smarty-config.json'; 
@@ -26,56 +28,65 @@ function openAdminGitSyncModal() {
   const modal = document.createElement('div');
   modal.style.cssText = `
     background: #1e1e1e; padding: 25px; border-radius: 12px;
-    width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    width: 420px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
     color: #f1f1f1; position: relative; border: 1px solid #333;
   `;
 
-  const savedToken = localStorage.getItem('smarty_admin_token') || '';
+  let sessionToken = '';
 
   modal.innerHTML = `
     <h3 style="margin: 0 0 15px 0; font-size: 18px; color: #ff4081; text-align: center;">⚙️ 관리자 원격 제어소</h3>
     
-    <!-- 🔑 Step 1: 비밀번호 인증 -->
     <div id="adminStep1">
-      <p style="font-size: 13px; color: #aaa; margin-bottom: 10px; text-align:center;">관리자 권한을 인증해주세요.</p>
-      <input type="password" id="adminPwd" placeholder="비밀번호 입력" style="width: 100%; padding: 10px; background: #2d2d2d; color: #fff; border: 1px solid #444; border-radius: 6px; box-sizing: border-box; text-align:center; outline: none;">
+      <p style="font-size: 13px; color: #aaa; margin-bottom: 15px; text-align:center;">관리자 권한과 Git 연동을 위해 정보를 입력해주세요.</p>
+      
+      <input type="password" id="adminPwd" placeholder="🔑 관리자 비밀번호 입력" style="width: 100%; padding: 12px; margin-bottom: 10px; background: #2d2d2d; color: #fff; border: 1px solid #444; border-radius: 6px; box-sizing: border-box; text-align:center; outline: none;">
+      
+      <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px; width: 100%;">
+        <input type="password" id="adminTokenInput" placeholder="🛠️ GitHub 개인 토큰 (PAT) 입력" style="flex: 1; padding: 12px; background: #2d2d2d; color: #fff; border: 1px solid #444; border-radius: 6px; box-sizing: border-box; text-align:center; outline: none;">
+        <label style="font-size: 12px; color: #ccc; display: flex; align-items: center; gap: 4px; cursor: pointer; white-space: nowrap; user-select: none;">
+          <input type="checkbox" id="saveTokenCheck" style="cursor: pointer; transform: scale(1.1);"> PC 저장
+        </label>
+      </div>
+      
       <p id="adminErrMsg" style="color: #ff5252; font-size: 12px; text-align: center; height: 14px; margin: 8px 0;"></p>
-      <button id="btnAuth" style="width: 100%; padding: 10px; background: #ff4081; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;">인증하기</button>
+      
+      <button id="btnAuth" style="width: 100%; padding: 12px; background: #ff4081; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;">인증 및 접속</button>
     </div>
 
-    <!-- 🛠 Step 2: 설정 관리 -->
     <div id="adminStep2" style="display: none;">
-      <div style="margin-bottom: 15px; background: rgba(255, 64, 129, 0.1); padding: 10px; border-radius: 6px; border: 1px solid rgba(255, 64, 129, 0.3);">
-        <label style="font-size: 11px; color: #ff4081; font-weight: bold;">🔑 GitHub 관리자 토큰</label>
-        <div style="display: flex; gap: 5px; margin-top: 5px;">
-          <input type="password" id="adminTokenInput" value="${savedToken}" placeholder="토큰 입력 후 엔터" style="flex: 1; padding: 6px; background: #2d2d2d; color: #fff; border: 1px solid #444; border-radius:4px; box-sizing: border-box; outline: none;">
-          <button id="btnFetchGit" style="padding: 0 12px; background: #d32f2f; color: white; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s;">🔄 가져오기</button>
-        </div>
+      
+      <div style="margin-bottom: 15px; background: rgba(76, 199, 26, 0.1); padding: 12px; border-radius: 6px; border: 1px solid rgba(76, 199, 26, 0.3); text-align: center;">
+        <div style="font-size: 13px; color: #4cc71a; font-weight: bold; margin-bottom: 8px;">📂 학생 정답 폴더 / 자료실 관리</div>
+        <button id="btnOpenStudyRoomManager" style="width: 100%; padding: 10px; background: #4cc71a; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 14px;">
+          👨‍🏫 관리자 전용 탐색기 열기
+        </button>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;">
-        ${['moveBlueHand', 'moveRedHand', 'moveBlueSlide', 'moveRedSlide'].map(id => `
-          <div style="background: #252525; padding: 8px 12px; border-radius: 6px; border: 1px solid #333; display: flex; align-items: center; justify-content: space-between;">
-            <div style="font-size: 13px; font-weight: bold; color: #4ae0c2; flex: 1;">${id}</div>
-            <div style="display: flex; gap: 8px; align-items: center;">
-              <label style="font-size: 12px; color: #ccc; display: flex; align-items: center; gap: 4px;">
-                Min
-                <input type="number" id="min_${id}" style="width: 50px; padding: 4px; background: #1e1e1e; color: #fff; border: 1px solid #444; border-radius:4px; outline: none; text-align: center;">
-              </label>
-              <label style="font-size: 12px; color: #ccc; display: flex; align-items: center; gap: 4px;">
-                Max
-                <input type="number" id="max_${id}" style="width: 50px; padding: 4px; background: #1e1e1e; color: #fff; border: 1px solid #444; border-radius:4px; outline: none; text-align: center;">
-              </label>
+      <div style="margin-bottom: 15px; background: rgba(255, 64, 129, 0.1); padding: 10px; border-radius: 6px; border: 1px solid rgba(255, 64, 129, 0.3);">
+        <label style="font-size: 11px; color: #ff4081; font-weight: bold; display:block; margin-bottom:8px;">⚙️ 모터 각도 설정</label>
+        <div style="display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; padding-right: 5px;">
+          ${['moveBlueHand', 'moveRedHand', 'moveBlueSlide', 'moveRedSlide'].map(id => `
+            <div style="background: #252525; padding: 8px 12px; border-radius: 6px; border: 1px solid #333; display: flex; align-items: center; justify-content: space-between;">
+              <div style="font-size: 13px; font-weight: bold; color: #4ae0c2; flex: 1;">${id}</div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <label style="font-size: 12px; color: #ccc; display: flex; align-items: center; gap: 4px;">
+                  Min <input type="number" id="min_${id}" style="width: 45px; padding: 4px; background: #1e1e1e; color: #fff; border: 1px solid #444; border-radius:4px; outline: none; text-align: center;">
+                </label>
+                <label style="font-size: 12px; color: #ccc; display: flex; align-items: center; gap: 4px;">
+                  Max <input type="number" id="max_${id}" style="width: 45px; padding: 4px; background: #1e1e1e; color: #fff; border: 1px solid #444; border-radius:4px; outline: none; text-align: center;">
+                </label>
+              </div>
             </div>
-          </div>
-        `).join('')}
+          `).join('')}
+        </div>
       </div>
 
       <p id="gitStatusMsg" style="color: #64b5f6; font-size: 12px; text-align: center; height: 14px; margin: 15px 0; font-weight:bold;"></p>
       
       <div style="display: flex; gap: 10px;">
-        <button id="btnAdminCancel" style="flex: 1; padding: 12px; background: #444; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;">❌ 취소</button>
-        <button id="btnGitPush" style="flex: 2; padding: 12px; background: #2196F3; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;">🚀 Git 배포</button>
+        <button id="btnAdminCancel" style="flex: 1; padding: 12px; background: #444; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;">❌ 닫기</button>
+        <button id="btnGitPush" style="flex: 2; padding: 12px; background: #2196F3; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;">🚀 모터 설정 배포</button>
       </div>
     </div>
     
@@ -85,7 +96,6 @@ function openAdminGitSyncModal() {
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
 
-  // 스타일 (스크롤바 숨기기 및 넘버 인풋 화살표 숨기기)
   const style = document.createElement('style');
   style.innerHTML = `
     input[type=number]::-webkit-inner-spin-button, 
@@ -98,7 +108,13 @@ function openAdminGitSyncModal() {
   `;
   document.head.appendChild(style);
 
-  // 버튼 Hover 효과
+  // 로컬 스토리지에서 저장된 토큰 불러오기
+  const savedToken = localStorage.getItem('smartyAdminToken');
+  if (savedToken) {
+    (document.getElementById('adminTokenInput') as HTMLInputElement).value = savedToken;
+    (document.getElementById('saveTokenCheck') as HTMLInputElement).checked = true;
+  }
+
   const addHover = (id: string, color: string, hoverColor: string) => {
     const el = document.getElementById(id);
     if(el) {
@@ -107,27 +123,26 @@ function openAdminGitSyncModal() {
     }
   }
   addHover('btnAuth', '#ff4081', '#f50057');
-  addHover('btnFetchGit', '#d32f2f', '#b71c1c');
   addHover('btnAdminCancel', '#444', '#555');
   addHover('btnGitPush', '#2196F3', '#1976D2');
+  addHover('btnOpenStudyRoomManager', '#4cc71a', '#3da115');
   
-  const btnClose = document.getElementById('btnAdminClose');
-  if(btnClose) {
-    btnClose.addEventListener('mouseenter', () => btnClose.style.color = '#fff');
-    btnClose.addEventListener('mouseleave', () => btnClose.style.color = '#666');
-    btnClose.addEventListener('click', () => { overlay.remove(); style.remove(); });
-  }
+  const closeEvent = () => { overlay.remove(); style.remove(); };
+  document.getElementById('btnAdminClose')?.addEventListener('click', closeEvent);
+  document.getElementById('btnAdminCancel')?.addEventListener('click', closeEvent);
 
-  document.getElementById('btnAdminCancel')?.addEventListener('click', () => { overlay.remove(); style.remove(); });
+  document.getElementById('btnOpenStudyRoomManager')?.addEventListener('click', () => {
+    openStudyRoomManager(sessionToken);
+    closeEvent(); 
+  });
 
   const fetchSettings = async () => {
     const statusMsg = document.getElementById('gitStatusMsg')!;
-    const token = (document.getElementById('adminTokenInput') as HTMLInputElement).value;
-    if (!token) { statusMsg.style.color = '#ffb300'; statusMsg.innerText = "⚠️ 토큰을 입력해주세요!"; return; }
-    localStorage.setItem('smarty_admin_token', token);
-    statusMsg.style.color = '#64b5f6'; statusMsg.innerText = "⏳ 불러오는 중...";
+    statusMsg.style.color = '#64b5f6'; statusMsg.innerText = "⏳ 서버에서 설정을 불러오는 중...";
     try {
-      const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`, { headers: { 'Authorization': `token ${token}`, 'Cache-Control': 'no-cache' } });
+      const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}?t=${Date.now()}`, { 
+        headers: { 'Authorization': `token ${sessionToken}` } 
+      });
       if (res.ok) {
         const apiData = await res.json();
         const data = JSON.parse(decodeURIComponent(escape(atob(apiData.content))));
@@ -138,44 +153,74 @@ function openAdminGitSyncModal() {
           }
         });
         statusMsg.style.color = '#4ae0c2'; statusMsg.innerText = "✅ 로드 완료!";
-      } else { statusMsg.style.color = '#ffb300'; statusMsg.innerText = "⚠️ 파일이 없습니다."; }
-    } catch (e) { statusMsg.style.color = '#ff5252'; statusMsg.innerText = "❌ 실패!"; }
+      } else { 
+        statusMsg.style.color = '#ffb300'; statusMsg.innerText = "⚠️ 파일이 없습니다."; 
+      }
+    } catch (e) { 
+      statusMsg.style.color = '#ff5252'; statusMsg.innerText = "❌ 로드 실패!"; 
+      console.error(e);
+    }
   };
 
   const authenticate = () => {
-    if ((document.getElementById('adminPwd') as HTMLInputElement).value === 'smartygood') {
+    const pwd = (document.getElementById('adminPwd') as HTMLInputElement).value;
+    const token = (document.getElementById('adminTokenInput') as HTMLInputElement).value;
+    const isSaveChecked = (document.getElementById('saveTokenCheck') as HTMLInputElement).checked;
+
+    if (pwd === 'smartygood') {
+      if (!token) {
+        document.getElementById('adminErrMsg')!.innerText = "GitHub 토큰을 입력해주세요!";
+        return;
+      }
+      
+      // PC 저장 체크박스 상태에 따라 로컬 스토리지 업데이트
+      if (isSaveChecked) {
+        localStorage.setItem('smartyAdminToken', token);
+      } else {
+        localStorage.removeItem('smartyAdminToken');
+      }
+
+      sessionToken = token;
+      
       document.getElementById('adminStep1')!.style.display = 'none';
       document.getElementById('adminStep2')!.style.display = 'block';
-      if ((document.getElementById('adminTokenInput') as HTMLInputElement).value) fetchSettings();
+      fetchSettings();
     } else {
-      document.getElementById('adminErrMsg')!.innerText = "비밀번호 오류";
+      document.getElementById('adminErrMsg')!.innerText = "비밀번호가 올바르지 않습니다.";
     }
   };
 
   document.getElementById('btnAuth')?.addEventListener('click', authenticate);
   document.getElementById('adminPwd')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') authenticate(); });
-
-  document.getElementById('btnFetchGit')?.addEventListener('click', fetchSettings);
-  document.getElementById('adminTokenInput')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') fetchSettings(); });
+  document.getElementById('adminTokenInput')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') authenticate(); });
 
   document.getElementById('btnGitPush')?.addEventListener('click', async () => {
     const statusMsg = document.getElementById('gitStatusMsg')!;
     const btnPush = document.getElementById('btnGitPush') as HTMLButtonElement;
-    const token = (document.getElementById('adminTokenInput') as HTMLInputElement).value;
-    if (!token) { statusMsg.style.color = '#ff5252'; statusMsg.innerText = "❌ 토큰 필요"; return; }
-    localStorage.setItem('smarty_admin_token', token);
+    
     const newConfig: any = {};
     ['moveBlueHand', 'moveRedHand', 'moveBlueSlide', 'moveRedSlide'].forEach(id => {
       newConfig[id] = { min: parseInt((document.getElementById(`min_${id}`) as HTMLInputElement).value) || 0, max: parseInt((document.getElementById(`max_${id}`) as HTMLInputElement).value) || 180 };
     });
-    btnPush.disabled = true; btnPush.style.background = '#444'; statusMsg.style.color = '#64b5f6'; statusMsg.innerText = "🔄 배포 중...";
+
+    btnPush.disabled = true; btnPush.style.background = '#444'; 
+    statusMsg.style.color = '#64b5f6'; statusMsg.innerText = "🔄 배포 중...";
+    
     try {
       const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
-      const headers = { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' };
+      
       let fileSha = '';
-      const getRes = await fetch(apiUrl, { headers });
-      if (getRes.ok) fileSha = (await getRes.json()).sha;
-      const putRes = await fetch(apiUrl, { method: 'PUT', headers, body: JSON.stringify({ message: '🚀 설정 업데이트', content: btoa(unescape(encodeURIComponent(JSON.stringify(newConfig, null, 2)))), sha: fileSha || undefined }) });
+      const getRes = await fetch(`${apiUrl}?t=${Date.now()}`, { headers: { 'Authorization': `token ${sessionToken}` } });
+      if (getRes.ok) {
+        const fileData = await getRes.json();
+        fileSha = fileData.sha;
+      }
+      
+      const putRes = await fetch(apiUrl, { 
+        method: 'PUT', 
+        headers: { 'Authorization': `token ${sessionToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: '🚀 설정 업데이트', content: btoa(unescape(encodeURIComponent(JSON.stringify(newConfig, null, 2)))), sha: fileSha || undefined }) 
+      });
       
       if (putRes.ok) { 
         statusMsg.style.color = '#4ae0c2'; 
@@ -210,8 +255,8 @@ export async function fetchLatestDataFromGit() {
   try {
     const configRes = await fetch(`https://raw.githubusercontent.com/xeders26/smarty_update/main/smarty-config.json?t=${Date.now()}`);
     if (configRes.ok) window.dispatchEvent(new CustomEvent('smartyConfigUpdated', { detail: await configRes.json() }));
-    window.dispatchEvent(new Event('smartyExamplesUpdated'));
-    statusEl.innerText = "🎉 가져오기 완료! 최신 예제와 설정이 적용되었습니다.";
+    window.dispatchEvent(new Event('smartyStudyRoomUpdated'));
+    statusEl.innerText = "🎉 가져오기 완료! 최신 자료실과 설정이 적용되었습니다.";
     setTimeout(() => statusEl.remove(), 2500);
   } catch (error) {
     statusEl.style.background = '#ff5252'; statusEl.style.color = 'white'; 
@@ -221,7 +266,7 @@ export async function fetchLatestDataFromGit() {
 }
 
 // =========================================================
-// ⚙️ 환경설정 UI 초기화 (HTML 훼손 없는 가장 깔끔한 버전)
+// ⚙️ 환경설정 UI 초기화 (바로 여기가 잘리면 에러가 납니다!)
 // =========================================================
 export function initSettingsModal(callbacks: {
   updateVisibility: (code: boolean, monitor: boolean) => void;
@@ -231,7 +276,7 @@ export function initSettingsModal(callbacks: {
 
   const versionElement = document.getElementById('smartyVersionText');
   if (versionElement) {
-    versionElement.innerText = `v${pkg.version}`; // ex) "v2.6.7" 로 자동 변경
+    versionElement.innerText = `v${pkg.version}`; 
   }
   const appSettingsBtn = document.getElementById('settingsBtn');
   const appSettingsModal = document.getElementById('settingsModal');
@@ -256,7 +301,6 @@ export function initSettingsModal(callbacks: {
     });
   }
 
-  // 버튼 이벤트 리스너들
   appCodeRadios.forEach(r => r.addEventListener('change', (e) => { 
     callbacks.updateVisibility((e.target as HTMLInputElement).value === 'show', callbacks.getState().monitor); 
   }));
@@ -276,7 +320,6 @@ export function initSettingsModal(callbacks: {
   }
   if (appSaveSettingsBtn && appSettingsModal) appSaveSettingsBtn.addEventListener('click', () => appSettingsModal.style.display = 'none');
 
-  // HTML에 고정된 추가 버튼 이벤트 연결 (DOM 추가 없이 연결만)
   document.getElementById('smartyCloseModalBtn')?.addEventListener('click', () => appSettingsModal!.style.display = 'none');
   
   document.getElementById('btnFetchLatest')?.addEventListener('click', () => { 

@@ -12,7 +12,7 @@ import { initSerialMonitor } from './serialAndBoard';
 import { initBoardControl } from './boardControl';
 import { initAppUI, initMascotAnimation } from './appUI';
 import { initFileOperations } from './fileOperations';
-import { initExplorer } from './explorer';
+import { initStudyRoomBoard } from './studyRoomBoard';
 import { initHelpTabUI } from './helpTab';
 import { initMinimap } from './miniMap'; 
 import { initRcTabUI } from './rcTab';
@@ -237,7 +237,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
   }
   
-  initExplorer(workspace, tabManager.createNewProgram, (item: any) => {
+  initStudyRoomBoard(workspace, tabManager.createNewProgram, (item: any) => {
     try {
       tabManager.createNewProgram();
       workspace.clear();
@@ -262,7 +262,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         tabManager.renderTabs();
       }
     } catch (err) {
-      showCuteModal('alert', '⚠️ 예제 파일 오류', '', () => {});
+      showCuteModal('alert', '⚠️ 자료실 파일 오류', '', () => {});
     }
   });
 

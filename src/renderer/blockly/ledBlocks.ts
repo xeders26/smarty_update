@@ -122,6 +122,8 @@ export function initLedBlocks(arduinoGenerator: any) {
     }
   };
 
+  Blockly.Blocks['smarty_switch'] = { init: function(this: any) { this.appendDummyInput().appendField("🔘 스위치").appendField(new Blockly.FieldDropdown([["SW1 (왼쪽)","SW1"],["SW2 (오른쪽)","SW2"]]), "SW").appendField("가 눌렸는가?"); this.setOutput(true, "Boolean"); this.setColour(60); } };
+  
   // 🔘 10. 스위치 기다리기 블록 추가
   Blockly.Blocks['smarty_switch_wait'] = {
     init: function(this: any) {
@@ -287,6 +289,7 @@ export function initLedBlocks(arduinoGenerator: any) {
     return code;
   };
   
+  arduinoGenerator.forBlock['smarty_switch'] = function(block: any) { return[`readSw(${block.getFieldValue('SW')})`, 0]; };
   // 🔘 10. 스위치 대기 C++ 제너레이터 (C++ 논리 완벽 구현!)
   arduinoGenerator.forBlock['smarty_switch_wait'] = function(block: any) {
     const sw = block.getFieldValue('SW');

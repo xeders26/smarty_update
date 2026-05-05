@@ -1,23 +1,23 @@
 /*========
-  /src/renderer/app/explorer.ts
+  /src/renderer/app/studyRoomBoard.ts
   * - 예제 파일과 폴더를 트리 구조로 보여주는 사이드 패널입니다.
   * - 파일을 클릭하면 상세 설명과 함께 블록 미리보기가 나타납니다.
   * - 폴더를 클릭하면 해당 폴더의 하위 항목들이 새로운 칼럼으로 표시됩니다.
-  * - 창 바깥을 클릭하거나 다시 열기 버튼을 누르면 탐색기가 닫힙니다.
-  * - 메모리 누수를 방지하기 위해 블록 미리보기 워크스페이스는 창이 닫힐 때마다 깔끔하게 정리됩니다.
+  * - 🌟 [추가] 정답 폴더 클릭 시 studyRoom_info.json (또는 visible.json) 연동하여 목록 필터링
+  * - 🌟 [추가] 자료실 열기 버튼 클릭 시 Git 서버의 버전을 체크하고 자동 업데이트 진행 (OTA)
   =========*/
 
 import * as Blockly from 'blockly';
 
-// 🌟 [추가됨] 미리보기 워크스페이스를 기억해둘 변수 (메모리 누수 방지용)
+// 🌟 미리보기 워크스페이스를 기억해둘 변수 (메모리 누수 방지용)
 let previewWorkspace: Blockly.WorkspaceSvg | null = null;
 
-export async function initExplorer(
+export async function initStudyRoomBoard(
   workspace: Blockly.WorkspaceSvg,
   createNewProgramCb: () => void,
   loadFileCb: (item: any) => void
 ) {
-  let examplesData: any[] = [];
+  let studyRoomData: any[] = [];
   let activeSelections: any[] = [];
 
   // 1. 스크롤바 디자인 적용
@@ -32,14 +32,17 @@ export async function initExplorer(
     document.head.appendChild(style);
   }
 
-  // 2. 예제 데이터 로딩
-  try {
-    if ((window as any).api && (window as any).api.getExamplesTree) {
-      examplesData = await (window as any).api.getExamplesTree();
+  // 2. 초기 로컬 자료실 데이터 로딩
+  const fetchLocalTree = async () => {
+    try {
+      if ((window as any).api && (window as any).api.getStudyRoomTree) {
+        studyRoomData = await (window as any).api.getStudyRoomTree();
+      }
+    } catch (e) {
+      console.error("❌ 로컬 자료실 불러오기 실패:", e);
     }
-  } catch (e) {
-    console.error("❌ 예제 불러오기 실패:", e);
-  }
+  };
+  await fetchLocalTree();
 
   // 3. 팝업창 컨테이너 세팅
   const explorerContainer = document.getElementById('my-custom-explorer');
@@ -64,7 +67,6 @@ export async function initExplorer(
       if (tb && typeof tb.clearSelection === 'function') tb.clearSelection();
     }
     
-    // 🌟 [추가됨] 창을 닫을 때 미리보기 워크스페이스도 깔끔하게 메모리에서 지워줍니다.
     if (previewWorkspace) {
       previewWorkspace.dispose();
       previewWorkspace = null;
@@ -86,12 +88,11 @@ export async function initExplorer(
   document.addEventListener('mousedown', handleOutsideClick, true);
   document.addEventListener('touchstart', handleOutsideClick, true);
 
-  // 🌟 [핵심 수정] 5. 헬프 패널 업데이트 (반으로 쪼개고 우측에 블록 렌더링)
+  // 5. 헬프 패널 업데이트
   function updateHelpPanel(item: any) {
     const hp = document.getElementById('helpPanel');
     if (!hp) return;
 
-    // 이전에 그려진 블록 미리보기가 있다면 메모리에서 삭제
     if (previewWorkspace) {
       previewWorkspace.dispose();
       previewWorkspace = null;
@@ -100,35 +101,27 @@ export async function initExplorer(
     if (item.type === 'file') {
       hp.innerHTML = `
         <div style="display: flex; flex-direction: row; width: 100%; height: 100%; gap: 30px;">
-          
-          <!-- 좌측: 설명 텍스트 창 (flex: 1) -->
           <div style="flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding-right: 10px;">
             <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 700; font-size: 21px; color: #4cc71a; margin-bottom: 12px; border-bottom: 1px solid #3c3c3c; padding-bottom: 8px; pointer-events: none;">
-              📝 ${item.name} 예제
+              📝 ${item.name} 자료
             </div>
             <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 500; color: #d4d4d4; line-height: 1.5; white-space: normal; font-size: 15px; pointer-events: none;">
               ${item.help || '저장된 설명이 없습니다.'}
             </div>
           </div>
-
-          <!-- 우측: 블록 미리보기 창 (flex: 1) -->
           <div style="flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.3); border: 1px solid #3c3c3c; border-radius: 12px; overflow: hidden;">
             <div style="padding: 10px; background: rgba(255,255,255,0.05); color: #aaa; font-size: 13px; font-weight: bold; text-align: center; border-bottom: 1px solid #3c3c3c; pointer-events: none;">
               🧩 블록 미리보기 (읽기 전용)
             </div>
-            <!-- 이 div 안에 Blockly가 주입됩니다! -->
             <div id="blockly-preview-div" style="flex: 1; width: 100%; height: 100%;"></div>
           </div>
-
         </div>
       `;
 
-      // 🌟 HTML 렌더링 후 50ms 뒤에 블록 렌더링 시작
       setTimeout(() => {
         const previewDiv = document.getElementById('blockly-preview-div');
         if (!previewDiv) return;
 
-        // 1. 읽기 전용 워크스페이스 주입 (메인 도화지와 100% 동일한 유전자 이식!)
         previewWorkspace = Blockly.inject(previewDiv, {
           readOnly: true,
           scrollbars: true,
@@ -136,23 +129,15 @@ export async function initExplorer(
           renderer: 'zelos', 
           theme: workspace.getTheme(), 
           move: { scrollbars: true, drag: true, wheel: true },
-          // 🌟 [추가됨] 블록 크기를 60%로 줄이고, 휠로 확대/축소를 못하게 고정합니다!
-          zoom: {
-            controls: false, // 줌 인/아웃 버튼 숨기기
-            wheel: false,    // 마우스 휠로 줌 조절 금지 (스크롤만 가능하게)
-            startScale: 0.7  // 🌟 핵심! 시작부터 60% 크기로 보여주기!
-          }
+          zoom: { controls: false, wheel: false, startScale: 0.7 }
         });
 
         try {
           const blockData = item.code; 
-
-          // 2. 데이터가 존재한다면 바로 화면에 그리기!
           if (blockData) {
             const parsedData = typeof blockData === 'string' ? JSON.parse(blockData) : blockData;
             Blockly.serialization.workspaces.load(parsedData, previewWorkspace);
             
-            // 🎨 스마티 전용 커스텀 블록 색상 덧칠하기 유지
             const customColors = (window as any).__smartyBlockColors || (window as any).__blockColorMap;
             if (customColors) {
               previewWorkspace.getAllBlocks(false).forEach(block => {
@@ -161,40 +146,33 @@ export async function initExplorer(
                 }
               });
             }
-
-            console.log("✅ 블록 모양(Zelos) 및 테마 완벽 적용 성공!");
-            
           } else {
-            throw new Error("item.code 안에 블록 데이터가 없습니다!");
+            throw new Error("데이터 없음");
           }
-
         } catch (err) {
-          console.error("❌ 블록 로드 실패:", err);
           previewDiv.innerHTML = `
             <div style="color:#ff6b6b; padding:20px; text-align:center; font-family: Pretendard; line-height: 1.5;">
-              <b>블록 데이터를 불러오지 못했습니다 😭</b><br><br>
-              <span style="font-size:13px; color:#aaa;">JSON 파일 형식이 잘못되었거나 파일이 비어있습니다.</span>
+              <b>블록 데이터를 불러오지 못했습니다 😭</b>
             </div>
           `;
         }
       }, 50);
     } else {
-      // 폴더를 클릭했을 때의 화면 (가운데 정렬된 깔끔한 UI 유지)
       hp.innerHTML = `
         <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; text-align: center; pointer-events: none;">
           <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 700; font-size: 24px; color: #4cc71a; margin-bottom: 15px;">
             📁 ${item.name} 폴더
           </div>
           <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 500; color: #aaaaaa; line-height: 1.6; font-size: 16px;">
-            이 폴더 안에는 다양한 하위 예제들이 들어있습니다.<br>왼쪽 목록에서 파일(📝)을 클릭하여 예제 내용과 블록 코드를 확인하세요!
+            왼쪽 목록에서 파일(📝)을 클릭하여 자료실 내용과 블록 코드를 확인하세요!
           </div>
         </div>
       `;
     }
   }
 
-  // 6. 칼럼 및 화면 렌더링
-  function renderColumns() {
+  // 6. 칼럼 렌더링
+  async function renderColumns() {
     if (explorerContainer!.style.display !== 'flex') {
       explorerContainer!.style.display = 'flex';
     }
@@ -210,7 +188,7 @@ export async function initExplorer(
       helpPanel.innerHTML = `
         <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; text-align: center; pointer-events: none;">
           <div style="font-size: 50px; margin-bottom: 20px;">💡</div>
-          <div style="font-size: 20px; font-weight: 600; color: #888; line-height: 1.5;">목록에서 예제 파일을 선택하면<br>상세 설명과 블록 설계도가 여기에 표시됩니다.</div>
+          <div style="font-size: 20px; font-weight: 600; color: #888; line-height: 1.5;">목록에서 자료실 파일을 선택하면<br>상세 설명과 블록 설계도가 여기에 표시됩니다.</div>
         </div>
       `;
       helpPanel.addEventListener('wheel', (e) => e.stopPropagation());
@@ -218,13 +196,39 @@ export async function initExplorer(
     }
 
     let neededCols: any[] = [];
-    let tempDir = examplesData;
+    let tempDir = studyRoomData;
     let tempDepth = 0;
     
     while (true) {
       neededCols.push({ depth: tempDepth, data: tempDir });
+      
       if (activeSelections[tempDepth] && activeSelections[tempDepth].type === 'folder') {
-        tempDir = activeSelections[tempDepth].children || [];
+        let children = activeSelections[tempDepth].children || [];
+
+        // 🚨🚨 [핵심] 폴더 이름이 "정답"인 경우 visible 데이터 연동 필터링
+        if (activeSelections[tempDepth].name === '정답') {
+          try {
+            let visibleData = null;
+            if ((window as any).api && (window as any).api.readStudyRoomInfo) {
+              const info = await (window as any).api.readStudyRoomInfo();
+              visibleData = info.visible;
+            } else if ((window as any).api && (window as any).api.readVisibleJson) {
+              visibleData = await (window as any).api.readVisibleJson();
+            }
+            
+            if (visibleData) {
+              children = children.filter((child: any) => {
+                if (child.type === 'folder') return true; 
+                // 🚨 수정된 부분 (name 대신 relPath 사용) 🚨
+                return visibleData[child.relPath] !== false; 
+              });
+            }
+          } catch (err) {
+            console.warn("⚠️ 가시성 정보를 읽어오는데 실패했습니다.", err);
+          }
+        }
+        
+        tempDir = children;
         tempDepth++;
       } else {
         break;
@@ -264,6 +268,9 @@ export async function initExplorer(
         col.currentData = dirData;
 
         dirData.forEach((item: any) => {
+          // 📝 설정 파일들은 학생 화면(목록)에서 숨김 처리!
+          if (item.name === 'visible.json' || item.name === 'studyRoom_info.json') return; 
+
           const btn = document.createElement('div');
           const isFolder = item.type === 'folder';
           btn.innerHTML = (isFolder ? '📁 ' : '📝 ') + item.name + (isFolder ? '<span style="float:right; color:#aaaaaa;">▶</span>' : '');
@@ -276,13 +283,13 @@ export async function initExplorer(
             transition: all 0.2s; user-select: none;
           `;
 
-          btn.onmouseenter = () => {
+          btn.onmouseenter = async () => {
             if (activeSelections[idx] !== item) btn.style.background = 'rgba(255,255,255,0.1)';
             updateHelpPanel(item);
             if (isFolder && activeSelections[idx] !== item) {
               activeSelections[idx] = item;
               activeSelections.splice(idx + 1);
-              renderColumns();
+              await renderColumns();
             }
           };
 
@@ -290,7 +297,7 @@ export async function initExplorer(
             if (activeSelections[idx] !== item) btn.style.background = 'transparent';
           };
 
-          btn.onclick = (e) => {
+          btn.onclick = async (e) => {
             e.stopPropagation();
             e.preventDefault();
             if (activeSelections[idx] === item) {
@@ -304,12 +311,12 @@ export async function initExplorer(
                 return; 
               }
             }
-            renderColumns(); 
+            await renderColumns(); 
           };
           col.appendChild(btn);
         });
 
-        if (dirData.length === 0) {
+        if (dirData.length === 0 || col.innerHTML === '') {
           col.innerHTML = `<div style="padding:10px; color:#666666; text-align:center; font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 500;">비어있음</div>`;
         }
       }
@@ -333,21 +340,62 @@ export async function initExplorer(
     });
   }
 
-  // 7. 창 열기
-  (window as any).openExplorerWindow = () => {
+  // 🌟 [핵심 추가] 7. 창 열기 (열 때마다 Git 서버와 통신)
+  let isSyncing = false;
+
+  (window as any).openExplorerWindow = async () => {
     if (explorerContainer!.style.display === 'flex') {
       closeExplorerWindow();
     } else {
+      // 🚀 통신 중복 실행 방지
+      if (isSyncing) return;
+      isSyncing = true;
+
+      // 화면 우측 상단에 동기화 알림 표시
+      const syncAlert = document.createElement('div');
+      syncAlert.style.cssText = `
+        position: fixed; top: 20px; right: 20px; background: rgba(0, 0, 0, 0.8);
+        border: 1px solid #4cc71a; color: #4cc71a; padding: 10px 20px; border-radius: 8px;
+        font-family: Pretendard; font-size: 14px; z-index: 999999; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      `;
+      syncAlert.innerHTML = `🔄 서버에서 최신 자료실을 확인 중입니다...`;
+      document.body.appendChild(syncAlert);
+
+      try {
+        // 🌟 백엔드(main.ts)에 Git 동기화(pull)를 요청합니다.
+        if ((window as any).api && (window as any).api.syncStudyRoomFromGit) {
+          const syncResult = await (window as any).api.syncStudyRoomFromGit();
+          if (syncResult && syncResult.updated) {
+             syncAlert.innerHTML = `🎉 최신 버전(${syncResult.version})으로 업데이트 되었습니다!`;
+          } else {
+             syncAlert.innerHTML = `✅ 이미 최신 자료실입니다.`;
+          }
+          // 동기화가 끝나면 로컬 트리를 새로고침 합니다.
+          await fetchLocalTree();
+        } else {
+          syncAlert.innerHTML = `⚠️ 오프라인 모드로 실행합니다. (동기화 API 없음)`;
+        }
+      } catch (err) {
+        console.warn("Git 동기화 실패:", err);
+        syncAlert.style.borderColor = "#ff6b6b";
+        syncAlert.style.color = "#ff6b6b";
+        syncAlert.innerHTML = `❌ 인터넷 연결 불안정 (오프라인 모드 실행)`;
+      } finally {
+        setTimeout(() => syncAlert.remove(), 2500); // 2.5초 뒤 알림 제거
+        isSyncing = false;
+      }
+
+      // UI 오픈 애니메이션 시작
       explorerContainer!.style.opacity = '0';
       explorerContainer!.style.animation = 'none';
       activeSelections = [];
-      renderColumns(); 
+      await renderColumns();
       void explorerContainer!.offsetWidth; 
       explorerContainer!.style.animation = 'smartyBoardOpen 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards';
     }
   };
 
-  workspace.registerToolboxCategoryCallback('EXAMPLES_CATEGORY', () => {
+  workspace.registerToolboxCategoryCallback('STUDYROOM_CATEGORY', () => {
     (window as any).openExplorerWindow();
     return [];
   });

@@ -291,8 +291,7 @@ function getBaseToolbox() {
               CNT: { shadow: { type: 'math_number', fields: { NUM: 5 } } }
             }
           },
-          { kind: 'block', type: 'readSw' },
-          { kind: 'block', type: 'getSw' },
+          { kind: 'block', type: 'smarty_switch' },
           { kind: 'block', type: 'smarty_switch_wait' },
           { kind: 'block', type: 'turnBumpLED' },
           { kind: 'block', type: 'smarty_bumper_red' },
@@ -318,7 +317,6 @@ function getBaseToolbox() {
         name: '센서',
         colour: '60',
         contents: [
-          { kind: 'block', type: 'smarty_switch' },
           { kind: 'block', type: 'smarty_sensor' },
           { kind: 'block', type: 'smarty_adv_sensor_init' },
           { kind: 'block', type: 'smarty_adv_sensor_read' },
@@ -345,15 +343,13 @@ function getBaseToolbox() {
             inputs: { VAL: { shadow: { type: 'math_number', fields: { NUM: 128 } } } }
           },
           { kind: 'block', type: 'arduino_analog_read' },
-          { kind: 'block', type: 'getAdc' },
           {
             kind: 'block',
             type: 'waitUntilAdc',
             inputs: {
               VAL: { shadow: { type: 'math_number', fields: { NUM: 500 } } }
             }
-          },
-          { kind: 'block', type: 'readDIO' }
+          }
         ]
       },
       {
@@ -428,9 +424,9 @@ function getBaseToolbox() {
       { kind: 'sep', gap: 500 },
       {
         kind: 'category',
-        id: normalizeCategoryId('📁 예제 모음'),
-        name: '📁 예제 모음',
-        custom: 'EXAMPLES_CATEGORY',
+        id: normalizeCategoryId('📁 자료실'),
+        name: '📁 자료실',
+        custom: 'STUDYROOM_CATEGORY',
         colour: '#8e44ad'
       }
     ]
@@ -722,7 +718,7 @@ export function initCategorySidebar(workspace: any) {
     if (category.contents) category.contents.forEach(processNode)
 
     // 🚨 [추가됨] 이 카테고리가 '예제'인지 확인합니다.
-    const isExampleCategory = category.custom === 'EXAMPLES_CATEGORY' || cleanName.includes('예제');
+    const isExampleCategory = category.custom === 'STUDYROOM_CATEGORY' || cleanName.includes('자료실');
 
     const chip = document.createElement('button')
     chip.type = 'button'
@@ -751,7 +747,7 @@ export function initCategorySidebar(workspace: any) {
       }
 
       const catName = category.name || '';
-      const isExample = category.custom === 'EXAMPLES_CATEGORY' || catName.includes('예제');
+      const isExample = category.custom === 'STUDYROOM_CATEGORY' || catName.includes('자료실');
       if (isExample) {
         if (typeof (window as any).openExplorerWindow === 'function') (window as any).openExplorerWindow();
         return; 
@@ -786,6 +782,7 @@ export function initCategorySidebar(workspace: any) {
           smoothScrollTo(flyout, scrollPos, 450)
         }
       }
+      
       document.querySelectorAll('.smarty-category-btn').forEach((btn) => btn.classList.remove('selected'))
       chip.classList.add('selected')
     }
@@ -881,7 +878,17 @@ export function initCategorySidebar(workspace: any) {
   registerFuncCreator('CREATE_PROCEDURE_NO_RETURN', 'procedures_defnoreturn', '🛠️ 새로운 함수의 이름을 입력하세요:');
   registerFuncCreator('CREATE_PROCEDURE_RETURN', 'procedures_defreturn', '🔄 결과값이 있는 새로운 함수의 이름을 입력하세요:');
   
-  // 🚨 콜백 등록이 무사히 끝나야 아래 updateToolbox가 정상 실행됨!
+  // ==========================================================
+  // 🚨 [유령 킬러 가동] getSw 블록이 툴박스에 들어오려 하면 강제로 모가지를 칩니다!
+  // ==========================================================
+  const cleanContents = flatContents.filter((item: any) => {
+    // 만약 넘어오는 데이터 중에 'getSw' 라는 녀석이 있으면? 무시하고 버려버림(false)!
+    if (item.kind === 'block' && item.type === 'getSw') {
+      console.log("👻 유령 getSw 차단 완료!");
+      return false; 
+    }
+    return true; // 정상적인 녀석들은 모두 통과
+  });
   workspace.updateToolbox({ kind: 'flyoutToolbox', contents: flatContents })
 
   const flyout = workspace.getFlyout()
@@ -1102,9 +1109,8 @@ function injectWaterdropCSS() {
     #category-sidebar .waterdrop-chip.selected { background: radial-gradient(circle at 30% 30%, var(--glass-light) 0%, var(--glass-base) 45%, var(--glass-dark) 100%) !important; box-shadow: inset 0px -4px 8px rgba(255, 255, 255, 0.4), inset 0px 4px 6px rgba(255, 255, 255, 0.3), 0px 0px 15px var(--glass-base), 0px 6px 15px var(--glass-shadow) !important; transform: scale(1.15); }
     #category-sidebar .waterdrop-chip .chip-icon { z-index: 3; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: #ffffff; }
     #category-sidebar .waterdrop-chip .chip-icon svg { width: 100% !important; height: 100% !important; fill: currentColor !important; filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.3)); }
-    #smarty-global-tooltip { position: fixed; transform: translateY(-50%); background: rgba(30, 30, 30, 0.85); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); font-size: 16px; font-weight: 700; white-space: nowrap; padding: 8px 14px; border-radius: 6px; box-shadow: 0px 4px 12px rgba(0,0,0,0.2); pointer-events: none; opacity: 0; visibility: hidden; z-index: 999999; transition: opacity 0.15s ease, visibility 0.15s ease; }
+    #smarty-global-tooltip { position: fixed; transform: translateY(-50%); background: rgba(30, 30, 30, 0.85); backdrop-filter: blur(4px); --backdrop-filter: blur(4px); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); font-size: 16px; font-weight: 700; white-space: nowrap; padding: 8px 14px; border-radius: 6px; box-shadow: 0px 4px 12px rgba(0,0,0,0.2); pointer-events: none; opacity: 0; visibility: hidden; z-index: 999999; transition: opacity 0.15s ease, visibility 0.15s ease; }
 
-    /* 🚨 [신규 추가] 예제 모음 전용 버튼 스타일 (위쪽 여백, 구분선 및 사각형 폴더 모양) */
     #category-sidebar .example-folder-btn {
       position: relative;
       margin-top: 36px !important; /* 위쪽 블록들과 넓은 여백 띄우기 */

@@ -4,7 +4,6 @@ export function initSensorBlocks(arduinoGenerator: any) {
   // ==========================================
   // [모양 정의]
   // ==========================================
-  Blockly.Blocks['smarty_switch'] = { init: function(this: any) { this.appendDummyInput().appendField("🔘 스위치").appendField(new Blockly.FieldDropdown([["SW1 (왼쪽)","SW1"],["SW2 (오른쪽)","SW2"]]), "SW").appendField("가 눌렸는가?"); this.setOutput(true, "Boolean"); this.setColour(60); } };
   Blockly.Blocks['smarty_sensor'] = { init: function(this: any) { this.appendDummyInput().appendField("🔍 일반 센서값 읽기:").appendField(new Blockly.FieldDropdown([["초음파 거리(cm)", "getSonar()"],["소리 크기(Mic)", "getMic()"],["빛 밝기(Light)", "getLight()"],["바닥 IR 1번", "getIR(1)"],["바닥 IR 2번", "getIR(2)"],["바닥 IR 3번", "getIR(3)"],["바닥 IR 4번", "getIR(4)"],["바닥 IR 5번", "getIR(5)"],["아날로그 핀 1번", "readAdc(1)"],["디지털 핀 1번", "readDIO(1,0)"]]), "SENSOR"); this.setOutput(true, "Number"); this.setColour(60); } };
   Blockly.Blocks['smarty_adv_sensor_init'] = { init: function(this: any) { this.appendDummyInput().appendField("🛠️ 확장 센서 시작하기").appendField(new Blockly.FieldDropdown([["🎨 컬러 센서", "beginColorSensor()"],["🧭 자이로 센서", "beginGyroSensor()"],["📏 거리 센서", "beginRangeSensor()"],["🚗 범퍼 보드", "beginBumperSensor()"]]), "FUNC"); this.setPreviousStatement(true, null); this.setNextStatement(true, null); this.setColour(60); } };
   Blockly.Blocks['smarty_adv_sensor_read'] = { init: function(this: any) { this.appendDummyInput().appendField("📡 확장 센서값 읽기:").appendField(new Blockly.FieldDropdown([["🎨 컬러 색상번호", "getColorNumber()"],["🎨 컬러 Red", "getColorRed()"],["🎨 컬러 Green", "getColorGreen()"],["🎨 컬러 Blue", "getColorBlue()"],["🧭 자이로 방향각도", "getGyroDgree()"],["🧭 자이로 절대각도", "getGyroAbsolute()"],["🧭 자이로 X축", "getGyroAxisX()"],["🧭 자이로 Y축", "getGyroAxisY()"],["🧭 자이로 Z축", "getGyroAxisZ()"],["📏 초음파(I2C) 거리", "getRangeUltrasonic()"],["📏 광학(I2C) 거리", "getRangeOptical()"]]), "FUNC"); this.setOutput(true, "Number"); this.setColour(60); } };
@@ -15,8 +14,6 @@ export function initSensorBlocks(arduinoGenerator: any) {
   Blockly.defineBlocksWithJsonArray([
     { "type": "getAdc", "message0": "아날로그 읽기 CH: %1", "args0":[{"type": "field_dropdown", "name": "CH", "options": [["A1", "A1"],["A2", "A2"],["A3", "A3"],["A4", "A4"],["A5", "A5"],["A6", "A6"],["A7", "A7"],["A8", "A8"]]}], "output": "Number", "colour": 120 },
     { "type": "readDIO", "message0": "디지털 읽기 CH: %1", "args0":[{"type": "field_dropdown", "name": "CH", "options": [["D1", "D1"], ["D2", "D2"],["D3", "D3"],["D4", "D4"], ["D5", "D5"],["D6", "D6"],["D7", "D7"], ["D8", "D8"]]}], "output": ["Number", "Boolean"], "colour": 120 },
-    { "type": "readSw", "message0": "스위치 상태 읽기 ID: %1", "args0":[{"type": "field_dropdown", "name": "ID", "options": [["SW1", "SW1"], ["SW2", "SW2"]]}], "output": ["Number", "Boolean"], "colour": 60 },
-    { "type": "waitUntilSw", "message0": "스위치 대기 ID: %1 상태: %2", "args0":[ {"type": "field_dropdown", "name": "ID", "options": [["SW1", "SW1"], ["SW2", "SW2"]]}, {"type": "field_dropdown", "name": "STATE", "options": [["누름", "ON"],["뗌", "OFF"]]} ], "previousStatement": null, "nextStatement": null, "colour": 60 },
     { "type": "initBump", "message0": "범퍼 센서 초기화", "previousStatement": null, "nextStatement": null, "colour": 30 }
   ]);
 
@@ -41,7 +38,7 @@ export function initSensorBlocks(arduinoGenerator: any) {
 
   Blockly.Blocks['findBumpLine'] = {
     init: function(this: any) {
-      const posInput = this.appendValueInput("POS").setCheck("Number").appendField("범퍼 라인 감지(기본) POS:");
+      const posInput = this.appendValueInput("POS").setCheck("Number").appendField("범퍼 라인 감지(기본) 위치:");
       posInput.connection.setShadowDom(Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">1</field></shadow>')); // 기본값 1
       
       const lineInput = this.appendValueInput("LINE").setCheck("Number").appendField("LINE:");
@@ -55,7 +52,7 @@ export function initSensorBlocks(arduinoGenerator: any) {
 
   Blockly.Blocks['findBumpObject'] = {
     init: function(this: any) {
-      const posInput = this.appendValueInput("POS").setCheck("Number").appendField("범퍼 장애물 감지(기본) POS:");
+      const posInput = this.appendValueInput("POS").setCheck("Number").appendField("범퍼 장애물 감지(기본) 위치:");
       posInput.connection.setShadowDom(Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">1</field></shadow>')); // 기본값 1
       
       const distInput = this.appendValueInput("DIST").setCheck("Number").appendField("DIST:");
@@ -69,7 +66,7 @@ export function initSensorBlocks(arduinoGenerator: any) {
 
   Blockly.Blocks['getBumpDistance'] = {
     init: function(this: any) {
-      const posInput = this.appendValueInput("POS").setCheck("Number").appendField("범퍼 거리값 읽기(기본) POS:");
+      const posInput = this.appendValueInput("POS").setCheck("Number").appendField("범퍼 거리값 읽기(기본) 위치:");
       posInput.connection.setShadowDom(Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">1</field></shadow>')); // 기본값 1
       
       this.setInputsInline(true);
@@ -80,7 +77,7 @@ export function initSensorBlocks(arduinoGenerator: any) {
 
   Blockly.Blocks['getBumpLine'] = {
     init: function(this: any) {
-      const posInput = this.appendValueInput("POS").setCheck("Number").appendField("범퍼 라인값 읽기(기본) POS:");
+      const posInput = this.appendValueInput("POS").setCheck("Number").appendField("범퍼 라인값 읽기(기본) 위치:");
       posInput.connection.setShadowDom(Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">1</field></shadow>')); // 기본값 1
       
       this.setInputsInline(true);
@@ -92,7 +89,7 @@ export function initSensorBlocks(arduinoGenerator: any) {
   // ==========================================
   // [C++ 제너레이터]
   // ==========================================
-  arduinoGenerator.forBlock['smarty_switch'] = function(block: any) { return[`readSw(${block.getFieldValue('SW')})`, 0]; };
+
   arduinoGenerator.forBlock['smarty_sensor'] = function(block: any) { return[`${block.getFieldValue('SENSOR')}`, 0]; };
   arduinoGenerator.forBlock['smarty_adv_sensor_init'] = function(block: any) { return `${block.getFieldValue('FUNC')};\n`; };
   arduinoGenerator.forBlock['smarty_adv_sensor_read'] = function(block: any) { return[`${block.getFieldValue('FUNC')}`, 0]; };

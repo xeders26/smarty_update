@@ -7,7 +7,7 @@ import { createMainWindow } from './window'
 import { registerSerialHandlers } from './serial'
 import { registerUploadHandler, initArduinoCLI } from './upload' // 👈 initArduinoCLI 추가!
 import { registerDialogHandlers } from './dialog'
-import { registerExampleHandlers } from './examples'
+import { registerStudyRoomHandlers } from './studyRoom'
 import { setupAutoUpdater, registerUpdateHandlers } from './updater'
 
 app.whenReady().then(() => {
@@ -20,7 +20,7 @@ app.whenReady().then(() => {
   registerSerialHandlers()
   registerUploadHandler()
   registerDialogHandlers()
-  registerExampleHandlers()
+  registerStudyRoomHandlers()
   registerUpdateHandlers()
   setupAutoUpdater()
 

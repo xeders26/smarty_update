@@ -212,22 +212,50 @@ export const LedBlocksHelp: Record<string, string> = {
     </div>
   `,
 
+  'smarty_switch': `
+    <h3 style="color: #3498db; margin-top:0; font-size: 1.0rem; font-weight: normal;">🔘 스위치가 눌렸는가? (상태 확인)</h3>
+    <hr style="border-color: rgba(255,255,255,0.1);">
+    <p style="font-weight: normal;">로봇 윗면의 SW1(왼쪽) 또는 SW2(오른쪽) 버튼이 현재 눌려있는지 확인하여 논리값(참/거짓)을 반환하는 육각형 블록입니다.</p>
+    <ul style="font-weight: normal;">
+      <li>[만약 ~라면] 블록의 조건 홈에 쏙 넣어서, 스위치를 누를 때만 특정 행동을 하도록 만들 수 있습니다.</li>
+    </ul>
+    
+    <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-left:4px solid #f39c12 !important; padding:8px 12px; border-radius:4px; font-size:0.95em; line-height:1.6;">
+      <div style="margin-bottom: 4px;"><span style="color:#2ecc71;">📥</span> <span style="color:#bdc3c7; font-weight:bold;">입력 정보</span></div>
+      <div style="padding-left: 20px;">
+        <span style="color:#f5b041;">• 확인 대상 : </span><span style="color:#e67e22;">SW1 (왼쪽) 또는 SW2 (오른쪽) 중 선택</span>
+      </div>
+      <div style="height: 12px;"></div>
+      <div style="margin-bottom: 4px;"><span style="color:#3498db;">📤</span> <span style="color:#bdc3c7; font-weight:bold;">출력 정보</span></div>
+      <div style="padding-left: 20px;">
+        <span style="color:#f5b041;">• 반환값 (논리형) : </span><span style="color:#e67e22;">눌렸으면 참(True)/1, 안 눌렸으면 거짓(False)/0</span>
+      </div>
+    </div>
+    
+    <div style="height: 8px;"></div>
+    
+    <div style="background:rgba(255,255,255,0.05); padding:6px 12px; border-left:3px solid #9b59b6 !important; font-family: monospace; border-radius: 4px;">
+      <span style="color:#bdc3c7; font-size: 0.85em;">C++ 변환 코드:</span><br>
+      <span style="color:#9aa5a6;">readSw(SW1)</span>
+    </div>
+  `,
+
   'smarty_switch_wait': `
-    <h3 style="color: #3498db; margin-top:0; font-size: 1.0rem; font-weight: normal;">🔘 스위치 기다리기</h3>
+    <h3 style="color: #3498db; margin-top:0; font-size: 1.0rem; font-weight: normal;">🔘 스위치 기다리기 (대기)</h3>
     <hr style="border-color: rgba(255,255,255,0.1);">
     <p style="font-weight: normal;">지정한 스위치가 눌리거나 떼어질 때까지 프로그램의 진행을 멈추고 기다리는 블록입니다.</p>
     <ul style="font-weight: normal;">
-      <li>LED1 / LED2: 로봇 윗면에 있는 스위치를 지정합니다.</li>
-      <li>둘 중 하나(EITHER): 두 버튼 중 하나라도 조건이 맞으면 바로 다음으로 넘어갑니다.</li>
-      <li>모두(BOTH): 두 버튼이 동시에 조건이 맞아야만 넘어갑니다.</li>
+      <li>SW1 / SW2: 확인할 스위치를 지정합니다.</li>
+      <li>SW1 또는 SW2: 두 버튼 중 하나라도 조건이 맞으면 바로 다음 코드로 넘어갑니다.</li>
+      <li>모두: 두 버튼이 동시에 조건이 맞아야만 넘어갑니다.</li>
       <li>특정 행동을 하기 전, 사용자의 신호(버튼 클릭)를 받을 때 유용합니다.</li>
     </ul>
     
     <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-left:4px solid #f39c12 !important; padding:8px 12px; border-radius:4px; font-size:0.95em; line-height:1.6;">
       <div style="margin-bottom: 4px;"><span style="color:#2ecc71;">📥</span> <span style="color:#bdc3c7; font-weight:bold;">입력 정보</span></div>
       <div style="padding-left: 20px;">
-        <span style="color:#f5b041;">• 대상 스위치 : </span><span style="color:#e67e22;">LED1(SW1), LED2(SW2), 둘 중 하나, 또는 둘 다 선택</span><br>
-        <span style="color:#f5b041;">• 목표 상태 : </span><span style="color:#e67e22;">눌림 또는 떨어짐(떼어짐) 상태 선택</span>
+        <span style="color:#f5b041;">• 대상 스위치 : </span><span style="color:#e67e22;">SW1, SW2, 하나라도, 모두 중 선택</span><br>
+        <span style="color:#f5b041;">• 목표 상태 : </span><span style="color:#e67e22;">눌릴 때까지 또는 뗄 때까지 상태 선택</span>
       </div>
       <div style="height: 12px;"></div>
       <div style="margin-bottom: 4px;"><span style="color:#3498db;">📤</span> <span style="color:#bdc3c7; font-weight:bold;">출력 정보</span></div>
@@ -240,7 +268,7 @@ export const LedBlocksHelp: Record<string, string> = {
     
     <div style="background:rgba(255,255,255,0.05); padding:6px 12px; border-left:3px solid #9b59b6 !important; font-family: monospace; border-radius: 4px;">
       <span style="color:#bdc3c7; font-size: 0.85em;">C++ 변환 코드:</span><br>
-      <span style="color:#9aa5a6;">while(readSw(1) != 1) { delay(1); }</span> <span style="color:#9aa5a6;">// LED1 눌릴 때까지 대기</span>
+      <span style="color:#9aa5a6;">while(readSw(1) != 1) { delay(1); }</span> <span style="color:#9aa5a6;">// SW1 눌릴 때까지 대기</span>
     </div>
   `
 };

@@ -8,6 +8,12 @@ export function initIoBlocks(arduinoGenerator: any) {
   // 1. 아두이노 필수 기본 블록들 정의
   // ==========================================
   
+  // 🌟 입력 칸이 없어서 그대로 유지해도 되는 블록들
+  Blockly.defineBlocksWithJsonArray([
+    { "type": "readDIO", "message0": "디지털 읽기 CH: %1", "args0":[{"type": "field_dropdown", "name": "CH", "options": [["D1", "D1"], ["D2", "D2"],["D3", "D3"],["D4", "D4"], ["D5", "D5"],["D6", "D6"],["D7", "D7"], ["D8", "D8"]]}], "output": ["Number", "Boolean"], "colour": 120 },
+    { "type": "readSw", "message0": "스위치 상태 읽기 ID: %1", "args0":[{"type": "field_dropdown", "name": "ID", "options": [["SW1", "SW1"], ["SW2", "SW2"]]}], "output": ["Number", "Boolean"], "colour": 60 },
+  ]);  
+  
   Blockly.Blocks['arduino_digital_write'] = { 
     init: function(this: any) { 
       this.appendDummyInput()
@@ -50,7 +56,7 @@ export function initIoBlocks(arduinoGenerator: any) {
           .appendField("디지털 핀")
           .appendField(new Blockly.FieldNumber(2, 0, 100), "PIN")
           .appendField("번 읽기"); 
-      this.setOutput(true, "B"); 
+      this.setOutput(true, "Boolean"); 
       this.setColour(160); 
     } 
   };

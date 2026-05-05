@@ -209,7 +209,7 @@ export function openExampleUploadModal(workspace: Blockly.WorkspaceSvg, currentT
     const jsonStr = JSON.stringify(workspaceJson, null, 2);
 
     const uploadToGit = async (extension: string, contentStr: string) => {
-      const fullPath = `examples/${folder}/${fileName}.${extension}`;
+      const fullPath = `StudyRoom/${folder}/${fileName}.${extension}`;
       const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${fullPath}`;
       const headers = { 'Authorization': `token ${gitToken}`, 'Content-Type': 'application/json' };
       
