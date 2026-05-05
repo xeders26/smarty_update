@@ -144,56 +144,36 @@
                               },
                               "DO0": {
                                 "block": {
-                                  "type": "smarty_variables_set",
-                                  "id": "O_c4p50=|46A5R(7L_lL",
+                                  "type": "turnBumpLED",
+                                  "id": "c.gdS(u|pL2,$PVy$N]f",
                                   "fields": {
-                                    "VAR": {
-                                      "id": "[jN$g*KwcHHnHDz47l|5"
-                                    }
-                                  },
-                                  "inputs": {
-                                    "VALUE": {
-                                      "shadow": {
-                                        "type": "math_number",
-                                        "id": "7MsF-V{9|l@V;QNxn)$/",
-                                        "fields": {
-                                          "NUM": 0
-                                        }
-                                      },
-                                      "block": {
-                                        "type": "smarty_bt_send_string",
-                                        "id": "ywGc44va(7o-0(tV0jWi",
-                                        "inputs": {
-                                          "TEXT": {
-                                            "shadow": {
-                                              "type": "text",
-                                              "id": "*K{*X1N=6F:`wi9bHSZ)",
-                                              "fields": {
-                                                "TEXT": "Hello"
-                                              }
-                                            }
-                                          }
-                                        }
-                                      }
-                                    }
+                                    "DIR": "2",
+                                    "COLOR": "0",
+                                    "STATE": "1"
                                   },
                                   "next": {
                                     "block": {
                                       "type": "turnBumpLED",
-                                      "id": "c.gdS(u|pL2,$PVy$N]f",
+                                      "id": "|EXLHnk{X3(hKCAYNsua",
                                       "fields": {
                                         "DIR": "2",
-                                        "COLOR": "0",
-                                        "STATE": "1"
+                                        "COLOR": "1",
+                                        "STATE": "0"
                                       },
                                       "next": {
                                         "block": {
-                                          "type": "turnBumpLED",
-                                          "id": "|EXLHnk{X3(hKCAYNsua",
-                                          "fields": {
-                                            "DIR": "2",
-                                            "COLOR": "0",
-                                            "STATE": "0"
+                                          "type": "arduino_delay",
+                                          "id": "g%vzEA*@,Y;iR.psB[L(",
+                                          "inputs": {
+                                            "MS": {
+                                              "shadow": {
+                                                "type": "math_number",
+                                                "id": "l)kc9t7,k4kzCIhiEEc~",
+                                                "fields": {
+                                                  "NUM": 1000
+                                                }
+                                              }
+                                            }
                                           }
                                         }
                                       }
@@ -239,7 +219,7 @@
                                   "next": {
                                     "block": {
                                       "type": "turnBumpLED",
-                                      "id": ";EdKR,JF$1@f56s/;P(j",
+                                      "id": "aKBQDCA}o4Hg9)7!uM[v",
                                       "fields": {
                                         "DIR": "2",
                                         "COLOR": "0",
@@ -248,11 +228,28 @@
                                       "next": {
                                         "block": {
                                           "type": "turnBumpLED",
-                                          "id": "aKBQDCA}o4Hg9)7!uM[v",
+                                          "id": ";EdKR,JF$1@f56s/;P(j",
                                           "fields": {
                                             "DIR": "2",
-                                            "COLOR": "0",
+                                            "COLOR": "1",
                                             "STATE": "1"
+                                          },
+                                          "next": {
+                                            "block": {
+                                              "type": "arduino_delay",
+                                              "id": "Yq#v}UJ%*8,$MyhMqttw",
+                                              "inputs": {
+                                                "MS": {
+                                                  "shadow": {
+                                                    "type": "math_number",
+                                                    "id": "*HEu{!LUIEZG6kAouq+/",
+                                                    "fields": {
+                                                      "NUM": 1000
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
                                           }
                                         }
                                       }
@@ -299,17 +296,6 @@
                               "DIR": "2",
                               "COLOR": "1",
                               "STATE": "0"
-                            },
-                            "next": {
-                              "block": {
-                                "type": "turnBumpLED",
-                                "id": "Ely?sg}3aWdF6MaYShX8",
-                                "fields": {
-                                  "DIR": "2",
-                                  "COLOR": "0",
-                                  "STATE": "0"
-                                }
-                              }
                             }
                           }
                         }

@@ -31,15 +31,12 @@ export function initTabManager(workspace: Blockly.Workspace) {
     }
   }
 
-  // 🌟 [신규 추가] 커스텀 우클릭 팝업 메뉴 생성 함수
   function showContextMenu(x: number, y: number, program: ProgramData) {
-    // 혹시 이미 열려있는 메뉴가 있다면 닫기
     const existingMenu = document.getElementById('smarty-tab-context-menu');
     if (existingMenu) existingMenu.remove();
 
     const isDark = document.body.classList.contains('dark-mode');
     
-    // 메뉴 생성
     const menu = document.createElement('div');
     menu.id = 'smarty-tab-context-menu';
     menu.style.cssText = `
@@ -56,7 +53,6 @@ export function initTabManager(workspace: Blockly.Workspace) {
       font-family: 'Pretendard', sans-serif;
     `;
 
-    // 메뉴 아이템 생성
     const menuItem = document.createElement('div');
     menuItem.innerHTML = '🚀 예제로 배포하기 (AI)';
     menuItem.style.cssText = `
@@ -68,13 +64,11 @@ export function initTabManager(workspace: Blockly.Workspace) {
       transition: background 0.2s;
     `;
 
-    // 호버 효과
     menuItem.onmouseenter = () => { menuItem.style.background = isDark ? '#3e4451' : '#f0f3f4'; };
     menuItem.onmouseleave = () => { menuItem.style.background = 'transparent'; };
 
-    // 클릭 시 실행 로직
     menuItem.onclick = () => {
-      menu.remove(); // 메뉴 닫기
+      menu.remove(); 
       if (currentProgramId !== program.id) {
         switchTab(program.id);
       }
@@ -84,16 +78,12 @@ export function initTabManager(workspace: Blockly.Workspace) {
     menu.appendChild(menuItem);
     document.body.appendChild(menu);
 
-    // 바탕화면 아무 곳이나 클릭하면 메뉴가 닫히도록 이벤트 추가
     const closeMenu = () => {
       menu.remove();
       document.removeEventListener('click', closeMenu);
     };
     
-    // setTimeout을 주지 않으면, 지금 클릭한 우클릭 이벤트 때문에 바로 닫혀버림
-    setTimeout(() => {
-      document.addEventListener('click', closeMenu);
-    }, 10);
+    setTimeout(() => { document.addEventListener('click', closeMenu); }, 10);
   }
 
   function renderTabs() {
@@ -164,10 +154,8 @@ export function initTabManager(workspace: Blockly.Workspace) {
       closeBtn.onmouseenter = () => { closeBtn.style.background = 'rgba(231, 76, 60, 0.2)'; };
       closeBtn.onmouseleave = () => { closeBtn.style.background = 'transparent'; };
 
-      // [왼쪽 클릭] 탭 전환
       btn.onclick = () => switchTab(program.id);
       
-      // 🌟 [수정됨: 오른쪽 클릭] 커스텀 팝업 메뉴 띄우기
       btn.oncontextmenu = (e) => {
         e.preventDefault(); 
         showContextMenu(e.pageX, e.pageY, program);
@@ -201,16 +189,27 @@ export function initTabManager(workspace: Blockly.Workspace) {
   function switchTab(targetId: string) {
     if (currentProgramId === targetId) return;
     saveCurrentTab();
-    workspace.clear();
+
     currentProgramId = targetId;
     const targetProgram = programs.find(p => p.id === targetId);
     if (targetProgram) {
+      
+
+      workspace.clear();
+      const wsSvg = workspace as any;
+      if (wsSvg.trashcan) {
+        wsSvg.trashcan.contents_ = [];
+        if (typeof wsSvg.trashcan.emptyContents === 'function') wsSvg.trashcan.emptyContents();
+      }
+
       if (targetProgram.blockState) {
         Blockly.serialization.workspaces.load(targetProgram.blockState, workspace);
       } else {
+        workspace.clear();
         const xml = '<xml><block type="arduino_main" deletable="false" x="50" y="50"> <statement name="SETUP"> <block type="smarty_begin"></block> </statement></block></xml>';
         Blockly.Xml.domToWorkspace(Blockly.utils.xml.textToDom(xml), workspace);
       }
+      
       const serialOutput = document.getElementById('serial-output') as HTMLTextAreaElement;
       if (serialOutput) serialOutput.value = targetProgram.serialData || '';
       const helpText = document.getElementById('help-text');

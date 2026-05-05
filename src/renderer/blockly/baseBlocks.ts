@@ -91,7 +91,7 @@ export function initBaseBlocks(arduinoGenerator: any) {
 
   // [C++ 제너레이터]
   arduinoGenerator.forBlock['smarty_begin'] = function (block: any) {
-    return 'beginSmarty();\n  turnBumperAllOff();\nturnBumperBlinkLeftY(0);\nturnBumperBlinkRightY(0);\nturnBumperBlinkW(0);\nturnBumperBlinkR(0);\n waitSW(SW1);\n'
+    return 'beginSmarty();\n'
   }
 
   arduinoGenerator.forBlock['smarty_get_battery'] = function (block: any) {

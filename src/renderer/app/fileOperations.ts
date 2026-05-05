@@ -14,6 +14,18 @@ export function initFileOperations(workspace: any, tabManager: ReturnType<typeof
     return JSON.stringify(Blockly.serialization.workspaces.save(workspace), null, 2);
   }
 
+  // 🌟 [핵심 추가] 화면이 초기화될 때 휴지통과 되돌리기(Ctrl+Z) 기록을 완벽히 비워주는 함수
+  /*
+  function cleanUpTrashAndUndo() {
+    setTimeout(() => {
+      if (workspace.trashcan && typeof workspace.trashcan.emptyContents === 'function') {
+        workspace.trashcan.emptyContents(); // 휴지통 비우기
+      }
+      workspace.clearUndo(); // 되돌리기 기록 지우기
+    }, 150); // 블록이 도화지에 완전히 세팅될 때까지 0.15초 기다린 후 싹 비웁니다.
+  }
+  */
+
   if (newFileBtn) {
     newFileBtn.onclick = () => {
       tabManager.createNewProgram();
@@ -26,8 +38,10 @@ export function initFileOperations(workspace: any, tabManager: ReturnType<typeof
         const result = await window.api.openFile();
         if (!result.canceled && result.filePaths && result.data) {
           tabManager.createNewProgram();
-          workspace.clear();
+          
+          workspace.clear(); // ⚠️ 이때 기존 블록들이 휴지통으로 빨려 들어갑니다.
           Blockly.serialization.workspaces.load(JSON.parse(result.data), workspace);
+          
           const loadedFilePath = result.filePaths[0];
           const parts = loadedFilePath.split(/[/\\]/);
           const loadedFileName = parts.pop() || '불러온 프로그램';
@@ -37,6 +51,9 @@ export function initFileOperations(workspace: any, tabManager: ReturnType<typeof
             (currentProgram as any).filePath = loadedFilePath;
             tabManager.renderTabs();
           }
+
+          // 👉 파일 불러오기가 끝난 직후 휴지통 비우기 실행!
+          cleanUpTrashAndUndo();
         }
       }
     };

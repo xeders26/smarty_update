@@ -1,4 +1,4 @@
-/*================
+/*====================  
 src/renderer/app/appUI.ts
 ===============*/
 import * as Blockly from 'blockly';

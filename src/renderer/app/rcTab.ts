@@ -15,7 +15,24 @@ export function initRcTabUI() {
     document.querySelectorAll('#hudPower').forEach(el => el.remove());
 
     // ==========================================
-    // 🚀 모니터 동적 리사이징
+    // 🎨 [추가] 디자인 수정용 CSS 강제 주입
+    // ==========================================
+    if (!document.getElementById('smartyRcDesignFix')) {
+      const styleFix = document.createElement('style');
+      styleFix.id = 'smartyRcDesignFix';
+      styleFix.innerHTML = `
+        #hudScreen::-webkit-scrollbar { width: 10px; }
+        #hudScreen::-webkit-scrollbar-track { background: #11141a; border-radius: 5px; }
+        #hudScreen::-webkit-scrollbar-thumb { background: #3b4252; border-radius: 5px; border: 1px solid #11141a; }
+        #hudScreen::-webkit-scrollbar-thumb:hover { background: #4c566a; }
+        .cockpit-panel { background: none !important; box-shadow: none !important; border: none !important; padding: 0 !important; }
+        #rcArea { padding: 0 !important; overflow: hidden; }
+      `;
+      document.head.appendChild(styleFix);
+    }
+
+    // ==========================================
+    // 🚀 모니터 동적 리사이징 (하단 짤림 완벽 방지 & 5px 여백)
     // ==========================================
     const updateRcScale = () => {
       if (rcArea.style.display === 'none') return;
@@ -24,28 +41,30 @@ export function initRcTabUI() {
       const currentHeight = rcArea.clientHeight;
       if (currentWidth === 0 || currentHeight === 0) return;
 
-      const BASE_WIDTH = 650;
-      let scale = (currentWidth * 0.90) / BASE_WIDTH;
-      scale = Math.min(scale, 1.3);
+      const BASE_WIDTH = 630; 
+      let scale = currentWidth / BASE_WIDTH; 
 
       cockpitPanel.style.height = 'auto';
       cockpitPanel.style.maxHeight = 'none';
-      cockpitPanel.style.paddingBottom = '25px';
 
       const terminalWrapper = document.getElementById('smartyTerminalWrapper');
       if (terminalWrapper && terminalWrapper.style.display !== 'none') {
-        const unscaledScreenHeight = (currentHeight * 0.95) / scale;
-        let newTermHeight = unscaledScreenHeight - 440;
+        // 터미널이 켜져 있을 땐 화면에 맞게 동적 높이 계산
+        const unscaledScreenHeight = currentHeight / scale;
+        let newTermHeight = unscaledScreenHeight - 390; 
         if (newTermHeight < 100) newTermHeight = 100; 
-        
         terminalWrapper.style.height = `${newTermHeight}px`;
-      } else {
-        const panelHeight = cockpitPanel.offsetHeight || 520;
-        const scaleY = (currentHeight * 0.95) / panelHeight;
-        if (scaleY < scale) scale = scaleY;
       }
 
-      cockpitPanel.style.transform = `translate(-50%, -50%) scale(${scale})`;
+      // 🌟 [핵심] 조종 패널 전체 높이가 화면 높이를 넘어가지 않도록 강제 제한! (하단 짤림 방지)
+      // 패널의 실제 높이를 계산한 뒤, 가로 비율(scale)과 세로 비율(scaleY) 중 더 작은 것을 선택합니다.
+      const panelHeight = cockpitPanel.offsetHeight || 520;
+      const scaleY = currentHeight / panelHeight;
+      
+      // 상하좌우 여백(약 5px)을 주기 위해 최종 배율에 0.96을 곱합니다.
+      const finalScale = Math.min(scale, scaleY) * 0.96;
+
+      cockpitPanel.style.transform = `translate(-50%, -50%) scale(${finalScale})`;
     };
 
     if (typeof ResizeObserver !== 'undefined') {
@@ -80,7 +99,7 @@ export function initRcTabUI() {
           return;
         }
 
-        const smartyCode = `#include "smartyLib.h"\n#include "math.h"\n\nvoid setup() {\n  beginSmarty();\n  setNameBt("Smarty${num}");\n  setPinBt("1234");\n}\n\nvoid loop() {\n\n}\n`;
+        const smartyCode = `#include "smartyLib.h"\n#include "math.h"\n\nvoid setup() {\n  initSmarty();\n  setNameBt("Smarty${num}");\n  setPinBt("1234");\n}\n\nvoid loop() {\n\n}\n`;
 
         assignBtn.textContent = '⏳ 업로드 중...';
         assignBtn.style.background = '#f39c12';
@@ -240,8 +259,8 @@ export function initRcTabUI() {
       terminalWrapper.style.cssText = `display:none; width:100%; box-sizing:border-box; margin-top:10px; margin-bottom:10px; padding:0 10px; height: 60px; transition: height 0.2s ease-out;`;
       
       terminalWrapper.innerHTML = `
-        <div id="hudScreen" style="width: 100%; background: #0b0e14; border: 2px solid #1e272e; border-radius: 8px; height: 100%; overflow-y: auto; padding: 6px 12px; display: flex; flex-direction: column; gap: 4px; font-family: 'Consolas', 'Courier New', monospace; font-size: 13px; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); box-sizing:border-box;">
-          <div id="hudWelcome" style="color:#7f8c8d; text-align:center; font-size:12px; margin-top: 15px;">-- 통신 대기 중 --</div>
+        <div id="hudScreen" style="width: 100%; background: #0b0e14; border: 2px solid #1e272e; border-radius: 8px; height: 100%; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; font-family: 'Consolas', 'Courier New', monospace; font-size: 15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); box-sizing:border-box;">
+          <div id="hudWelcome" style="color:#7f8c8d; text-align:center; font-size:13px; margin-top: 15px;">-- 통신 대기 중 --</div>
         </div>
       `;
       controlWrapper.parentNode.insertBefore(terminalWrapper, controlWrapper.nextSibling);
@@ -255,10 +274,10 @@ export function initRcTabUI() {
 
       const bubble = document.createElement('div');
       if (type === 'RX') {
-        bubble.style.cssText = `align-self: flex-start; background: rgba(39, 174, 96, 0.15); border: 1px solid #27ae60; color: #2ecc71; padding: 3px 8px; border-radius: 8px 8px 8px 0; max-width: 85%; word-break: break-all; margin-top:2px;`;
+        bubble.style.cssText = `align-self: flex-start; background: rgba(85, 239, 196, 0.15); border: 1px solid #00b894; color: #55efc4; font-weight: bold; padding: 4px 10px; border-radius: 8px 8px 8px 0; max-width: 85%; word-break: break-all; margin-top:2px;`;
         bubble.innerHTML = `⬇️ ${msg}`;
       } else {
-        bubble.style.cssText = `align-self: flex-end; background: rgba(41, 128, 185, 0.15); border: 1px solid #2980b9; color: #3498db; padding: 3px 8px; border-radius: 8px 8px 0 8px; max-width: 85%; word-break: break-all; margin-top:2px;`;
+        bubble.style.cssText = `align-self: flex-end; background: rgba(116, 185, 255, 0.15); border: 1px solid #0984e3; color: #74b9ff; font-weight: bold; padding: 4px 10px; border-radius: 8px 8px 0 8px; max-width: 85%; word-break: break-all; margin-top:2px;`;
         bubble.innerHTML = `${msg} ⬆️`;
       }
       screen.appendChild(bubble);
@@ -267,7 +286,7 @@ export function initRcTabUI() {
     };
 
     // ==========================================
-    // 👑 4. 상태 표시줄 인디케이터 장착
+    // 👑 4. 상태 표시줄 & 디자인 개선된 Clear 버튼 장착
     // ==========================================
     const statusTextEl = document.getElementById('bleStatus') as HTMLElement;
     
@@ -284,8 +303,9 @@ export function initRcTabUI() {
 
       const customStatusBar = document.createElement('div');
       customStatusBar.id = 'smartyCustomStatusBar';
-      customStatusBar.style.cssText = `display:flex; gap: 25px; align-items:center; margin-left: 5px;`;
+      customStatusBar.style.cssText = `display:flex; gap: 20px; align-items:center; margin-left: 5px; height: 100%;`; // 🌟 높이 100% 추가
       
+      // 🌟 [수정] 둥근 사각형(border-radius:6px), 은은한 주황색(테두리), 수직 중앙정렬(margin-top:0) 적용
       customStatusBar.innerHTML = `
         <div id="btnConnectToggle" style="text-align: center; cursor: pointer; padding: 5px; border-radius: 8px; transition: 0.2s;">
           <div id="hudLink" style="width:16px; height:16px; border-radius:50%; background:#ff4757; margin:0 auto 4px; box-shadow:0 0 10px #ff4757; transition:0.3s;"></div>
@@ -295,9 +315,14 @@ export function initRcTabUI() {
           <div id="hudRx" style="width:16px; height:16px; border-radius:50%; background:#34495e; margin:0 auto 4px; transition:0.05s;"></div>
           <div style="color:#7f8c8d; font-size:12px; font-weight:bold;">수신(RX)</div>
         </div>
-        <div style="text-align: center; margin-top:2px;">
-          <div id="hudTx" style="width:16px; height:16px; border-radius:50%; background:#34495e; margin:0 auto 4px; transition:0.05s;"></div>
-          <div style="color:#7f8c8d; font-size:12px; font-weight:bold;">송신(TX)</div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="text-align: center; margin-top:2px;">
+            <div id="hudTx" style="width:16px; height:16px; border-radius:50%; background:#34495e; margin:0 auto 4px; transition:0.05s;"></div>
+            <div style="color:#7f8c8d; font-size:12px; font-weight:bold;">송신(TX)</div>
+          </div>
+          <div id="hudClearBtn" style="width:28px; height:24px; border-radius:6px; background:transparent; border:1px solid #e67e22; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:0.2s; margin-top:0;" title="터미널 지우기">
+            <span style="color:#e67e22; font-size:12px; font-weight:bold;">C</span>
+          </div>
         </div>
       `;
       
@@ -310,6 +335,23 @@ export function initRcTabUI() {
       if (toggleBtn) {
         toggleBtn.addEventListener('mouseenter', () => toggleBtn.style.backgroundColor = 'rgba(255,255,255,0.05)');
         toggleBtn.addEventListener('mouseleave', () => toggleBtn.style.backgroundColor = 'transparent');
+      }
+
+      // Clear 버튼 Hover 애니메이션 효과
+      const clearBtn = document.getElementById('hudClearBtn');
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          const screen = document.getElementById('hudScreen');
+          if (screen) screen.innerHTML = ''; 
+        });
+        clearBtn.addEventListener('mouseenter', () => {
+          clearBtn.style.background = 'rgba(230, 126, 34, 0.15)'; 
+          clearBtn.style.boxShadow = '0 0 8px rgba(230, 126, 34, 0.4)';
+        });
+        clearBtn.addEventListener('mouseleave', () => {
+          clearBtn.style.background = 'transparent'; 
+          clearBtn.style.boxShadow = 'none';
+        });
       }
     }
 
@@ -347,7 +389,7 @@ export function initRcTabUI() {
     if (controlWrapper) controlWrapper.addEventListener('mouseenter', loadBluetoothPorts);
 
     // ==========================================
-    // 📡 6. 통신 로직 및 완벽한 수신 엔진 (패치 완료)
+    // 📡 6. 통신 로직 및 완벽한 수신 엔진
     // ==========================================
     let isConnected = false;
     let currentDirection = 10;
@@ -356,8 +398,8 @@ export function initRcTabUI() {
     let rxLightTimer: any;
     let txLightTimer: any;
     
-    let rxBuffer = ''; // 💡 수신 문자열을 엔터(\n) 단위로 모으는 버퍼!
-    const decoder = new TextDecoder(); // 💡 시리얼 모니터와 동일한 정공법 디코더 장착
+    let rxBuffer = ''; 
+    const decoder = new TextDecoder(); 
 
     const forceDisconnectUI = () => {
       isConnected = false;
@@ -372,7 +414,7 @@ export function initRcTabUI() {
       setTimeout(updateRcScale, 10);
       currentDirection = 10;
       activeKeys.clear();
-      rxBuffer = ''; // 연결 끊길 때 버퍼 초기화
+      rxBuffer = ''; 
     };
 
     const toggleConnectBtn = document.getElementById('btnConnectToggle');
@@ -406,7 +448,7 @@ export function initRcTabUI() {
 
             setTimeout(updateRcScale, 10);
             const screen = document.getElementById('hudScreen');
-            if (screen) screen.innerHTML = `<div id="hudWelcome" style="color:#2ecc71; text-align:center; font-size:12px; margin-top: 15px;">-- 스마티 통신 개시 --</div>`;
+            if (screen) screen.innerHTML = `<div id="hudWelcome" style="color:#2ecc71; text-align:center; font-size:13px; font-weight:bold; margin-top: 15px;">-- 스마티 통신 개시 --</div>`;
 
           } else { throw new Error("포트가 사용 중이거나 응답이 없습니다."); }
         } catch (error: any) {
@@ -423,7 +465,6 @@ export function initRcTabUI() {
       (window as any).electron.ipcRenderer.removeAllListeners('serial-data');
       (window as any).electron.ipcRenderer.on('serial-data', (event: any, rawData: any) => {
         try {
-          // 💡 1. RX 깜빡임 UI 활성화
           const rxLight = document.getElementById('hudRx');
           if (rxLight) {
             rxLight.style.background = '#2ecc71'; rxLight.style.boxShadow = '0 0 15px #2ecc71';
@@ -431,7 +472,6 @@ export function initRcTabUI() {
             rxLightTimer = setTimeout(() => { rxLight.style.background = '#34495e'; rxLight.style.boxShadow = 'none'; }, 80);
           }
 
-          // 💡 2. Electron IPC 버퍼 객체를 안전하게 포맷 변환
           let u8Arr: Uint8Array;
           if (rawData instanceof Uint8Array) {
             u8Arr = rawData;
@@ -442,16 +482,13 @@ export function initRcTabUI() {
           } else if (typeof rawData === 'string') {
             u8Arr = new TextEncoder().encode(rawData);
           } else {
-            return; // 알 수 없는 쓰레기값이면 무시
+            return; 
           }
 
-          // 💡 3. 안전하게 스트림 디코딩 후 버퍼에 누적 보관
           rxBuffer += decoder.decode(u8Arr, { stream: true });
 
-          // 💡 4. 엔터(\n)가 들어올 때만 문장을 잘라서 화면에 예쁘게 출력!
           if (rxBuffer.includes('\n')) {
             const lines = rxBuffer.split('\n');
-            // 마지막 줄은 아직 엔터가 안 쳐진 상태일 수 있으므로 다시 버퍼에 넣음
             rxBuffer = lines.pop() || '';
 
             lines.forEach(line => {
@@ -490,7 +527,7 @@ export function initRcTabUI() {
       let newDir = 10;
       if (up && right) newDir = 1; else if (right && down) newDir = 3; else if (down && left) newDir = 5;
       else if (left && up) newDir = 7; else if (up) newDir = 0; else if (right) newDir = 2;
-      else if (down) newDir = 4; else if (left) newDir = 6; else if (q) newDir = 8; else if (w) newDir = 9;
+      else if (down) newDir = 4; else if (left) newDir = 6; else if (q) newDir = 9; else if (w) newDir = 8;
       if (newDir !== currentDirection) { currentDirection = newDir; send2Bytes(68, currentDirection); }
     };
 
@@ -498,52 +535,56 @@ export function initRcTabUI() {
     const changePower = (delta: number) => {
       if (lever) {
         const currentVal = parseInt(lever.value, 10);
-        const newVal = Math.max(-100, Math.min(100, currentVal + delta));
+        const newVal = Math.max(0, Math.min(100, currentVal + delta));
         if (currentVal !== newVal) { lever.value = newVal.toString(); lever.dispatchEvent(new Event('input')); }
       }
     };
     const startPowerChange = (delta: number) => {
       if (powerInterval) clearInterval(powerInterval);
-      changePower(delta); powerInterval = setInterval(() => { changePower(delta); }, 25); 
+      changePower(delta); powerInterval = setInterval(() => { changePower(delta); }, 5); 
     };
     const stopPowerChange = () => { if (powerInterval) { clearInterval(powerInterval); powerInterval = null; } };
 
     const handleKeyDown = (key: string) => {
       if (activeKeys.has(key)) return; 
       activeKeys.add(key); const nKey = key.toLowerCase(); 
-      if (nKey === 'a') send2Bytes(70, 97); else if (nKey === 's') send2Bytes(70, 115);
-      else if (nKey === 'z') send2Bytes(70, 122); else if (nKey === 'x') send2Bytes(70, 120);
+      if (nKey === 'a' || nKey === 'A') send2Bytes(70, 11); else if (nKey === 's' || nKey === 'S') send2Bytes(70, 21);
+      else if (nKey === 'z' || nKey === 'Z') send2Bytes(70, 31); else if (nKey === 'x' || nKey === 'X') send2Bytes(70, 41);
       else if (nKey === '.' || nKey === 'pageup' || nKey === 'pgup') startPowerChange(1);
       else if (nKey === ',' || nKey === 'pagedown' || nKey === 'pgdn') startPowerChange(-1);
       else updateDirectionCommand();
     };
 
     const handleKeyUp = (key: string) => {
-      if (!activeKeys.has(key)) return; activeKeys.delete(key); const nKey = key.toLowerCase();
-      if (['.', ',', 'pageup', 'pagedown', 'pgup', 'pgdn'].includes(nKey)) { stopPowerChange(); return; }
-      if (['a', 's', 'z', 'x'].includes(nKey)) return;
+      if (!activeKeys.has(key)) return; 
+      activeKeys.delete(key); 
+      const nKey = key.toLowerCase();
+      
+      if (['.', ',', 'pageup', 'pagedown', 'pgup', 'pgdn'].includes(nKey)) { 
+        stopPowerChange(); 
+        return; 
+      }
+      
+      if (nKey === 'a' || nKey === 'A') send2Bytes(70, 10); else if (nKey === 's' || nKey === 'S') send2Bytes(70, 20);
+      else if (nKey === 'z' || nKey === 'Z') send2Bytes(70, 30); else if (nKey === 'x' || nKey === 'X') send2Bytes(70, 40);
       updateDirectionCommand();
     };
 
     const updateSpeed = () => {
       if (!lever) return;
       const val = parseInt(lever.value, 10);
-      const percentage = ((val + 100) / 200) * 100;
+      const percentage = val;
       
       const originalDisplay = document.getElementById('speedValueDisplay');
       if (originalDisplay) {
-        originalDisplay.textContent = `${val}%`; 
-        if (val === 0) { originalDisplay.style.color = '#2ecc71'; originalDisplay.style.textShadow = '0 0 10px #2ecc71'; }
-        else if (val > 0) { originalDisplay.style.color = '#00d2d3'; originalDisplay.style.textShadow = '0 0 10px #00d2d3'; }
-        else { originalDisplay.style.color = '#ff4757'; originalDisplay.style.textShadow = '0 0 10px #ff4757'; }
+        originalDisplay.textContent = `${val}`; 
+        originalDisplay.style.color = '#00d2d3'; originalDisplay.style.textShadow = '0 0 10px #00d2d3'; 
       }
       
-      if (val === 0) lever.style.background = `linear-gradient(to right, #111 48%, #2ecc71 50%, #111 52%)`;
-      else if (val > 0) lever.style.background = `linear-gradient(to right, #111 50%, #0984e3 50%, #00d2d3 ${percentage}%, #111 ${percentage}%)`;
-      else lever.style.background = `linear-gradient(to right, #111 ${percentage}%, #ff4757 ${percentage}%, #d63031 50%, #111 50%)`;
+      lever.style.background = `linear-gradient(to right, #111 0%, #0984e3 0%, #00d2d3 ${percentage}%, #111 ${percentage}%)`;
     };
 
-    if (lever) { lever.addEventListener('input', () => { updateSpeed(); const val = parseInt(lever.value, 10); send2Bytes(80, val + 100); }); }
+    if (lever) { lever.addEventListener('input', () => { updateSpeed(); const val = parseInt(lever.value, 10); send2Bytes(80, val); }); }
 
     const toggleButtonHighlight = (key: string, isActive: boolean) => {
       let cmdList = [key];

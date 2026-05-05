@@ -181,10 +181,19 @@ export function initVariableBlocks(arduinoGenerator: any) {
         callback(val);
       };
 
+      // 🌟 [핵심 해결] 블록리가 키보드/마우스 입력을 납치하지 못하도록 완벽 방어!
+      box.addEventListener('mousedown', (e) => e.stopPropagation());
+      box.addEventListener('touchstart', (e) => e.stopPropagation());
+      
       nameInput.onkeydown = (e) => {
+        e.stopPropagation(); // 👈 키보드 이벤트 납치 차단
         if (e.key === 'Enter') okBtn.click();
         if (e.key === 'Escape') cancelBtn.click();
       };
+      
+      if (lenInput) {
+        lenInput.onkeydown = (e) => e.stopPropagation();
+      }
 
       btnGroup.appendChild(cancelBtn);
       btnGroup.appendChild(okBtn);
@@ -192,7 +201,11 @@ export function initVariableBlocks(arduinoGenerator: any) {
       modal.appendChild(box);
       document.body.appendChild(modal);
 
-      nameInput.focus();
+      // 모달이 완전히 화면에 그려진 후 포커스를 강제로 빼앗아옵니다.
+      setTimeout(() => {
+        nameInput.focus();
+        nameInput.select();
+      }, 50);
     });
   }
 
@@ -202,8 +215,16 @@ export function initVariableBlocks(arduinoGenerator: any) {
   const getBlocklyCheckType = (type: string) => {
     if (!type) return null; 
     if (type === 'boolean') return ['Boolean']; 
-    if (type === 'int' || type === 'float' || type === 'char') return ['Number']; // 정수, 실수, 문자는 모두 '숫자(Number)' 취급
+    
+    // 1. 순수 숫자 (정수, 실수)
+    if (type === 'int' || type === 'float') return ['Number']; 
+    
+    // 🛠️ 2. 문자(char)는 숫자와 문자열 모두와 결합할 수 있는 '만능(하이브리드)' 타입으로 설정!
+    if (type === 'char') return ['Number', 'String']; 
+    
+    // 3. 순수 문자열 (배열 형태의 문자들)
     if (type === 'string' || type === 'string_array' || type.startsWith('char[')) return ['String']; 
+    
     return null;
   };
 

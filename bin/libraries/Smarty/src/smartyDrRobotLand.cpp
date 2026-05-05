@@ -14,31 +14,26 @@ void waitSW(unsigned int no)
 {
   while (!readSw(no))
   	delay(10);
-  delay(300);
 }
 
 void openHand(int val)
 {
     runServo(S2, val);
-    delay(400);
 }
 
 void closeHand(int val)
 {
     runServo(S2, val);
-    delay(400);
 }
 
 void getBall(int val)
 {
     runServo(S1, val);
-    delay(400);
 }
 
 void putBall(int val)
 {
     runServo(S1, val);
-   delay(400);
 }
 
 SmartyBumperPairValue initLineSensor()

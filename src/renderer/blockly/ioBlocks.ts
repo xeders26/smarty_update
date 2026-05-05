@@ -50,7 +50,7 @@ export function initIoBlocks(arduinoGenerator: any) {
           .appendField("디지털 핀")
           .appendField(new Blockly.FieldNumber(2, 0, 100), "PIN")
           .appendField("번 읽기"); 
-      this.setOutput(true, "Number"); 
+      this.setOutput(true, "B"); 
       this.setColour(160); 
     } 
   };

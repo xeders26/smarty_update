@@ -205,19 +205,28 @@ function getBaseToolbox() {
           {
             kind: 'block',
             type: 'mecanumDrive',
-            inputs: { SPD: { shadow: { type: 'math_number', fields: { NUM: 150 } } } }
+            inputs: { SPD: { shadow: { type: 'math_number', fields: { NUM: 30 } } } }
+          },
+          // 🚀 [여기 추가됨!] 메카넘 정수 제어 블록 (기본값 동작: 0, 속도: 30)
+          {
+            kind: 'block',
+            type: 'mecanumMove',
+            inputs: {
+              ACT: { shadow: { type: 'math_number', fields: { NUM: 0 } } },
+              SPD: { shadow: { type: 'math_number', fields: { NUM: 30 } } }
+            }
           },
           {
             kind: 'block',
             type: 'runDcMotor',
-            inputs: { SPD: { shadow: { type: 'math_number', fields: { NUM: 150 } } } }
+            inputs: { SPD: { shadow: { type: 'math_number', fields: { NUM: 30 } } } }
           },
           {
             kind: 'block',
             type: 'runDcMotor_acc',
             inputs: {
               START: { shadow: { type: 'math_number', fields: { NUM: 0 } } },
-              FINAL: { shadow: { type: 'math_number', fields: { NUM: 255 } } },
+              FINAL: { shadow: { type: 'math_number', fields: { NUM: 80 } } },
               STEP: { shadow: { type: 'math_number', fields: { NUM: 5 } } },
               INTV: { shadow: { type: 'math_number', fields: { NUM: 10 } } }
             }

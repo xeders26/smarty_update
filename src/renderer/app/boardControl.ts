@@ -1,8 +1,4 @@
-/*================
 
-src/renderer/app/boardControl.ts  
-
-===============*/
 import { getArduinoPort, setArduinoPort, isSerialMonitorOpen } from './serialAndBoard';
 import { showCuteModal } from '../ui/modal';
 

@@ -3,7 +3,6 @@
 =================*/
 import * as Blockly from 'blockly';
 
-//import { initSmartyBlocks } from '../blockly/smartyBlocks';
 import { loadAllBlocklyModules, arduinoGenerator, getSafeVarName, smartyTheme } from './blocklySetup';
 
 import { installBlocklyDialogs, showCuteModal } from '../ui/modal';
@@ -14,16 +13,12 @@ import { initBoardControl } from './boardControl';
 import { initAppUI, initMascotAnimation } from './appUI';
 import { initFileOperations } from './fileOperations';
 import { initExplorer } from './explorer';
-// ✅ 대장님의 새로운 기능 모듈 유지!
 import { initHelpTabUI } from './helpTab';
 import { initMinimap } from './miniMap'; 
 import { initRcTabUI } from './rcTab';
 
 import '@blockly/block-plus-minus';
 
-// =========================================================================
-// 🚨 [새로 추가됨!!] 전역 로딩 스피너(마법의 로딩 창) 함수
-// =========================================================================
 export function toggleLoadingModal(show: boolean) {
   let overlay = document.getElementById('smarty-upload-loading-overlay');
 
@@ -68,13 +63,8 @@ export function toggleLoadingModal(show: boolean) {
   }
 }
 
-// 🌟 다른 파일(ex. boardControl.ts)에서도 쉽게 꺼내 쓸 수 있도록 윈도우 객체에 등록!
 (window as any).toggleLoading = toggleLoadingModal;
-// =========================================================================
 
-// =========================================================================
-// 🚨[코어 엔진 해킹 - TS 에러 방어 버전]
-// =========================================================================
 if (!(window as any).__flyoutCorePatched) {
   if (Blockly.VerticalFlyout && Blockly.VerticalFlyout.prototype) {
     const FlyoutProto = Blockly.VerticalFlyout.prototype as any; 
@@ -105,24 +95,20 @@ if (!(window as any).__flyoutCorePatched) {
         if (_this.svgGroup_) {
           const transform = _this.svgGroup_.getAttribute('transform') || '';
           _this.svgGroup_.setAttribute('transform', transform.replace(/translate\([^,]+,/, 'translate(0,'));
-                    // 🚨 [여기에 새로 추가!!] 블록 목록 가장 오른쪽에 경계선(가위선) 긋기
           if (!_this.rightBorderLine_) {
             _this.rightBorderLine_ = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             _this.rightBorderLine_.setAttribute('class', 'smarty-flyout-border');
             
-            // 선이 블록들을 가리지 않도록, 배경 바로 위에만 살짝 얹어줍니다!
             if (_this.svgBackground_ && _this.svgBackground_.nextSibling) {
               _this.svgGroup_.insertBefore(_this.rightBorderLine_, _this.svgBackground_.nextSibling);
             } else {
               _this.svgGroup_.appendChild(_this.rightBorderLine_);
             }
           }
-          // 200px 위치에 위에서 아래로 쫙 뻗은 선을 설정합니다.
           _this.rightBorderLine_.setAttribute('x1', '200');
           _this.rightBorderLine_.setAttribute('x2', '200');
           _this.rightBorderLine_.setAttribute('y1', '0');
-          _this.rightBorderLine_.setAttribute('y2', '5000'); // 아래까지 닿도록 넉넉하게 설정
-        
+          _this.rightBorderLine_.setAttribute('y2', '5000'); 
         }
 
         if (_this.scrollbar && _this.scrollbar.svgGroup_ && _this.scrollbar.position_) {
@@ -139,7 +125,7 @@ if (!(window as any).__flyoutCorePatched) {
   (window as any).__flyoutCorePatched = true;
 }
 
-window.addEventListener('DOMContentLoaded', async () => { // 👈 async 추가!
+window.addEventListener('DOMContentLoaded', async () => {
   Blockly.Msg['MATH_RANDOM_INT_TITLE'] = '🎲 %1 부터 %2 사이의 무작위 수 (랜덤)';
   Blockly.Msg['CONTROLS_REPEAT_TITLE'] = '🔁 %1 번 반복하기';
   Blockly.Msg['LOGIC_BOOLEAN_TRUE'] = '참 (맞음)';
@@ -161,10 +147,41 @@ window.addEventListener('DOMContentLoaded', async () => { // 👈 async 추가!
     zoom: { controls: true, wheel: true, startScale: 0.85, maxScale: 2.5, minScale: 0.4, scaleSpeed: 1.01 }
   });
 
+  const emptyTrashOption = {
+    id: 'empty_trashcan_custom',
+    weight: 100, 
+    scopeType: Blockly.ContextMenuRegistry.ScopeType.WORKSPACE,
+    displayText: '🗑️ 휴지통 비우기',
+    preconditionFn: function(scope: any) {
+      if (scope.workspace && !scope.block) {
+        const wsSvg = scope.workspace as Blockly.WorkspaceSvg;
+        const trashcan = wsSvg.trashcan as any; 
+        if (trashcan && trashcan.contents_ && trashcan.contents_.length > 0) {
+          return 'enabled';
+        }
+        return 'disabled'; 
+      }
+      return 'hidden';
+    },
+    callback: function(scope: any) {
+      const wsSvg = scope.workspace as Blockly.WorkspaceSvg;
+      if (wsSvg && wsSvg.trashcan) {
+        const trashcan = wsSvg.trashcan as any;
+        trashcan.contents_ = [];
+        if (typeof trashcan.emptyContents === 'function') trashcan.emptyContents();
+        if (trashcan.flyout_ && typeof trashcan.flyout_.hide === 'function') trashcan.flyout_.hide();
+      }
+    }
+  };
+  
+  if (Blockly.ContextMenuRegistry.registry.getItem('empty_trashcan_custom')) {
+    Blockly.ContextMenuRegistry.registry.unregister('empty_trashcan_custom');
+  }
+  Blockly.ContextMenuRegistry.registry.register(emptyTrashOption);
+
   workspace.registerToolboxCategoryCallback(
     'PROCEDURE',
     (ws: Blockly.WorkspaceSvg) => {
-      // 강제로 2번째 인자(false)를 넣어서 타입스크립트의 입을 막아버립니다!
       return Blockly.Procedures.flyoutCategory(ws, false) as any;
     }
   );
@@ -182,16 +199,13 @@ window.addEventListener('DOMContentLoaded', async () => { // 👈 async 추가!
   initMinimap(workspace);
   initMascotAnimation(workspace);
 
-  // =========================================================================
-  // 🚨 [업데이트] 정지 버튼에도 짧은 로딩 스피너 적용!
-  // =========================================================================
   const stopBtn = document.getElementById('stopBtn');
   if (stopBtn) {
     stopBtn.addEventListener('click', async () => {
       stopBtn.style.opacity = '0.5';
       setTimeout(() => { stopBtn.style.opacity = '1'; }, 150);
 
-      const emptyStopCode = `#include <smartyLib.h>\n\nvoid setup() {\n   beginSmarty();\n   waitSW(SW1);\n}\n\nvoid loop() {}`;
+      const emptyStopCode = `#include <smartyLib.h>\n\nvoid setup() {\n   beginSmarty();\n}\n\nvoid loop() {}`;
 
       try {
         const wAny = window as any;
@@ -208,16 +222,13 @@ window.addEventListener('DOMContentLoaded', async () => { // 👈 async 추가!
           const statusSpan = document.getElementById('header-status');
           if (statusSpan) statusSpan.textContent = '🛑 정지 명령 전송 중...';
 
-          // 🌟 로딩 시작! (정지 명령도 통신 시간이 걸리므로 화면을 막아줍니다)
           if (wAny.toggleLoading) wAny.toggleLoading(true);
 
           wAny.electron.ipcRenderer.invoke('upload-code', emptyStopCode, fqbn, port)
           .then((res: string) => {
-            // 🌟 로딩 끝!
             if (wAny.toggleLoading) wAny.toggleLoading(false);
             if (statusSpan) statusSpan.textContent = (res && res.includes('❌')) ? '❌ 정지 실패!' : '✅ 스마티 정지 완료!';
           }).catch((err: any) => {
-            // 🌟 에러 나도 로딩 끄기!
             if (wAny.toggleLoading) wAny.toggleLoading(false);
             if (statusSpan) statusSpan.textContent = '❌ 정지 통신 오류!';
           });
@@ -230,6 +241,14 @@ window.addEventListener('DOMContentLoaded', async () => { // 👈 async 추가!
     try {
       tabManager.createNewProgram();
       workspace.clear();
+      
+      // 🚨 [새프로그램 버그 완벽 차단 2] 예제 열기 전 강제로 휴지통 소각!
+      const wsSvg = workspace as any;
+      if (wsSvg.trashcan) {
+        wsSvg.trashcan.contents_ = [];
+        if (typeof wsSvg.trashcan.emptyContents === 'function') wsSvg.trashcan.emptyContents();
+      }
+
       if (item.ext === 'json') {
         Blockly.serialization.workspaces.load(JSON.parse(item.code), workspace);
       } else {
@@ -257,9 +276,6 @@ window.addEventListener('DOMContentLoaded', async () => { // 👈 async 추가!
       if (!themeUpdateQueued) {
         themeUpdateQueued = true;
         Promise.resolve().then(() => {
-          const currentTheme = workspace.getTheme();
-          workspace.setTheme(currentTheme);
-
           const customColors = (window as any).__smartyBlockColors || (window as any).__blockColorMap;
           if (customColors) {
             workspace.getAllBlocks(false).forEach(block => {
@@ -291,17 +307,7 @@ window.addEventListener('DOMContentLoaded', async () => { // 👈 async 추가!
         }
       });
       
-      const allVars = workspace.getVariableMap().getAllVariables();
-      let varDeclarations = '';
-      if (allVars.length > 0) {
-        varDeclarations = '// 📦 변수 선언\n';
-        allVars.forEach(v => {
-          varDeclarations += `double ${getSafeVarName((v as any).name)} = 0;\n`;
-        });
-        varDeclarations += '\n';
-      }
-      
-      const rawCode = `${varDeclarations}${functionCode}void setup() {\n  ${setupCode}}\n\nvoid loop() {\n${loopCode}}\n`;
+      const rawCode = `${functionCode}void setup() {\n  ${setupCode}}\n\nvoid loop() {\n${loopCode}}\n`;      
       const codeArea = document.getElementById('codeArea');
       if (codeArea) codeArea.textContent = (arduinoGenerator as any).finish(rawCode);
     } catch (e) {

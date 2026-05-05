@@ -177,6 +177,28 @@ void write8(unsigned char state)
 
 //------------------------------------------------------------------------
 //Smarty 
+
+
+//Smarty 
+void initSmarty(void)
+{
+	delay(100);
+
+	Serial.begin(9600);
+	Serial.write("Start Xeders Smarty V20200417\n");
+	beginI2C();
+	_setupTimer();
+	_setupMotor();
+	_setupServo();
+	_setupLed();
+	_setupSwitch();
+	_setupBt();
+	_setupAdc();
+	_setupDIO();
+	initDio();
+	sei();
+}
+
 void beginSmarty(void)
 {
 	delay(100);
@@ -194,6 +216,9 @@ void beginSmarty(void)
 	_setupDIO();
 	initDio();
 	sei();
+	turnBumperAllOff();
+	PORTK &= ~(1 << PK1);  //turn on BT
+	waitSW(1); //Wait SW1 for Start
 }
 
 
@@ -513,7 +538,7 @@ void runMotor(char id, signed short spd)
 {
 	if(id < M1 || id > M4)
 		return;
-
+	spd = spd * 10;
 	_motor[id - 1].mode = MOTOR_MODE_NORMAL;
 	_driveMotor(id, spd);	
 }
@@ -525,6 +550,10 @@ void accDecMotor(char id, signed short startSpd, signed short finalSpd, signed s
 	stepSpd *= -1;
 	if(id < M1 || id > M4)
 		return;
+
+	startSpd = startSpd * 10;
+	finalSpd = finalSpd * 10;
+	stepSpd = stepSpd * 10;
 
 	if (startSpd > MAX_SPEED)
 		startSpd = MAX_SPEED;

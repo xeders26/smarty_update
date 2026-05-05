@@ -39,21 +39,6 @@ export function initSensorBlocks(arduinoGenerator: any) {
     }
   };
 
-  Blockly.Blocks['getSw'] = {
-    init: function(this: any) {
-      this.appendDummyInput()
-          .appendField("스위치 눌림 확인(시간) ID:")
-          .appendField(new Blockly.FieldDropdown([["SW1", "SW1"],["SW2", "SW2"]]), "ID")
-          .appendField("대기시간(ms):");
-      const intervalInput = this.appendValueInput("INTERVAL").setCheck("Number");
-      intervalInput.connection.setShadowDom(Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">50</field></shadow>')); // 기본값 50
-      
-      this.setInputsInline(true);
-      this.setOutput(true, "Boolean");
-      this.setColour(60);
-    }
-  };
-
   Blockly.Blocks['findBumpLine'] = {
     init: function(this: any) {
       const posInput = this.appendValueInput("POS").setCheck("Number").appendField("범퍼 라인 감지(기본) POS:");
@@ -117,7 +102,6 @@ export function initSensorBlocks(arduinoGenerator: any) {
   arduinoGenerator.forBlock['getAdc'] = function(block: any) { return [`readAdc(${block.getFieldValue('CH')})`, 0]; };
   arduinoGenerator.forBlock['waitUntilAdc'] = function(block: any) { const val = arduinoGenerator.valueToCode(block, 'VAL', 0) || '0'; return `waitUntilAdc(${block.getFieldValue('CH')}, ${block.getFieldValue('COM')}, ${val});\n`; };
   arduinoGenerator.forBlock['readDIO'] = function(block: any) { return[`readDIO(${block.getFieldValue('CH')})`, 0]; };
-  arduinoGenerator.forBlock['getSw'] = function(block: any) { const interval = arduinoGenerator.valueToCode(block, 'INTERVAL', 0) || '50'; return [`getSw(${block.getFieldValue('ID')}, ${interval})`, 0]; };
   arduinoGenerator.forBlock['readSw'] = function(block: any) { return[`readSw(${block.getFieldValue('ID')})`, 0]; };
   arduinoGenerator.forBlock['waitUntilSw'] = function(block: any) { return `waitUntilSw(${block.getFieldValue('ID')}, ${block.getFieldValue('STATE')});\n`; };
   

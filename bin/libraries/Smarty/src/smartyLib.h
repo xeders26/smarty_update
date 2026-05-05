@@ -34,6 +34,7 @@ void write8(unsigned char state);
 
 
 //Smarty 
+void initSmarty(void);
 void beginSmarty(void);
 void _setupTimer(void);
 void runTimer(char id, unsigned int interval);

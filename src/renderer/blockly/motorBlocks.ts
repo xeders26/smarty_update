@@ -1,7 +1,9 @@
 import * as Blockly from 'blockly'
 
 export function initMotorBlocks(arduinoGenerator: any) {
-  // [모양 정의]
+  // =========================================================
+  // 🧱 [1] 모양 정의 (기존 JS 객체 방식)
+  // =========================================================
   Blockly.Blocks['mecanumDrive'] = {
     init: function () {
       this.appendDummyInput()
@@ -60,6 +62,7 @@ export function initMotorBlocks(arduinoGenerator: any) {
       this.setColour(230)
     }
   }
+  
   Blockly.Blocks['runDcMotor'] = {
     init: function (this: any) {
       this.appendDummyInput()
@@ -89,6 +92,7 @@ export function initMotorBlocks(arduinoGenerator: any) {
       this.setColour(230)
     }
   }
+  
   Blockly.Blocks['runDcMotor_acc'] = {
     init: function (this: any) {
       this.appendDummyInput()
@@ -113,6 +117,9 @@ export function initMotorBlocks(arduinoGenerator: any) {
     }
   }
 
+  // =========================================================
+  // 🧱 [2] 모양 정의 (JSON 배열 방식)
+  // =========================================================
   Blockly.defineBlocksWithJsonArray([
     {
       type: 'accDecMotor',
@@ -136,7 +143,7 @@ export function initMotorBlocks(arduinoGenerator: any) {
       previousStatement: null,
       nextStatement: null,
       colour: 230,
-      inputsInline: true // 🚨 추가됨: 가로로 펴기
+      inputsInline: true 
     },
     {
       type: 'reverseMotor',
@@ -176,7 +183,7 @@ export function initMotorBlocks(arduinoGenerator: any) {
       previousStatement: null,
       nextStatement: null,
       colour: 230,
-      inputsInline: true // 🚨 추가됨: 가로로 펴기
+      inputsInline: true 
     },
     {
       type: 'stopMotor',
@@ -262,7 +269,7 @@ export function initMotorBlocks(arduinoGenerator: any) {
       previousStatement: null,
       nextStatement: null,
       colour: 180,
-      inputsInline: true // 🚨 추가됨: 가로로 펴기
+      inputsInline: true 
     },
     {
       type: 'setupServo',
@@ -284,7 +291,7 @@ export function initMotorBlocks(arduinoGenerator: any) {
       previousStatement: null,
       nextStatement: null,
       colour: 180,
-      inputsInline: true // 🚨 추가됨: 가로로 펴기
+      inputsInline: true 
     },
     {
       type: 'slowServo',
@@ -308,16 +315,33 @@ export function initMotorBlocks(arduinoGenerator: any) {
       previousStatement: null,
       nextStatement: null,
       colour: 180,
-      inputsInline: true // 🚨 추가됨: 가로로 펴기
+      inputsInline: true 
+    },
+    // 🚀 [추가됨!] 메카넘 휠 변수/숫자 입력 블록 (mecanumMove)
+    {
+      type: 'mecanumMove',
+      message0: '메카넘 동작 %1 속도 %2',
+      args0: [
+        { type: 'input_value', name: 'ACT', check: ['Number'] }, // 정수형 입력 구멍
+        { type: 'input_value', name: 'SPD', check: ['Number'] }  // 정수형 입력 구멍
+      ],
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#FF5722', // 기존 메카넘 블록과 똑같은 주황색
+      inputsInline: true, // 가로로 한 줄로 펴기
+      tooltip: '숫자나 변수를 입력하여 메카넘 휠의 동작(0~10)과 속도를 제어합니다.'
     }
   ])
 
-  // [C++ 제너레이터]
+  // =========================================================
+  // ⚙️ [3] C++ 제너레이터 
+  // =========================================================
   arduinoGenerator.forBlock['mecanumDrive'] = function (block: any) {
     const dir = block.getFieldValue('DIR')
-    const speed = arduinoGenerator.valueToCode(block, 'SPD', 0) || '150'
+    const speed = arduinoGenerator.valueToCode(block, 'SPD', 0) || '30'
     return `driveMecanum(${dir}, ${speed});\n`
   }
+  
   arduinoGenerator.forBlock['smarty_servo'] = function (block: any) {
     const id = block.getFieldValue('ID')
     const act = block.getFieldValue('ACT')
@@ -325,6 +349,7 @@ export function initMotorBlocks(arduinoGenerator: any) {
     if (act === 'OFF') return `offServo(${id});\n`
     return `runServo(${id}, ${angle});\n`
   }
+  
   arduinoGenerator.forBlock['runDcMotor'] = function (block: any) {
     const id = block.getFieldValue('ID')
     const act = block.getFieldValue('ACT')
@@ -334,10 +359,11 @@ export function initMotorBlocks(arduinoGenerator: any) {
     if (act === 'stopOn') return `stopMotor(${id}, 1);\n`
     return `reverseMotor(${id});\n`
   }
+  
   arduinoGenerator.forBlock['runDcMotor_acc'] = function (block: any) {
     const id = block.getFieldValue('ID')
     const st = arduinoGenerator.valueToCode(block, 'START', 0) || '0'
-    const fn = arduinoGenerator.valueToCode(block, 'FINAL', 0) || '255'
+    const fn = arduinoGenerator.valueToCode(block, 'FINAL', 0) || '100'
     const step = arduinoGenerator.valueToCode(block, 'STEP', 0) || '5'
     const intv = arduinoGenerator.valueToCode(block, 'INTV', 0) || '10'
     return `accDecMotor(${id}, ${st}, ${fn}, ${step}, ${intv});\n`
@@ -351,36 +377,54 @@ export function initMotorBlocks(arduinoGenerator: any) {
     const interval = arduinoGenerator.valueToCode(block, 'INTERVAL', 0) || '0'
     return `accDecMotor(${id}, ${startSpd}, ${finalSpd}, ${stepSpd}, ${interval});\n`
   }
+  
   arduinoGenerator.forBlock['reverseMotor'] = function (block: any) {
     return `reverseMotor(${block.getFieldValue('ID')});\n`
   }
+  
   arduinoGenerator.forBlock['runMotor'] = function (block: any) {
     const spd = arduinoGenerator.valueToCode(block, 'SPD', 0) || '0'
     return `runMotor(${block.getFieldValue('ID')}, ${spd});\n`
   }
+  
   arduinoGenerator.forBlock['stopMotor'] = function (block: any) {
     return `stopMotor(${block.getFieldValue('ID')}, ${block.getFieldValue('TYPE')});\n`
   }
+  
   arduinoGenerator.forBlock['waitAccDecMotor'] = function (block: any) {
     return `waitAccDecMotor(${block.getFieldValue('ID')});\n`
   }
+  
   arduinoGenerator.forBlock['offServo'] = function (block: any) {
     return `offServo(${block.getFieldValue('ID')});\n`
   }
+  
   arduinoGenerator.forBlock['runServo'] = function (block: any) {
     const deg = arduinoGenerator.valueToCode(block, 'DEG', 0) || '0'
     return `runServo(${block.getFieldValue('ID')}, ${deg});\n`
   }
+  
   arduinoGenerator.forBlock['setupServo'] = function (block: any) {
     const deg0 = arduinoGenerator.valueToCode(block, 'DEG0', 0) || '600'
     const deg180 = arduinoGenerator.valueToCode(block, 'DEG180', 0) || '2400'
     return `setupServo(${block.getFieldValue('ID')}, ${deg0}, ${deg180});\n`
   }
+  
   arduinoGenerator.forBlock['slowServo'] = function (block: any) {
     const start = arduinoGenerator.valueToCode(block, 'START', 0) || '0'
     const finalDeg = arduinoGenerator.valueToCode(block, 'FINAL', 0) || '0'
     const step = arduinoGenerator.valueToCode(block, 'STEP', 0) || '1'
     const interval = arduinoGenerator.valueToCode(block, 'INTERVAL', 0) || '10'
     return `slowServo(${block.getFieldValue('ID')}, ${start}, ${finalDeg}, ${step}, ${interval});\n`
+  }
+
+  // 🚀 [추가됨!] 메카넘 휠 변수/숫자 입력 블록 (mecanumMove) 제너레이터
+  arduinoGenerator.forBlock['mecanumMove'] = function (block: any) {
+    // 빈칸일 경우 기본값: 동작 '0'(앞으로), 속도 '50' 설정
+    const act = arduinoGenerator.valueToCode(block, 'ACT', 0) || '0'
+    const spd = arduinoGenerator.valueToCode(block, 'SPD', 0) || '50'
+    
+    // 기존과 동일한 driveMecanum 함수를 호출하여 동작시킵니다.
+    return `driveMecanum(${act}, ${spd});\n`
   }
 }

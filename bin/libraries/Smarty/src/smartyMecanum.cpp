@@ -1,7 +1,7 @@
 #include "smartyMecanum.h"
 
 void driveMecanum(int dir, int spd) {
-
+  
   int leftMotorDir, rightMotorDir;
   if (MOTOR_DIRECTION)
   {

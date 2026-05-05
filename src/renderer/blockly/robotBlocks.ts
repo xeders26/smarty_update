@@ -91,14 +91,14 @@ if (!document.getElementById('smarty-robot-custom-css')) {
   document.head.appendChild(style);
 }
 
-const ICON_HAND_BLUE = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMjE5NkYzIiBkPSJNMjg4IDMyYzAtMTcuNy0xNC4zLTMyLTMyLTMycy0zMiAxNC4zLTMyIDMyVjI1NmMwIDEuNy0uMSAzLjQtLjMgNUwyMDggMjQ1LjNjLTcuMi0xMS4yLTE5LjgtMTcuMy0zMi0xNy4zYy0yMi4xIDAtNDAgMTcuOS00MCA0MGMwIDUgLjkgOS44IDIuNSAxNC4ybC0zMi01MGMtMTEuNi0xOC4xLTM2LjItMjMuNC01NC4zLTExLjhzLTIzLjQgMzYuMi0xMS44IDU0LjNsOTYgMTUwYzI2LjkgNDIuMSA3Mi44IDY4LjMgMTIzIDY4LjNoNjRjNTMgMCA5Ni00MyA5Ni05NlYxMjhjMC0xNy43LTE0LjMtMzItMzItMzJzLTMyIDE0LjMtMzIgMzJWMjQwYzAgOC44LTcuMiAxNi0xNiAxNnMtMTYtNy4yLTE2LTE2VjY0YzAtMTcuNy0xNC4zLTMyLTMyLTMycy0zMiAxNC4zLTMyIDMyVjI0MGMwIDguOC03LjIgMTYtMTYgMTZzLTE2LTcuMi0xNi0xNlYzMnoiLz48L3N2Zz4=";
-const ICON_HAND_RED = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjRjQ0MzM2IiBkPSJNMjg4IDMyYzAtMTcuNy0xNC4zLTMyLTMyLTMycy0zMiAxNC4zLTMyIDMyVjI1NmMwIDEuNy0uMSAzLjQtLjMgNUwyMDggMjQ1LjNjLTcuMi0xMS4yLTE5LjgtMTcuMy0zMi0xNy4zYy0yMi4xIDAtNDAgMTcuOS00MCA0MGMwIDUgLjkgOS44IDIuNSAxNC4ybC0zMi01MGMtMTEuNi0xOC4xLTM2LjItMjMuNC01NC4zLTExLjhzLTIzLjQgMzYuMi0xMS44IDU0LjNsOTYgMTUwYzI2LjkgNDIuMSA3Mi44IDY4LjMgMTIzIDY4LjNoNjRjNTMgMCA5Ni00MyA5Ni05NlYxMjhjMC0xNy43LTE0LjMtMzItMzItMzJzLTMyIDE0LjMtMzIgMzJWMjQwYzAgOC44LTcuMiAxNi0xNiAxNnMtMTYtNy4yLTE2LTE2VjY0YzAtMTcuNy0xNC4zLTMyLTMyLTMycy0zMiAxNC4zLTMyIDMyVjI0MGMwIDguOC03LjIgMTYtMTYgMTZzLTE2LTcuMi0xNi0xNlYzMnoiLz48L3N2Zz4=";
-const ICON_SLIDE_BLUE = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzIxOTZFMyIgZD0iTTMgMTl2LTJoMnYtNEgzdi0yaDR2LTRINVY1aDZ2MTRoMTB2Mkgzem04LTEyaDNMMTkgMTZoLTNsLTUtOXoiLz48L3N2Zz4=";
-const ICON_SLIDE_RED = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI0Y0NDMzNiIgZD0iTTMgMTl2LTJoMnYtNEgzdi0yaDR2LTRINVY1aDZ2MTRoMTB2Mkgzem04LTEyaDNMMTkgMTZoLTNsLTUtOXoiLz48L3N2Zz4=";
+const ICON_HAND_BLUE = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMjg4IDMyYzAtMTcuNy0xNC4zLTMyLTMyLTMycy0zMiAxNC4zLTMyIDMyVjI1NmMwIDEuNy0uMSAzLjQtLjMgNUwyMDggMjQ1LjNjLTcuMi0xMS4yLTE5LjgtMTcuMy0zMi0xNy4zYy0yMi4xIDAtNDAgMTcuOS00MCA0MGMwIDUgLjkgOS44IDIuNSAxNC4ybC0zMi01MGMtMTEuNi0xOC4xLTM2LjItMjMuNC01NC4zLTExLjhzLTIzLjQgMzYuMi0xMS44IDU0LjNsOTYgMTUwYzI2LjkgNDIuMSA3Mi44IDY4LjMgMTIzIDY4LjNoNjRjNTMgMCA5Ni00MyA5Ni05NlYxMjhjMC0xNy43LTE0LjMtMzItMzItMzJzLTMyIDE0LjMtMzIgMzJWMjQwYzAgOC44LTcuMiAxNi0xNiAxNnMtMTYtNy4yLTE2LTE2VjY0YzAtMTcuNy0xNC4zLTMyLTMyLTMycy0zMiAxNC4zLTMyIDMyVjI0MGMwIDguOC03LjIgMTYtMTYgMTZzLTE2LTcuMi0xNi0xNlYzMnoiLz48L3N2Zz4=";
+const ICON_HAND_RED = ICON_HAND_BLUE;
+const ICON_SLIDE_BLUE = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI0ZGRkZGRiIgZD0iTTMgMTl2LTJoMnYtNEgzdi0yaDR2LTRINVY1aDZ2MTRoMTB2Mkgzem04LTEyaDNMMTkgMTZoLTNsLTUtOXoiLz48L3N2Zz4=";
+const ICON_SLIDE_RED = ICON_SLIDE_BLUE;
 const WARNING_ICON_RIGHT = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI0ZGQzEwNyIgc3Ryb2tlPSIjRTY1MTAwIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZD0iTTEyIDJMMSAyMWgyMkwxMiAyem0xIDE2aC0ydi0yaDJ2MnptMC00aC0ydi00aDJ2NHoiLz48L3N2Zz4=";
 
 // =========================================================
-// 🧱 4. 로봇 블록 초기화 함수 (기존과 동일)
+// 🧱 4. 로봇 블록 초기화 함수 (타이핑 끊김 완벽 해결!)
 // =========================================================
 export function initRobotBlocks(arduinoGenerator: any) {
   
@@ -112,10 +112,8 @@ export function initRobotBlocks(arduinoGenerator: any) {
         this.appendDummyInput()
             .appendField(new Blockly.FieldImage(`data:image/svg+xml;base64,${iconB64}`, 18, 18, "*"))
             .appendField(new Blockly.FieldLabel(keyword, `smarty-text-${keyword === '블루' ? 'blue' : 'red'}`))
-            .appendField(labelTarget + ' ') 
-            .appendField(new Blockly.FieldDropdown([
-              ['S1', 'S1'], ['S2', 'S2'], ['S3', 'S3'], ['S4', 'S4']
-            ]), 'PORT');
+            // 🌟 드롭다운을 완전히 삭제하고 이름표만 남김
+            .appendField(labelTarget); 
             
         const angleInput = this.appendValueInput('ANGLE')
             .setCheck('Number')
@@ -123,9 +121,11 @@ export function initRobotBlocks(arduinoGenerator: any) {
             .appendField(new Blockly.FieldLabel(String(defaultMin)), 'MIN_LABEL')
             .appendField(' ≤');
 
+        // 기존 WARN_DUMMY 코드
         this.appendDummyInput('WARN_DUMMY')
             .appendField('≤ ')
-            .appendField(new Blockly.FieldLabel(String(defaultMax)), 'MAX_LABEL');
+            .appendField(new Blockly.FieldLabel(String(defaultMax)), 'MAX_LABEL')
+            .appendField(new Blockly.FieldImage("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PC9zdmc+", 22, 22, ""), 'WARN_IMG'); 
 
         const shadowXml = Blockly.utils.xml.textToDom('<shadow type="math_number"><field name="NUM">0</field></shadow>');
         angleInput.connection.setShadowDom(shadowXml);
@@ -155,7 +155,6 @@ export function initRobotBlocks(arduinoGenerator: any) {
         }
 
         this.setTooltip(`현재 설정된 허용 범위: ${currentMin}도 ~ ${currentMax}도`);
-        this.setWarningText(null); 
 
         const angleBlock = this.getInputTargetBlock('ANGLE');
         
@@ -165,6 +164,7 @@ export function initRobotBlocks(arduinoGenerator: any) {
           
           let hasError = (val < currentMin || val > currentMax);
 
+          // SVG 테두리 색상 변경 (렌더링을 덮어쓰지 않으므로 입력창이 닫히지 않음!)
           setTimeout(() => {
             if (angleBlock.svgGroup_) {
               const paths = angleBlock.svgGroup_.querySelectorAll('path.blocklyPath');
@@ -182,22 +182,24 @@ export function initRobotBlocks(arduinoGenerator: any) {
             }
           }, 10);
 
-          if (hasError) {
-            if (!this.getField('WARN_IMG')) {
-              const warnIcon = new Blockly.FieldImage(`data:image/svg+xml;base64,${WARNING_ICON_RIGHT}`, 22, 22, "오류");
-              this.getInput('WARN_DUMMY').appendField(warnIcon, 'WARN_IMG');
-            }
-            const errMsg = `⚠️ 제한 범위를 벗어났습니다!\n(허용 범위: ${currentMin}° ~ ${currentMax}°)`;
-            this.getField('WARN_IMG').setTooltip(errMsg);
-          } else {
-            if (this.getField('WARN_IMG')) {
-              this.getInput('WARN_DUMMY').removeField('WARN_IMG');
+          // 오른쪽 경고 아이콘 토글
+          const warnImgField = this.getField('WARN_IMG');
+          if (warnImgField) {
+            if (hasError) {
+              warnImgField.setValue(`data:image/svg+xml;base64,${WARNING_ICON_RIGHT}`);
+              warnImgField.setTooltip(`⚠️ 제한 범위를 벗어났습니다!\n(허용 범위: ${currentMin}° ~ ${currentMax}°)`);
+            } else {
+              warnImgField.setValue("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PC9zdmc+");
+              warnImgField.setTooltip("");
             }
           }
 
         } else {
-          if (this.getField('WARN_IMG')) {
-            this.getInput('WARN_DUMMY').removeField('WARN_IMG');
+          // 값이 아예 비어있을 땐 아이콘 지우기
+          const warnImgField = this.getField('WARN_IMG');
+          if (warnImgField) {
+             warnImgField.setValue("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PC9zdmc+");
+             warnImgField.setTooltip("");
           }
         }
       }
@@ -210,11 +212,15 @@ export function initRobotBlocks(arduinoGenerator: any) {
   Blockly.Blocks['moveRedSlide'] = createBlockDef('moveRedSlide', ICON_SLIDE_RED, '레드', '슬라이드 제어', '#F44336');
 
   // =========================================================
-  // 💻 5. C++ 코드 제너레이터 (기존과 동일)
+  // 💻 5. C++ 코드 제너레이터 
   // =========================================================
   const generateProtectedServoCode = function(block: any) {
-    const port = block.getFieldValue('PORT');
-    const angleCode = arduinoGenerator.valueToCode(block, 'ANGLE', 0) || '0';
+    // 🌟 블록 타입(이름)에 'Hand'가 포함되어 있으면 S2, 아니면(Slide) S1으로 내부에서 자동 고정!
+    const port = block.type.includes('Hand') ? 'S2' : 'S1';
+    
+    // 🌟 ORDER_ATOMIC 안전 보장: 코드가 누락되지 않도록 확실하게 파싱합니다.
+    const ORDER = arduinoGenerator.ORDER_ATOMIC !== undefined ? arduinoGenerator.ORDER_ATOMIC : 0;
+    const angleCode = arduinoGenerator.valueToCode(block, 'ANGLE', ORDER) || '0';
     
     let currentMin = Number(blockSettings[block.type]?.min);
     let currentMax = Number(blockSettings[block.type]?.max);
