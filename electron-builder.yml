@@ -20,6 +20,7 @@ files:
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
+  - "**/*.node"
   - resources/**
 win:
   executableName: my-arduino-blockly
@@ -47,7 +48,7 @@ linux:
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
-npmRebuild: false
+npmRebuild: true
 publish:
   provider: generic
   url: https://xeders.com/auto-updates
