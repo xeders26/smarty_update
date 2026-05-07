@@ -1,0 +1,80 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "arduino_main",
+        "id": "#@tXeLC2_5YfZ@p0(|)3",
+        "x": 50,
+        "y": 50,
+        "deletable": false,
+        "inputs": {
+          "SETUP": {
+            "block": {
+              "type": "smarty_begin",
+              "id": "$R_Ir@CG!Y{Lnh3hZv+2"
+            }
+          },
+          "LOOP": {
+            "block": {
+              "type": "controls_if",
+              "id": "~=ex0D_Hxp`]m%xwC7/r",
+              "inputs": {
+                "IF0": {
+                  "block": {
+                    "type": "arduino_serial_available",
+                    "id": "etUWe8*d54g^gG5Pb*Cy"
+                  }
+                },
+                "DO0": {
+                  "block": {
+                    "type": "arduino_serial_print",
+                    "id": "WPF^@N=Tqj:%4%RN6Fwq",
+                    "fields": {
+                      "NEWLINE": true
+                    },
+                    "inputs": {
+                      "TEXT": {
+                        "shadow": {
+                          "type": "text",
+                          "id": "-_NXDI]yBo4BYz/z`%+l",
+                          "fields": {
+                            "TEXT": "Hello!"
+                          }
+                        },
+                        "block": {
+                          "type": "arduino_serial_read",
+                          "id": ",p9p)pBQ_aL*TDyrU0nB",
+                          "fields": {
+                            "TYPE": "parseInt"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "next": {
+                "block": {
+                  "type": "arduino_delay",
+                  "id": "g:2B-;s,JY%tZ4R(Qwcc",
+                  "inputs": {
+                    "MS": {
+                      "shadow": {
+                        "type": "math_number",
+                        "id": "pGbf~OxO8#ZHj7Qw3}qz",
+                        "fields": {
+                          "NUM": 1000
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
