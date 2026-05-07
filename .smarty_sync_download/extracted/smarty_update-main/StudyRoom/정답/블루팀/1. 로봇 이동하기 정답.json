@@ -1,0 +1,270 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "arduino_main",
+        "id": "mp1Tx82[EWa^`$EQPxV/",
+        "x": 75,
+        "y": -3,
+        "deletable": false,
+        "inputs": {
+          "SETUP": {
+            "block": {
+              "type": "smarty_begin",
+              "id": "WgV/S2fX#Bca0!Q_Qo(,",
+              "next": {
+                "block": {
+                  "type": "smarty_variables_set",
+                  "id": "{[3!Ve*I48=HxJc{a-:^",
+                  "fields": {
+                    "VAR": {
+                      "id": "AJErk,~(%|e9N6vkt7Yl"
+                    }
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "math_number",
+                        "id": "L!;Xeh|tJ~7[Apu1q4f.",
+                        "fields": {
+                          "NUM": 0
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "LOOP": {
+            "block": {
+              "type": "controls_if",
+              "id": "P6CSFvUVJ$bz0itzgP#1",
+              "extraState": {
+                "elseIfCount": 0,
+                "hasElse": false
+              },
+              "inputs": {
+                "IF0": {
+                  "block": {
+                    "type": "availableBt",
+                    "id": "~jTRO9]Mt=,aN%y-C:8Z"
+                  }
+                },
+                "DO0": {
+                  "block": {
+                    "type": "smarty_variables_set",
+                    "id": "_{A`o,=HeidBV:X7mUgn",
+                    "fields": {
+                      "VAR": {
+                        "id": "X,C~#?o(f!Ftp2W:voKO"
+                      }
+                    },
+                    "inputs": {
+                      "VALUE": {
+                        "block": {
+                          "type": "smarty_bt_wait_cmd",
+                          "id": "?M79B[O`W~6}eO#0K44T"
+                        }
+                      }
+                    },
+                    "next": {
+                      "block": {
+                        "type": "smarty_variables_set",
+                        "id": "RmO@lcVW?~[{:WMJE@D%",
+                        "fields": {
+                          "VAR": {
+                            "id": ".Hc]72L^cSfzd]B1iE~,"
+                          }
+                        },
+                        "inputs": {
+                          "VALUE": {
+                            "block": {
+                              "type": "smarty_bt_wait_val",
+                              "id": "Tn|5oefI;`ReCeVT*,XS"
+                            }
+                          }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "controls_if",
+                            "id": "CuHLilzi*TZb3Jlc5Tk^",
+                            "extraState": {
+                              "elseIfCount": 1,
+                              "hasElse": false
+                            },
+                            "inputs": {
+                              "IF0": {
+                                "block": {
+                                  "type": "smarty_text_equals",
+                                  "id": "b#8d(hfWLfjTK*bi_.S#",
+                                  "inputs": {
+                                    "TEXT_A": {
+                                      "block": {
+                                        "type": "smarty_variables_get",
+                                        "id": "AXwqSou1BUw]RUd*eFsM",
+                                        "fields": {
+                                          "VAR": {
+                                            "id": "X,C~#?o(f!Ftp2W:voKO"
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "TEXT_B": {
+                                      "block": {
+                                        "type": "text",
+                                        "id": "!G.raLE%wyo9U|fs:o(V",
+                                        "fields": {
+                                          "TEXT": "D"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "DO0": {
+                                "block": {
+                                  "type": "mecanumMove",
+                                  "id": "^FD%.0ZVfq-Aa9|bR%VY",
+                                  "inputs": {
+                                    "ACT": {
+                                      "shadow": {
+                                        "type": "math_number",
+                                        "id": "qPLX.h%u*6BFS1n.l77(",
+                                        "fields": {
+                                          "NUM": 0
+                                        }
+                                      },
+                                      "block": {
+                                        "type": "smarty_variables_get",
+                                        "id": "u|!dY`#~njye*6bFI;7H",
+                                        "fields": {
+                                          "VAR": {
+                                            "id": ".Hc]72L^cSfzd]B1iE~,"
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "SPD": {
+                                      "shadow": {
+                                        "type": "math_number",
+                                        "id": "WnO9ze7*ZdY[}p+,Ws3%",
+                                        "fields": {
+                                          "NUM": 500
+                                        }
+                                      },
+                                      "block": {
+                                        "type": "smarty_variables_get",
+                                        "id": "{R^o!cEknJ*O|F%p89QH",
+                                        "fields": {
+                                          "VAR": {
+                                            "id": "AJErk,~(%|e9N6vkt7Yl"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "IF1": {
+                                "block": {
+                                  "type": "smarty_text_equals",
+                                  "id": "l^-QP~RY?KTh5^cH{6WM",
+                                  "inputs": {
+                                    "TEXT_A": {
+                                      "block": {
+                                        "type": "smarty_variables_get",
+                                        "id": "]8W,f,wPo/JlpAn@Hpa6",
+                                        "fields": {
+                                          "VAR": {
+                                            "id": "X,C~#?o(f!Ftp2W:voKO"
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "TEXT_B": {
+                                      "block": {
+                                        "type": "text",
+                                        "id": "Y-dfbkW~t5T1hug]Cdt(",
+                                        "fields": {
+                                          "TEXT": "P"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "DO1": {
+                                "block": {
+                                  "type": "smarty_variables_set",
+                                  "id": "ZQEux^io}!bNtaN}#{SO",
+                                  "fields": {
+                                    "VAR": {
+                                      "id": "AJErk,~(%|e9N6vkt7Yl"
+                                    }
+                                  },
+                                  "inputs": {
+                                    "VALUE": {
+                                      "block": {
+                                        "type": "smarty_variables_get",
+                                        "id": "WE8aV[Yh$iHEeLr+X34G",
+                                        "fields": {
+                                          "VAR": {
+                                            "id": ".Hc]72L^cSfzd]B1iE~,"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "next": {
+                "block": {
+                  "type": "arduino_delay",
+                  "id": "o+ebzX)bdRb%i[C7~it7",
+                  "inputs": {
+                    "MS": {
+                      "shadow": {
+                        "type": "math_number",
+                        "id": "7,kR5w{8AhAxDQj{yg|g",
+                        "fields": {
+                          "NUM": 10
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "variables": [
+    {
+      "name": "power",
+      "id": "AJErk,~(%|e9N6vkt7Yl",
+      "type": "int"
+    },
+    {
+      "name": "value",
+      "id": ".Hc]72L^cSfzd]B1iE~,",
+      "type": "char"
+    },
+    {
+      "name": "cmd",
+      "id": "X,C~#?o(f!Ftp2W:voKO",
+      "type": "char"
+    }
+  ]
+}
