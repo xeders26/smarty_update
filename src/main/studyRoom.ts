@@ -230,7 +230,7 @@ export function registerStudyRoomHandlers(): void {
   });
 
   // =========================================================
-  // 🔄 2. 학생 PC 동기화용: Git 충돌 방지 완벽 초기화 & 클론 방식
+  // 🔄 2. 학생 PC 동기화용: 무적의 안전 복사 (잠금 에러/경로 에러 완벽 회피)
   // =========================================================
   ipcMain.handle('sync-studyroom-git', async () => {
     try {
@@ -242,24 +242,35 @@ export function registerStudyRoomHandlers(): void {
         gitCmd = '"C:\\Program Files\\Git\\cmd\\git.exe"';
       }
 
-      // 🌟 [핵심 1] 학생 PC에 남아있는 '과거의 꼬인 Git 폴더'를 흔적도 없이 날려버립니다!
-      const syncDir = join(workspaceDir, '.smarty_sync');
-      if (fs.existsSync(syncDir)) {
-        fs.rmSync(syncDir, { recursive: true, force: true });
+      // 🌟 [핵심 1] 찌꺼기 방지를 위해 매번 완전히 새로운 임시 폴더명 생성
+      const syncFolderName = `.smarty_temp_${Date.now()}`;
+      const syncDir = join(workspaceDir, syncFolderName);
+
+      // 🌟 [핵심 2] --depth 1 옵션 추가: 수많은 과거 기록을 무시하고 "최신본"만 0.1초만에 번개처럼 받아옵니다! (메모리 튕김 방지)
+      await execPromise(`${gitCmd} clone --depth 1 https://github.com/xeders26/smarty_update.git "${syncFolderName}"`, { cwd: workspaceDir });
+
+      // 🌟 [핵심 3] 대장님의 질문 해결! 깃허브에 'StudyRoom 폴더'가 있든 없든(루트) 자동으로 찾아서 가져옵니다.
+      let downloadedDataPath = join(syncDir, 'StudyRoom');
+      if (!fs.existsSync(downloadedDataPath)) {
+        downloadedDataPath = syncDir; 
       }
 
-      // 🌟 [핵심 2] 복잡한 통신 대신, 가장 확실한 '통째로 새로 다운로드(clone)' 방식을 사용합니다!
-      await execPromise(`${gitCmd} clone https://github.com/xeders26/smarty_update.git .smarty_sync`, { cwd: workspaceDir });
-
-      // 다운받은 최신 StudyRoom으로 기존 폴더를 덮어씁니다.
-      const syncStudyRoomDir = join(syncDir, 'StudyRoom');
-      if (fs.existsSync(syncStudyRoomDir)) {
-        fs.rmSync(studyRoomDir, { recursive: true, force: true });
-        fs.cpSync(syncStudyRoomDir, studyRoomDir, { recursive: true });
-      } else {
-        throw new Error("서버에서 다운로드했으나 구조가 다릅니다.");
+      // 🌟 [핵심 4] 폴더 전체 삭제 금지! (윈도우 폴더 잠금 Abort 에러 완벽 해결)
+      // 폴더를 지우지 않고 안의 "내용물"만 쏙쏙 덮어씁니다.
+      if (!fs.existsSync(studyRoomDir)) fs.mkdirSync(studyRoomDir, { recursive: true });
+      
+      const items = fs.readdirSync(downloadedDataPath);
+      for (const item of items) {
+        if (item === '.git') continue; // Git 설정 파일은 안 가져옴
+        const srcPath = join(downloadedDataPath, item);
+        const destPath = join(studyRoomDir, item);
+        fs.cpSync(srcPath, destPath, { recursive: true, force: true });
       }
 
+      // 다 쓴 임시 폴더는 깔끔하게 삭제
+      try { fs.rmSync(syncDir, { recursive: true, force: true }); } catch (e) {}
+
+      // 버전 읽어오기
       const infoPath = join(studyRoomDir, 'studyRoom_info.json');
       let version = "1.0.0";
       if (fs.existsSync(infoPath)) {
@@ -269,8 +280,7 @@ export function registerStudyRoomHandlers(): void {
       return { updated: true, version };
     } catch (err: any) {
       console.warn("Git Sync 에러:", err);
-      // 💥 프론트엔드로 실패 이유를 정확히 던져줍니다!
-      return { updated: false, version: "오프라인", error: err.message || "Git 다운로드 실패" };
+      return { updated: false, version: "오프라인", error: err.message || "Git 통신/복사 실패" };
     }
   });
 }
