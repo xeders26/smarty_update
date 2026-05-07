@@ -56,6 +56,14 @@ function openAdminGitSyncModal() {
 
     <div id="adminStep2" style="display: none;">
       
+      <!-- 🌟 자동 로그인 토글 UI 추가 -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">
+        <div style="font-size: 13px; color: #aaa;">✅ 관리자 인증 완료</div>
+        <label style="font-size: 12px; color: #4cc71a; display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: bold; background: rgba(76, 199, 26, 0.1); padding: 5px 10px; border-radius: 20px;">
+          <input type="checkbox" id="autoLoginCheck" style="cursor: pointer; transform: scale(1.1); accent-color: #4cc71a;"> 다음부터 자동 로그인
+        </label>
+      </div>
+
       <div style="margin-bottom: 15px; background: rgba(76, 199, 26, 0.1); padding: 12px; border-radius: 6px; border: 1px solid rgba(76, 199, 26, 0.3); text-align: center;">
         <div style="font-size: 13px; color: #4cc71a; font-weight: bold; margin-bottom: 8px;">📂 학생 정답 폴더 / 자료실 관리</div>
         <button id="btnOpenStudyRoomManager" style="width: 100%; padding: 10px; background: #4cc71a; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 14px;">
@@ -108,12 +116,9 @@ function openAdminGitSyncModal() {
   `;
   document.head.appendChild(style);
 
-  // 로컬 스토리지에서 저장된 토큰 불러오기
+  // 🌟 로컬 스토리지에서 토큰 및 자동 로그인 상태 불러오기
   const savedToken = localStorage.getItem('smartyAdminToken');
-  if (savedToken) {
-    (document.getElementById('adminTokenInput') as HTMLInputElement).value = savedToken;
-    (document.getElementById('saveTokenCheck') as HTMLInputElement).checked = true;
-  }
+  const isAutoLogin = localStorage.getItem('smartyAdminAutoLogin') === 'true';
 
   const addHover = (id: string, color: string, hoverColor: string) => {
     const el = document.getElementById(id);
@@ -162,6 +167,20 @@ function openAdminGitSyncModal() {
     }
   };
 
+  // 🌟 자동 로그인 상태 체크박스 이벤트 연결
+  const autoLoginCheck = document.getElementById('autoLoginCheck') as HTMLInputElement;
+  autoLoginCheck.checked = isAutoLogin;
+  autoLoginCheck.addEventListener('change', (e) => {
+    const isChecked = (e.target as HTMLInputElement).checked;
+    if (isChecked) {
+      localStorage.setItem('smartyAdminAutoLogin', 'true');
+      localStorage.setItem('smartyAdminToken', sessionToken); // 자동 로그인 시 무조건 토큰 저장
+    } else {
+      localStorage.setItem('smartyAdminAutoLogin', 'false');
+    }
+  });
+
+  // 🌟 로그인 함수
   const authenticate = () => {
     const pwd = (document.getElementById('adminPwd') as HTMLInputElement).value;
     const token = (document.getElementById('adminTokenInput') as HTMLInputElement).value;
@@ -178,6 +197,9 @@ function openAdminGitSyncModal() {
         localStorage.setItem('smartyAdminToken', token);
       } else {
         localStorage.removeItem('smartyAdminToken');
+        // 토큰 저장을 해제하면 자동 로그인도 같이 해제
+        localStorage.setItem('smartyAdminAutoLogin', 'false');
+        autoLoginCheck.checked = false;
       }
 
       sessionToken = token;
@@ -237,6 +259,17 @@ function openAdminGitSyncModal() {
       btnPush.style.background = '#2196F3'; 
     }
   });
+
+  // 🌟 [핵심 변경] 자동 로그인 조건이 충족되면 즉시 Step2로 넘어갑니다!
+  if (savedToken && isAutoLogin) {
+    sessionToken = savedToken;
+    document.getElementById('adminStep1')!.style.display = 'none';
+    document.getElementById('adminStep2')!.style.display = 'block';
+    fetchSettings();
+  } else if (savedToken) {
+    (document.getElementById('adminTokenInput') as HTMLInputElement).value = savedToken;
+    (document.getElementById('saveTokenCheck') as HTMLInputElement).checked = true;
+  }
 }
 
 // =========================================================
@@ -266,7 +299,7 @@ export async function fetchLatestDataFromGit() {
 }
 
 // =========================================================
-// ⚙️ 환경설정 UI 초기화 (바로 여기가 잘리면 에러가 납니다!)
+// ⚙️ 환경설정 UI 초기화
 // =========================================================
 export function initSettingsModal(callbacks: {
   updateVisibility: (code: boolean, monitor: boolean) => void;

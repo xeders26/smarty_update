@@ -246,6 +246,9 @@ function createTreeElement(item: any, depth: number): HTMLElement {
         await (window as any).api.updateVisibleJson(visibleData);
       }
     }
+
+    // 🌟🌟 [핵심 해결] 가시성 체크박스를 누르면 로컬에 저장만 하던 것을 즉시 Git으로 쏴버립니다! 🌟🌟
+    await autoDeployToGit(checked ? "표시 설정(ON) 적용" : "숨김 설정(OFF) 적용");
   };
 
   const titleSpan = document.createElement('span'); 
@@ -431,7 +434,6 @@ function renderFileView(item: any) {
 
   setTimeout(() => {
     const previewDiv = document.getElementById('admin-blockly-preview'); if (!previewDiv) return;
-    // 🌟 에러가 났던 부분을 (Blockly.Themes as any).Dark 로 수정 완료!
     managerPreviewWorkspace = Blockly.inject(previewDiv, { readOnly: true, scrollbars: true, trashcan: false, renderer: 'zelos', theme: (Blockly.Themes as any).Dark, move: { scrollbars: true, drag: true, wheel: true }, zoom: { controls: true, wheel: true } });
     if (item.code) { Blockly.serialization.workspaces.load(typeof item.code === 'string' ? JSON.parse(item.code) : item.code, managerPreviewWorkspace); setTimeout(() => { managerPreviewWorkspace!.zoomToFit(); }, 100); }
   }, 100);

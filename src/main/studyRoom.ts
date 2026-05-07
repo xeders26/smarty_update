@@ -11,40 +11,34 @@ const execPromise = util.promisify(exec)
 
 export function registerStudyRoomHandlers(): void {
   
-  // 🌟 [핵심 변경] Windows 권한 문제(Permission denied) 해결
-  // 쓰기가 불가능한 Program Files 대신, 안전한 AppData(userData) 경로를 사용합니다.
+  // 🌟 [핵심 변경] 빈방 문제 해결! 원본 파일을 안전 구역으로 "복사"해옵니다!
+  // 🌟 [최종 수정본] 빈 방 문제 완벽 해결 & 설정 파일 절대 터치 금지!
   const getStudyRoomPath = () => {
-    if (!app.isPackaged) {
-      return join(process.cwd(), 'StudyRoom'); // 개발 모드
-    }
-
-    // 설치된 앱 모드: C:\Users\사용자\AppData\Roaming\앱이름\SmartyWorkspace
-    const workspacePath = join(app.getPath('userData'), 'SmartyWorkspace');
+    const isDev = !app.isPackaged;
+    const workspaceFolderName = isDev ? 'SmartyWorkspace_Dev' : 'SmartyWorkspace';
+    const workspacePath = join(app.getPath('userData'), workspaceFolderName);
     const studyRoomPath = join(workspacePath, 'StudyRoom');
 
-    // 만약 안전 구역(workspacePath)에 폴더가 없다면? (프로그램 최초 실행 시)
-    // Program Files에 있는 원본 자료들을 이곳으로 싹 복사해옵니다.
+    // 1. 안전 구역에 폴더가 아예 없으면 일단 빈 폴더 생성
     if (!fs.existsSync(studyRoomPath)) {
-      fs.mkdirSync(workspacePath, { recursive: true });
-      
-      const resourceStudyRoom = join(process.resourcesPath, 'StudyRoom');
-      if (fs.existsSync(resourceStudyRoom)) {
-        fs.cpSync(resourceStudyRoom, studyRoomPath, { recursive: true }); // 폴더 전체 복사
-      } else {
-        fs.mkdirSync(studyRoomPath, { recursive: true });
-      }
+      fs.mkdirSync(studyRoomPath, { recursive: true });
+    }
 
-      // smarty-config.json 도 같이 옮겨줍니다.
-      const resourceConfig = join(process.resourcesPath, 'smarty-config.json');
-      const workspaceConfig = join(workspacePath, 'smarty-config.json');
-      if (fs.existsSync(resourceConfig) && !fs.existsSync(workspaceConfig)) {
-        fs.copyFileSync(resourceConfig, workspaceConfig);
+    // 2. 🌟 [핵심 해결] 폴더는 있는데 안이 "텅텅 비어있다면?" 원본에서 무조건 꽉꽉 채워 넣습니다!
+    if (fs.readdirSync(studyRoomPath).length === 0) {
+      const sourceStudyRoom = isDev 
+        ? join(process.cwd(), 'StudyRoom') 
+        : join(process.resourcesPath, 'StudyRoom');
+
+      if (fs.existsSync(sourceStudyRoom)) {
+        fs.cpSync(sourceStudyRoom, studyRoomPath, { recursive: true }); 
       }
     }
     
-    return studyRoomPath;
+    // 💥 대장님을 화나게 했던 smarty-config.json 건드리는 코드는 우주 끝으로 날려버렸습니다! 절대 안 건드립니다!
+    
+    return studyRoomPath; 
   }
-
   ipcMain.handle('get-studyroom-tree', async () => {
     const studyRoomPath = getStudyRoomPath()
 
