@@ -238,14 +238,14 @@
                                     "DO0": {
                                       "block": {
                                         "type": "moveRedSlide",
-                                        "id": "M7Q$.pl:UD:x4#lsDA#|",
+                                        "id": "HQ)/-Uq9wh/^GB{h}c#f",
                                         "inputs": {
                                           "ANGLE": {
                                             "shadow": {
                                               "type": "math_number",
-                                              "id": "u(iy#N54mh7t?b(fR~3I",
+                                              "id": "r:HSUHdW!1nBSUTLcwG!",
                                               "fields": {
-                                                "NUM": 0
+                                                "NUM": 35
                                               }
                                             }
                                           }
@@ -275,23 +275,6 @@
                                             "block": {
                                               "type": "math_number",
                                               "id": "F,tgOSK!++.Ev^VpLjTn",
-                                              "fields": {
-                                                "NUM": 0
-                                              }
-                                            }
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "DO1": {
-                                      "block": {
-                                        "type": "moveRedSlide",
-                                        "id": "aFa}Sd9P73Y?%_]!rjx(",
-                                        "inputs": {
-                                          "ANGLE": {
-                                            "shadow": {
-                                              "type": "math_number",
-                                              "id": "6Ymow^bao]7Nu]d*mK?/",
                                               "fields": {
                                                 "NUM": 0
                                               }

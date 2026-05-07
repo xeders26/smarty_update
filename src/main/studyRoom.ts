@@ -1,6 +1,3 @@
-/*============================
-  src/main/studyRoom.ts    
-=============================*/
 import { app, ipcMain, dialog } from 'electron'
 import * as fs from 'fs'
 import { join, dirname, basename, relative } from 'path'
@@ -11,14 +8,11 @@ const execPromise = util.promisify(exec)
 
 export function registerStudyRoomHandlers(): void {
   
-  // 🌟 [핵심 변경] 개발 모드와 배포 모드를 완벽하게 격리! 대장님의 소스코드는 절대 건드리지 않습니다!
   const getStudyRoomPath = () => {
-    // 1. 배포판은 'SmartyWorkspace', 개발 모드일 때는 'SmartyWorkspace_Dev'라는 외부 격리 구역 사용!
     const workspaceFolderName = app.isPackaged ? 'SmartyWorkspace' : 'SmartyWorkspace_Dev';
     const workspacePath = join(app.getPath('userData'), workspaceFolderName);
     const studyRoomPath = join(workspacePath, 'StudyRoom');
 
-    // 2. 대장님의 소스코드(process.cwd())는 이제 단 한 줄도 쳐다보지 않습니다!
     if (!fs.existsSync(studyRoomPath)) {
       fs.mkdirSync(workspacePath, { recursive: true });
       
@@ -28,13 +22,19 @@ export function registerStudyRoomHandlers(): void {
       } else {
         fs.mkdirSync(studyRoomPath, { recursive: true });
       }
-
-      const resourceConfig = join(process.resourcesPath, 'smarty-config.json');
-      const workspaceConfig = join(workspacePath, 'smarty-config.json');
-      if (fs.existsSync(resourceConfig) && !fs.existsSync(workspaceConfig)) {
-        fs.copyFileSync(resourceConfig, workspaceConfig);
-      }
     }
+
+    const resourceConfig = join(process.resourcesPath, 'smarty-config.json');
+    const workspaceConfig = join(workspacePath, 'smarty-config.json');
+    if (fs.existsSync(resourceConfig) && !fs.existsSync(workspaceConfig)) {
+      fs.copyFileSync(resourceConfig, workspaceConfig);
+    }
+
+    // 🌟 [해결 1] 깃허브가 쓰레기 폴더(.smarty_)들을 쳐다보지도 않게 보호막(.gitignore) 강화!
+    const gitignorePath = join(workspacePath, '.gitignore');
+    const ignoreContent = "smarty-config.json\n.smarty_*\n";
+    fs.writeFileSync(gitignorePath, ignoreContent, 'utf-8');
+
     return studyRoomPath;
   }
 
@@ -186,6 +186,8 @@ export function registerStudyRoomHandlers(): void {
 
       if (!fs.existsSync(join(gitRootDir, '.git'))) return { updated: false, version: "오프라인 (Git 미설정)" };
 
+      await execPromise('git remote add origin https://github.com/xeders26/smarty_update.git', { cwd: gitRootDir }).catch(() => {});
+
       const { stdout } = await execPromise('git pull origin main', { cwd: gitRootDir });
       
       const infoPath = join(studyRoomDir, 'studyRoom_info.json');
@@ -202,7 +204,7 @@ export function registerStudyRoomHandlers(): void {
   ipcMain.handle('push-studyroom-git', async (_event, token) => {
     try {
       const studyRoomDir = getStudyRoomPath();
-      const gitRootDir = dirname(studyRoomDir); // 이제 이 경로는 AppData 쪽 안전한 경로가 됩니다.
+      const gitRootDir = dirname(studyRoomDir); 
       const remoteUrl = `https://${token}@github.com/xeders26/smarty_update.git`;
 
       const wrongGitPath = join(studyRoomDir, '.git');
@@ -218,7 +220,13 @@ export function registerStudyRoomHandlers(): void {
         await execPromise('git config user.email "admin@smarty.com"', { cwd: gitRootDir });
       }
       
-      await execPromise('git add .', { cwd: gitRootDir });
+      // 🌟 [해결 2] 깃허브 서버에 이미 올라가 있는 쓰레기 폴더 및 설정 파일을 찾아내서 삭제(캐시 클리어)
+      await execPromise('git rm -r --cached ".smarty_*"', { cwd: gitRootDir }).catch(() => {});
+      await execPromise('git rm --cached "smarty-config.json"', { cwd: gitRootDir }).catch(() => {});
+
+      // 🌟 [해결 3] 전체(.)를 올리지 않고, 우리가 필요한 "StudyRoom" 폴더 딱 하나만 정확하게 올립니다!
+      await execPromise('git add StudyRoom', { cwd: gitRootDir });
+      
       await execPromise(`git commit -m "🚀 자료실 자동 배포 (버전 업데이트)"`, { cwd: gitRootDir }).catch(() => console.log("새로운 커밋 없음"));
       
       await execPromise(`git push -f "${remoteUrl}" HEAD:main`, { cwd: gitRootDir });

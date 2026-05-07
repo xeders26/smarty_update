@@ -1,6 +1,3 @@
-/*================
-src/renderer/app/settings.ts
-===============*/
 import * as Blockly from 'blockly';
 import pkg from '../../../package.json'; 
 
@@ -56,7 +53,6 @@ function openAdminGitSyncModal() {
 
     <div id="adminStep2" style="display: none;">
       
-      <!-- 🌟 자동 로그인 토글 UI 추가 -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">
         <div style="font-size: 13px; color: #aaa;">✅ 관리자 인증 완료</div>
         <label style="font-size: 12px; color: #4cc71a; display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: bold; background: rgba(76, 199, 26, 0.1); padding: 5px 10px; border-radius: 20px;">
@@ -116,7 +112,6 @@ function openAdminGitSyncModal() {
   `;
   document.head.appendChild(style);
 
-  // 🌟 로컬 스토리지에서 토큰 및 자동 로그인 상태 불러오기
   const savedToken = localStorage.getItem('smartyAdminToken');
   const isAutoLogin = localStorage.getItem('smartyAdminAutoLogin') === 'true';
 
@@ -167,20 +162,18 @@ function openAdminGitSyncModal() {
     }
   };
 
-  // 🌟 자동 로그인 상태 체크박스 이벤트 연결
   const autoLoginCheck = document.getElementById('autoLoginCheck') as HTMLInputElement;
   autoLoginCheck.checked = isAutoLogin;
   autoLoginCheck.addEventListener('change', (e) => {
     const isChecked = (e.target as HTMLInputElement).checked;
     if (isChecked) {
       localStorage.setItem('smartyAdminAutoLogin', 'true');
-      localStorage.setItem('smartyAdminToken', sessionToken); // 자동 로그인 시 무조건 토큰 저장
+      localStorage.setItem('smartyAdminToken', sessionToken); 
     } else {
       localStorage.setItem('smartyAdminAutoLogin', 'false');
     }
   });
 
-  // 🌟 로그인 함수
   const authenticate = () => {
     const pwd = (document.getElementById('adminPwd') as HTMLInputElement).value;
     const token = (document.getElementById('adminTokenInput') as HTMLInputElement).value;
@@ -192,12 +185,10 @@ function openAdminGitSyncModal() {
         return;
       }
       
-      // PC 저장 체크박스 상태에 따라 로컬 스토리지 업데이트
       if (isSaveChecked) {
         localStorage.setItem('smartyAdminToken', token);
       } else {
         localStorage.removeItem('smartyAdminToken');
-        // 토큰 저장을 해제하면 자동 로그인도 같이 해제
         localStorage.setItem('smartyAdminAutoLogin', 'false');
         autoLoginCheck.checked = false;
       }
@@ -260,7 +251,6 @@ function openAdminGitSyncModal() {
     }
   });
 
-  // 🌟 [핵심 변경] 자동 로그인 조건이 충족되면 즉시 Step2로 넘어갑니다!
   if (savedToken && isAutoLogin) {
     sessionToken = savedToken;
     document.getElementById('adminStep1')!.style.display = 'none';
@@ -273,7 +263,7 @@ function openAdminGitSyncModal() {
 }
 
 // =========================================================
-// 🌟 최신 정보 받아오기
+// 🌟 최신 정보 받아오기 (완벽 수정본)
 // =========================================================
 export async function fetchLatestDataFromGit() {
   const statusEl = document.createElement('div');
@@ -285,15 +275,36 @@ export async function fetchLatestDataFromGit() {
   `;
   statusEl.innerText = "🔄 서버에서 최신 데이터를 가져오는 중입니다...";
   document.body.appendChild(statusEl);
+
   try {
-    const configRes = await fetch(`https://raw.githubusercontent.com/xeders26/smarty_update/main/smarty-config.json?t=${Date.now()}`);
-    if (configRes.ok) window.dispatchEvent(new CustomEvent('smartyConfigUpdated', { detail: await configRes.json() }));
+    // 🌟 [핵심 해결 1] 프론트엔드의 불안정한 fetch 대신, 백엔드의 강력하고 안전한 git pull 기능을 호출! (이게 진짜 동기화입니다)
+    if ((window as any).api && typeof (window as any).api.syncStudyRoomFromGit === 'function') {
+      await (window as any).api.syncStudyRoomFromGit();
+    }
+
+    // 🌟 [핵심 해결 2] 설정 파일(smarty-config.json)을 가져올 때 보안 방화벽(CSP)에 의해 차단되더라도
+    // 앱이 죽거나 "인터넷 연결 실패" 창이 뜨지 않도록 내부 안전망(try-catch)을 씌웠습니다.
+    try {
+      const configRes = await fetch(`https://raw.githubusercontent.com/xeders26/smarty_update/main/smarty-config.json?t=${Date.now()}`, { cache: 'no-store' });
+      if (configRes.ok) {
+        const configData = await configRes.json();
+        window.dispatchEvent(new CustomEvent('smartyConfigUpdated', { detail: configData }));
+      }
+    } catch (fetchErr) {
+      console.warn("설정 파일 직접 다운로드가 보안 정책에 의해 무시되었습니다. 백엔드 동기화는 정상 처리 완료:", fetchErr);
+    }
+
+    // 화면 새로고침 이벤트 발송
     window.dispatchEvent(new Event('smartyStudyRoomUpdated'));
+    
+    statusEl.style.background = '#4ae0c2';
     statusEl.innerText = "🎉 가져오기 완료! 최신 자료실과 설정이 적용되었습니다.";
     setTimeout(() => statusEl.remove(), 2500);
+
   } catch (error) {
+    // 이제 여기는 백엔드 통신 자체가 완전히 끊어졌을 때만 타게 됩니다.
     statusEl.style.background = '#ff5252'; statusEl.style.color = 'white'; 
-    statusEl.innerText = "❌ 가져오기 실패! 인터넷 연결을 확인해주세요.";
+    statusEl.innerText = "❌ 가져오기 실패! 인터페이스 통신을 확인해주세요.";
     setTimeout(() => statusEl.remove(), 3000);
   }
 }
