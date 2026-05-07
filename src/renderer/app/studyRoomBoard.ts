@@ -403,10 +403,14 @@ export async function initStudyRoomBoard(
           const syncResult = await (window as any).api.syncStudyRoomFromGit();
           if (syncResult && syncResult.updated) {
              syncAlert.innerHTML = `🎉 최신 버전(${syncResult.version})으로 업데이트 되었습니다!`;
+          } else if (syncResult && syncResult.error) {
+             // 💥 에러가 났을 때 화면에 빨간색으로 진짜 이유를 띄웁니다!
+             syncAlert.style.borderColor = "#ff6b6b";
+             syncAlert.style.color = "#ff6b6b";
+             syncAlert.innerHTML = `❌ 동기화 실패: ${syncResult.error.substring(0, 50)}`;
           } else {
              syncAlert.innerHTML = `✅ 이미 최신 자료실입니다.`;
           }
-          // 동기화가 끝나면 로컬 트리를 새로고침 합니다.
           await fetchLocalTree();
         } else {
           syncAlert.innerHTML = `⚠️ 오프라인 모드로 실행합니다. (동기화 API 없음)`;

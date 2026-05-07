@@ -183,7 +183,7 @@ export function registerStudyRoomHandlers(): void {
    // =========================================================
   // 🚀 1. 관리자 배포용: 격리 폴더에서 안전하게 서버로 전송
   // =========================================================
-  ipcMain.handle('push-studyroom-git', async (event, token) => {
+  ipcMain.handle('push-studyroom-git', async (_event, token) => {
     try {
       const studyRoomDir = getStudyRoomPath();
       const workspaceDir = dirname(studyRoomDir);
@@ -230,44 +230,34 @@ export function registerStudyRoomHandlers(): void {
   });
 
   // =========================================================
-  // 🔄 2. 학생 PC 동기화용: Git 설치 경로를 직접 타격합니다!
+  // 🔄 2. 학생 PC 동기화용: Git 충돌 방지 완벽 초기화 & 클론 방식
   // =========================================================
   ipcMain.handle('sync-studyroom-git', async () => {
     try {
       const studyRoomDir = getStudyRoomPath();
       const workspaceDir = dirname(studyRoomDir);
       
-      // 🌟 [핵심] 윈도우 환경변수(PATH)를 무시하고 Git 실행파일을 직접 찾습니다!
       let gitCmd = 'git';
       if (fs.existsSync('C:\\Program Files\\Git\\cmd\\git.exe')) {
         gitCmd = '"C:\\Program Files\\Git\\cmd\\git.exe"';
       }
 
-      // 악성 Git 폴더 제거
-      const oldGitPath = join(workspaceDir, '.git');
-      if (fs.existsSync(oldGitPath)) {
-        fs.rmSync(oldGitPath, { recursive: true, force: true });
-      }
-
+      // 🌟 [핵심 1] 학생 PC에 남아있는 '과거의 꼬인 Git 폴더'를 흔적도 없이 날려버립니다!
       const syncDir = join(workspaceDir, '.smarty_sync');
-      if (!fs.existsSync(syncDir)) fs.mkdirSync(syncDir, { recursive: true });
-
-      // 찾아낸 gitCmd로 강제 실행
-      if (!fs.existsSync(join(syncDir, '.git'))) {
-        await execPromise(`${gitCmd} init`, { cwd: syncDir });
-        await execPromise(`${gitCmd} branch -M main`, { cwd: syncDir });
+      if (fs.existsSync(syncDir)) {
+        fs.rmSync(syncDir, { recursive: true, force: true });
       }
-      await execPromise(`${gitCmd} remote remove origin`, { cwd: syncDir }).catch(()=>{});
-      await execPromise(`${gitCmd} remote add origin https://github.com/xeders26/smarty_update.git`, { cwd: syncDir });
 
-      // 서버 최신본 강제 덮어쓰기
-      await execPromise(`${gitCmd} fetch origin main`, { cwd: syncDir });
-      await execPromise(`${gitCmd} reset --hard origin/main`, { cwd: syncDir });
+      // 🌟 [핵심 2] 복잡한 통신 대신, 가장 확실한 '통째로 새로 다운로드(clone)' 방식을 사용합니다!
+      await execPromise(`${gitCmd} clone https://github.com/xeders26/smarty_update.git .smarty_sync`, { cwd: workspaceDir });
 
+      // 다운받은 최신 StudyRoom으로 기존 폴더를 덮어씁니다.
       const syncStudyRoomDir = join(syncDir, 'StudyRoom');
       if (fs.existsSync(syncStudyRoomDir)) {
         fs.rmSync(studyRoomDir, { recursive: true, force: true });
         fs.cpSync(syncStudyRoomDir, studyRoomDir, { recursive: true });
+      } else {
+        throw new Error("서버에서 다운로드했으나 구조가 다릅니다.");
       }
 
       const infoPath = join(studyRoomDir, 'studyRoom_info.json');
@@ -277,9 +267,10 @@ export function registerStudyRoomHandlers(): void {
       }
 
       return { updated: true, version };
-    } catch (err) {
+    } catch (err: any) {
       console.warn("Git Sync 에러:", err);
-      return { updated: false, version: "오프라인" };
+      // 💥 프론트엔드로 실패 이유를 정확히 던져줍니다!
+      return { updated: false, version: "오프라인", error: err.message || "Git 다운로드 실패" };
     }
   });
 }
