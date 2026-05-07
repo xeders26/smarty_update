@@ -11,34 +11,33 @@ const execPromise = util.promisify(exec)
 
 export function registerStudyRoomHandlers(): void {
   
-  // 🌟 [핵심 변경] 빈방 문제 해결! 원본 파일을 안전 구역으로 "복사"해옵니다!
-  // 🌟 [최종 수정본] 빈 방 문제 완벽 해결 & 설정 파일 절대 터치 금지!
+  // 🌟 [핵심 변경] 개발 모드와 배포 모드를 완벽하게 격리! 대장님의 소스코드는 절대 건드리지 않습니다!
   const getStudyRoomPath = () => {
-    const isDev = !app.isPackaged;
-    const workspaceFolderName = isDev ? 'SmartyWorkspace_Dev' : 'SmartyWorkspace';
+    // 1. 배포판은 'SmartyWorkspace', 개발 모드일 때는 'SmartyWorkspace_Dev'라는 외부 격리 구역 사용!
+    const workspaceFolderName = app.isPackaged ? 'SmartyWorkspace' : 'SmartyWorkspace_Dev';
     const workspacePath = join(app.getPath('userData'), workspaceFolderName);
     const studyRoomPath = join(workspacePath, 'StudyRoom');
 
-    // 1. 안전 구역에 폴더가 아예 없으면 일단 빈 폴더 생성
+    // 2. 대장님의 소스코드(process.cwd())는 이제 단 한 줄도 쳐다보지 않습니다!
     if (!fs.existsSync(studyRoomPath)) {
-      fs.mkdirSync(studyRoomPath, { recursive: true });
-    }
+      fs.mkdirSync(workspacePath, { recursive: true });
+      
+      const resourceStudyRoom = join(process.resourcesPath, 'StudyRoom');
+      if (fs.existsSync(resourceStudyRoom)) {
+        fs.cpSync(resourceStudyRoom, studyRoomPath, { recursive: true }); 
+      } else {
+        fs.mkdirSync(studyRoomPath, { recursive: true });
+      }
 
-    // 2. 🌟 [핵심 해결] 폴더는 있는데 안이 "텅텅 비어있다면?" 원본에서 무조건 꽉꽉 채워 넣습니다!
-    if (fs.readdirSync(studyRoomPath).length === 0) {
-      const sourceStudyRoom = isDev 
-        ? join(process.cwd(), 'StudyRoom') 
-        : join(process.resourcesPath, 'StudyRoom');
-
-      if (fs.existsSync(sourceStudyRoom)) {
-        fs.cpSync(sourceStudyRoom, studyRoomPath, { recursive: true }); 
+      const resourceConfig = join(process.resourcesPath, 'smarty-config.json');
+      const workspaceConfig = join(workspacePath, 'smarty-config.json');
+      if (fs.existsSync(resourceConfig) && !fs.existsSync(workspaceConfig)) {
+        fs.copyFileSync(resourceConfig, workspaceConfig);
       }
     }
-    
-    // 💥 대장님을 화나게 했던 smarty-config.json 건드리는 코드는 우주 끝으로 날려버렸습니다! 절대 안 건드립니다!
-    
-    return studyRoomPath; 
+    return studyRoomPath;
   }
+
   ipcMain.handle('get-studyroom-tree', async () => {
     const studyRoomPath = getStudyRoomPath()
 
@@ -180,107 +179,54 @@ export function registerStudyRoomHandlers(): void {
     return true;
   })
 
-   // =========================================================
-  // 🚀 1. 관리자 배포용: 격리 폴더에서 안전하게 서버로 전송
-  // =========================================================
+  ipcMain.handle('sync-studyroom-git', async () => {
+    try {
+      const studyRoomDir = getStudyRoomPath();
+      const gitRootDir = dirname(studyRoomDir); 
+
+      if (!fs.existsSync(join(gitRootDir, '.git'))) return { updated: false, version: "오프라인 (Git 미설정)" };
+
+      const { stdout } = await execPromise('git pull origin main', { cwd: gitRootDir });
+      
+      const infoPath = join(studyRoomDir, 'studyRoom_info.json');
+      let version = "1.0.0";
+      if (fs.existsSync(infoPath)) version = JSON.parse(fs.readFileSync(infoPath, 'utf-8')).version || "1.0.0";
+
+      return { updated: !stdout.includes('Already up to date'), version };
+    } catch (err) {
+      console.warn("Git Pull 에러:", err);
+      return { updated: false, version: "오프라인" };
+    }
+  })
+
   ipcMain.handle('push-studyroom-git', async (_event, token) => {
     try {
       const studyRoomDir = getStudyRoomPath();
-      const workspaceDir = dirname(studyRoomDir);
+      const gitRootDir = dirname(studyRoomDir); // 이제 이 경로는 AppData 쪽 안전한 경로가 됩니다.
+      const remoteUrl = `https://${token}@github.com/xeders26/smarty_update.git`;
+
+      const wrongGitPath = join(studyRoomDir, '.git');
+      if (fs.existsSync(wrongGitPath)) {
+        fs.rmSync(wrongGitPath, { recursive: true, force: true });
+      }
+
+      const correctGitPath = join(gitRootDir, '.git');
+      if (!fs.existsSync(correctGitPath)) {
+        await execPromise('git init', { cwd: gitRootDir });
+        await execPromise('git branch -M main', { cwd: gitRootDir });
+        await execPromise('git config user.name "SmartyAdmin"', { cwd: gitRootDir });
+        await execPromise('git config user.email "admin@smarty.com"', { cwd: gitRootDir });
+      }
       
-      // 🌟 [핵심] 꼬여버린 기존 Git 폴더 영구 삭제 (초기화)
-      const oldGitPath = join(workspaceDir, '.git');
-      if (fs.existsSync(oldGitPath)) {
-        fs.rmSync(oldGitPath, { recursive: true, force: true });
-      }
-
-      // 🌟 [핵심] Git 통신 전용 격리 폴더 생성
-      const syncDir = join(workspaceDir, '.smarty_sync');
-      if (!fs.existsSync(syncDir)) fs.mkdirSync(syncDir, { recursive: true });
-
-      // 격리 폴더 안에서만 Git 초기화
-      if (!fs.existsSync(join(syncDir, '.git'))) {
-        await execPromise('git init', { cwd: syncDir });
-        await execPromise('git branch -M main', { cwd: syncDir });
-      }
-      await execPromise('git remote remove origin', { cwd: syncDir }).catch(()=>{});
-      await execPromise(`git remote add origin https://xeders26:${token}@github.com/xeders26/smarty_update.git`, { cwd: syncDir });
-
-      // 서버의 최신 상태를 격리 폴더로 가져옴
-      await execPromise('git fetch origin main', { cwd: syncDir }).catch(()=>{});
-      await execPromise('git reset --hard origin/main', { cwd: syncDir }).catch(()=>{});
-
-      // 내 PC의 StudyRoom을 격리 폴더로 덮어쓰기
-      const syncStudyRoomDir = join(syncDir, 'StudyRoom');
-      if (fs.existsSync(syncStudyRoomDir)) {
-        fs.rmSync(syncStudyRoomDir, { recursive: true, force: true });
-      }
-      fs.cpSync(studyRoomDir, syncStudyRoomDir, { recursive: true });
-
-      // 격리 폴더에서 서버로 Push
-      await execPromise('git add StudyRoom', { cwd: syncDir });
-      await execPromise('git commit -m "🚀 자료실 업데이트"', { cwd: syncDir }).catch(()=>{});
-      await execPromise('git push origin main', { cwd: syncDir });
-
-      return { success: true };
+      await execPromise('git add .', { cwd: gitRootDir });
+      await execPromise(`git commit -m "🚀 자료실 자동 배포 (버전 업데이트)"`, { cwd: gitRootDir }).catch(() => console.log("새로운 커밋 없음"));
+      
+      await execPromise(`git push -f "${remoteUrl}" HEAD:main`, { cwd: gitRootDir });
+      
+      return true;
     } catch (err) {
       console.error("Git Push 에러:", err);
       throw err;
     }
-  });
-
-  // =========================================================
-  // 🔄 2. 학생 PC 동기화용: 무적의 안전 복사 (잠금 에러/경로 에러 완벽 회피)
-  // =========================================================
-  ipcMain.handle('sync-studyroom-git', async () => {
-    try {
-      const studyRoomDir = getStudyRoomPath();
-      const workspaceDir = dirname(studyRoomDir);
-      
-      let gitCmd = 'git';
-      if (fs.existsSync('C:\\Program Files\\Git\\cmd\\git.exe')) {
-        gitCmd = '"C:\\Program Files\\Git\\cmd\\git.exe"';
-      }
-
-      // 🌟 [핵심 1] 찌꺼기 방지를 위해 매번 완전히 새로운 임시 폴더명 생성
-      const syncFolderName = `.smarty_temp_${Date.now()}`;
-      const syncDir = join(workspaceDir, syncFolderName);
-
-      // 🌟 [핵심 2] --depth 1 옵션 추가: 수많은 과거 기록을 무시하고 "최신본"만 0.1초만에 번개처럼 받아옵니다! (메모리 튕김 방지)
-      await execPromise(`${gitCmd} clone --depth 1 https://github.com/xeders26/smarty_update.git "${syncFolderName}"`, { cwd: workspaceDir });
-
-      // 🌟 [핵심 3] 대장님의 질문 해결! 깃허브에 'StudyRoom 폴더'가 있든 없든(루트) 자동으로 찾아서 가져옵니다.
-      let downloadedDataPath = join(syncDir, 'StudyRoom');
-      if (!fs.existsSync(downloadedDataPath)) {
-        downloadedDataPath = syncDir; 
-      }
-
-      // 🌟 [핵심 4] 폴더 전체 삭제 금지! (윈도우 폴더 잠금 Abort 에러 완벽 해결)
-      // 폴더를 지우지 않고 안의 "내용물"만 쏙쏙 덮어씁니다.
-      if (!fs.existsSync(studyRoomDir)) fs.mkdirSync(studyRoomDir, { recursive: true });
-      
-      const items = fs.readdirSync(downloadedDataPath);
-      for (const item of items) {
-        if (item === '.git') continue; // Git 설정 파일은 안 가져옴
-        const srcPath = join(downloadedDataPath, item);
-        const destPath = join(studyRoomDir, item);
-        fs.cpSync(srcPath, destPath, { recursive: true, force: true });
-      }
-
-      // 다 쓴 임시 폴더는 깔끔하게 삭제
-      try { fs.rmSync(syncDir, { recursive: true, force: true }); } catch (e) {}
-
-      // 버전 읽어오기
-      const infoPath = join(studyRoomDir, 'studyRoom_info.json');
-      let version = "1.0.0";
-      if (fs.existsSync(infoPath)) {
-        version = JSON.parse(fs.readFileSync(infoPath, 'utf-8')).version || "1.0.0";
-      }
-
-      return { updated: true, version };
-    } catch (err: any) {
-      console.warn("Git Sync 에러:", err);
-      return { updated: false, version: "오프라인", error: err.message || "Git 통신/복사 실패" };
-    }
-  });
+  })
 }
