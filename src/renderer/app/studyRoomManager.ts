@@ -246,9 +246,7 @@ function createTreeElement(item: any, depth: number): HTMLElement {
         await (window as any).api.updateVisibleJson(visibleData);
       }
     }
-
-    // 🌟🌟 [핵심 해결] 가시성 체크박스를 누르면 로컬에 저장만 하던 것을 즉시 Git으로 쏴버립니다! 🌟🌟
-    await autoDeployToGit(checked ? "표시 설정(ON) 적용" : "숨김 설정(OFF) 적용");
+    // 🌟 대장님 요청: 체크박스 눌러도 자동 배포하지 않음! 로컬에만 저장!
   };
 
   const titleSpan = document.createElement('span'); 

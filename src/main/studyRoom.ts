@@ -183,15 +183,25 @@ export function registerStudyRoomHandlers(): void {
   ipcMain.handle('sync-studyroom-git', async () => {
     try {
       const studyRoomDir = getStudyRoomPath();
-      const gitRootDir = dirname(studyRoomDir); 
+      const gitRootDir = dirname(studyRoomDir);
 
-      if (!fs.existsSync(join(gitRootDir, '.git'))) return { updated: false, version: "오프라인 (Git 미설정)" };
+      // 🌟 학생 PC에 Git 저장소가 없으면 즉시 생성하고 서버 주소를 연결해 줍니다!
+      const gitPath = join(gitRootDir, '.git');
+      if (!fs.existsSync(gitPath)) {
+        await execPromise('git init', { cwd: gitRootDir });
+        await execPromise('git branch -M main', { cwd: gitRootDir });
+        // 토큰 없이 공개 주소로 연결 (학생들은 읽기만 하니까 토큰 불필요)
+        await execPromise('git remote add origin https://github.com/xeders26/smarty_update.git', { cwd: gitRootDir }).catch(() => {});
+      }
 
+      // 서버에서 최신 파일 당겨오기
       const { stdout } = await execPromise('git pull origin main', { cwd: gitRootDir });
-      
+
       const infoPath = join(studyRoomDir, 'studyRoom_info.json');
       let version = "1.0.0";
-      if (fs.existsSync(infoPath)) version = JSON.parse(fs.readFileSync(infoPath, 'utf-8')).version || "1.0.0";
+      if (fs.existsSync(infoPath)) {
+        version = JSON.parse(fs.readFileSync(infoPath, 'utf-8')).version || "1.0.0";
+      }
 
       return { updated: !stdout.includes('Already up to date'), version };
     } catch (err) {
