@@ -9,10 +9,10 @@
   },
   "moveBlueSlide": {
     "min": 0,
-    "max": 180
+    "max": 40
   },
   "moveRedSlide": {
     "min": 0,
-    "max": 180
+    "max": 40
   }
 }
