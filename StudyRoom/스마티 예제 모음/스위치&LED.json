@@ -1,0 +1,112 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "arduino_main",
+        "id": "rX#puy?m83-hXaNV0}$T",
+        "x": 50,
+        "y": 50,
+        "deletable": false,
+        "inputs": {
+          "SETUP": {
+            "block": {
+              "type": "smarty_begin",
+              "id": "Sx)+j5tLmCC~ceEm!J:L"
+            }
+          },
+          "LOOP": {
+            "block": {
+              "type": "controls_if",
+              "id": "o3qrl-G!=.P_yMlnfWaP",
+              "extraState": {
+                "elseIfCount": 1,
+                "hasElse": true
+              },
+              "inputs": {
+                "IF0": {
+                  "block": {
+                    "type": "readSw",
+                    "id": "n$:~d5aX$,~UuIgxD,E-",
+                    "fields": {
+                      "ID": "SW1"
+                    }
+                  }
+                },
+                "DO0": {
+                  "block": {
+                    "type": "smarty_led",
+                    "id": "uJXeQcawaA4We;axBH;v",
+                    "fields": {
+                      "ID": "LED1",
+                      "ACT": "ON"
+                    },
+                    "next": {
+                      "block": {
+                        "type": "smarty_led",
+                        "id": "Shs19Z]QvpnsyjAEW[%c",
+                        "fields": {
+                          "ID": "LED2",
+                          "ACT": "OFF"
+                        }
+                      }
+                    }
+                  }
+                },
+                "IF1": {
+                  "block": {
+                    "type": "readSw",
+                    "id": "8DHNaC?|8JE9N)8e6t]a",
+                    "fields": {
+                      "ID": "SW2"
+                    }
+                  }
+                },
+                "DO1": {
+                  "block": {
+                    "type": "smarty_led",
+                    "id": "=D?LB#Q/:^%LuvXQaG*+",
+                    "fields": {
+                      "ID": "LED1",
+                      "ACT": "OFF"
+                    },
+                    "next": {
+                      "block": {
+                        "type": "smarty_led",
+                        "id": "*{r)voh9@:}:.49}vkXv",
+                        "fields": {
+                          "ID": "LED2",
+                          "ACT": "ON"
+                        }
+                      }
+                    }
+                  }
+                },
+                "ELSE": {
+                  "block": {
+                    "type": "smarty_led",
+                    "id": "ol/FskOf8Yrq{;pH=-Ym",
+                    "fields": {
+                      "ID": "LED1",
+                      "ACT": "OFF"
+                    },
+                    "next": {
+                      "block": {
+                        "type": "smarty_led",
+                        "id": "gsWY+S{4}fSq*RoK:0?K",
+                        "fields": {
+                          "ID": "LED2",
+                          "ACT": "OFF"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
