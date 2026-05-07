@@ -19,6 +19,7 @@ export async function initStudyRoomBoard(
 ) {
   let studyRoomData: any[] = [];
   let activeSelections: any[] = [];
+  let currentVersion = "1.0.0"; // 🌟 버전 저장용 변수 추가!
 
   // 1. 스크롤바 디자인 적용
   if (!document.getElementById('explorer-scrollbar-style')) {
@@ -32,7 +33,7 @@ export async function initStudyRoomBoard(
     document.head.appendChild(style);
   }
 
-  // 2. 초기 로컬 자료실 데이터 로딩 (🌟 핵심: 여기서부터 가시성 필터링을 완벽하게 해버립니다)
+  // 2. 초기 로컬 자료실 데이터 로딩
   const fetchLocalTree = async () => {
     try {
       let rawTree = [];
@@ -40,11 +41,11 @@ export async function initStudyRoomBoard(
         rawTree = await (window as any).api.getStudyRoomTree();
       }
 
-      // 🌟 가시성(visible) 정보 가져오기
       let visibleMap: any = {};
       if ((window as any).api && (window as any).api.readStudyRoomInfo) {
         const info = await (window as any).api.readStudyRoomInfo();
         if (info && info.visible) visibleMap = info.visible;
+        if (info && info.version) currentVersion = info.version; // 🌟 버전 정보 저장!
       } else if ((window as any).api && (window as any).api.readVisibleJson) {
         visibleMap = await (window as any).api.readVisibleJson() || {};
       }
@@ -52,10 +53,17 @@ export async function initStudyRoomBoard(
       // 🌟 재귀 필터링: false로 설정된 '폴더'와 '파일'을 아예 트리에서 제거합니다.
       const applyVisibilityFilter = (items: any[]) => {
         return items.filter(item => {
-          // 관리자 화면에서 눈을 껐다(false)면 삭제!
-          if (visibleMap[item.relPath] === false) return false;
+          if (!item.relPath) return true;
+
+          // 🌟 [핵심] 윈도우(\)와 맥/리눅스(/) 경로 기호 완벽 호환 변환!
+          const pathWin = item.relPath.replace(/\//g, '\\');
+          const pathMac = item.relPath.replace(/\\/g, '/');
+
+          // 원본, 윈도우식, 맥식 셋 중 하나라도 숨김(false)이면 무조건 날립니다!
+          if (visibleMap[item.relPath] === false || visibleMap[pathWin] === false || visibleMap[pathMac] === false) {
+            return false;
+          }
           
-          // 폴더인 경우 하위 항목들도 똑같이 검사!
           if (item.type === 'folder' && item.children) {
             item.children = applyVisibilityFilter(item.children);
           }
@@ -200,10 +208,26 @@ export async function initStudyRoomBoard(
   }
 
   // 6. 칼럼 렌더링
+  // 6. 칼럼 렌더링
   async function renderColumns() {
     if (explorerContainer!.style.display !== 'flex') {
       explorerContainer!.style.display = 'flex';
     }
+
+    // 🌟 [추가] 좌측 하단에 흐리게 버전 표시
+    let versionDiv = document.getElementById('smarty-studyroom-version');
+    if (!versionDiv) {
+      versionDiv = document.createElement('div');
+      versionDiv.id = 'smarty-studyroom-version';
+      versionDiv.style.cssText = `
+        position: absolute; bottom: 8px; left: 12px;
+        font-family: 'Pretendard Variable', Pretendard, sans-serif;
+        font-size: 11px; color: rgba(255, 255, 255, 0.2); 
+        pointer-events: none; z-index: 100;
+      `;
+      explorerContainer!.appendChild(versionDiv);
+    }
+    versionDiv.innerHTML = `자료실 버전: v${currentVersion}`;
 
     let helpPanel = document.getElementById('helpPanel');
     if (!helpPanel) {
@@ -281,23 +305,30 @@ export async function initStudyRoomBoard(
           btn.innerHTML = (isFolder ? '📁 ' : '📝 ') + item.name + (isFolder ? '<span style="float:right; color:#aaaaaa;">▶</span>' : '');
           (btn as any).itemData = item;
 
+          // 🌟 [수정] padding과 margin-bottom을 대폭 줄여서 상하 간격을 좁혔습니다!
           btn.style.cssText = `
-            padding: 12px; margin-bottom: 6px; cursor: pointer; border-radius: 6px;
+            padding: 8px 12px; margin-bottom: 2px; cursor: pointer; border-radius: 6px;
             border: 1px solid transparent; background: transparent; color: #d4d4d4;
-            font-family: 'Pretendard Variable', Pretendard, sans-serif; font-size: 15px; font-weight: 500;
+            font-family: 'Pretendard Variable', Pretendard, sans-serif; font-size: 14px; font-weight: 500;
             transition: all 0.2s; user-select: none;
           `;
 
           btn.onmouseenter = async () => {
             if (activeSelections[idx] !== item) btn.style.background = 'rgba(255,255,255,0.1)';
             updateHelpPanel(item);
-            if (isFolder && activeSelections[idx] !== item) {
+            
+            // 🌟 [해결 포인트] isFolder 조건을 지웠습니다!
+            // 이제 파일(📝)이든 폴더(📁)든 마우스가 올라가면 무조건 초록색 테두리를 가져오고, 우측의 하위 칼럼을 닫습니다.
+            if (activeSelections[idx] !== item) {
               activeSelections[idx] = item;
               activeSelections.splice(idx + 1);
               await renderColumns();
             }
           };
 
+          btn.onmouseleave = () => {
+            if (activeSelections[idx] !== item) btn.style.background = 'transparent';
+          };
           btn.onmouseleave = () => {
             if (activeSelections[idx] !== item) btn.style.background = 'transparent';
           };

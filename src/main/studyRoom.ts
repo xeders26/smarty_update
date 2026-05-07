@@ -180,22 +180,95 @@ export function registerStudyRoomHandlers(): void {
     return true;
   })
 
+   // =========================================================
+  // 🚀 1. 관리자 배포용: 격리 폴더에서 안전하게 서버로 전송
+  // =========================================================
+  ipcMain.handle('push-studyroom-git', async (event, token) => {
+    try {
+      const studyRoomDir = getStudyRoomPath();
+      const workspaceDir = dirname(studyRoomDir);
+      
+      // 🌟 [핵심] 꼬여버린 기존 Git 폴더 영구 삭제 (초기화)
+      const oldGitPath = join(workspaceDir, '.git');
+      if (fs.existsSync(oldGitPath)) {
+        fs.rmSync(oldGitPath, { recursive: true, force: true });
+      }
+
+      // 🌟 [핵심] Git 통신 전용 격리 폴더 생성
+      const syncDir = join(workspaceDir, '.smarty_sync');
+      if (!fs.existsSync(syncDir)) fs.mkdirSync(syncDir, { recursive: true });
+
+      // 격리 폴더 안에서만 Git 초기화
+      if (!fs.existsSync(join(syncDir, '.git'))) {
+        await execPromise('git init', { cwd: syncDir });
+        await execPromise('git branch -M main', { cwd: syncDir });
+      }
+      await execPromise('git remote remove origin', { cwd: syncDir }).catch(()=>{});
+      await execPromise(`git remote add origin https://xeders26:${token}@github.com/xeders26/smarty_update.git`, { cwd: syncDir });
+
+      // 서버의 최신 상태를 격리 폴더로 가져옴
+      await execPromise('git fetch origin main', { cwd: syncDir }).catch(()=>{});
+      await execPromise('git reset --hard origin/main', { cwd: syncDir }).catch(()=>{});
+
+      // 내 PC의 StudyRoom을 격리 폴더로 덮어쓰기
+      const syncStudyRoomDir = join(syncDir, 'StudyRoom');
+      if (fs.existsSync(syncStudyRoomDir)) {
+        fs.rmSync(syncStudyRoomDir, { recursive: true, force: true });
+      }
+      fs.cpSync(studyRoomDir, syncStudyRoomDir, { recursive: true });
+
+      // 격리 폴더에서 서버로 Push
+      await execPromise('git add StudyRoom', { cwd: syncDir });
+      await execPromise('git commit -m "🚀 자료실 업데이트"', { cwd: syncDir }).catch(()=>{});
+      await execPromise('git push origin main', { cwd: syncDir });
+
+      return { success: true };
+    } catch (err) {
+      console.error("Git Push 에러:", err);
+      throw err;
+    }
+  });
+
+  // =========================================================
+  // 🔄 2. 학생 PC 동기화용: Git 설치 경로를 직접 타격합니다!
+  // =========================================================
   ipcMain.handle('sync-studyroom-git', async () => {
     try {
       const studyRoomDir = getStudyRoomPath();
-      const gitRootDir = dirname(studyRoomDir);
-
-      // 🌟 학생 PC에 Git 저장소가 없으면 즉시 생성하고 서버 주소를 연결해 줍니다!
-      const gitPath = join(gitRootDir, '.git');
-      if (!fs.existsSync(gitPath)) {
-        await execPromise('git init', { cwd: gitRootDir });
-        await execPromise('git branch -M main', { cwd: gitRootDir });
-        // 토큰 없이 공개 주소로 연결 (학생들은 읽기만 하니까 토큰 불필요)
-        await execPromise('git remote add origin https://github.com/xeders26/smarty_update.git', { cwd: gitRootDir }).catch(() => {});
+      const workspaceDir = dirname(studyRoomDir);
+      
+      // 🌟 [핵심] 윈도우 환경변수(PATH)를 무시하고 Git 실행파일을 직접 찾습니다!
+      let gitCmd = 'git';
+      if (fs.existsSync('C:\\Program Files\\Git\\cmd\\git.exe')) {
+        gitCmd = '"C:\\Program Files\\Git\\cmd\\git.exe"';
       }
 
-      // 서버에서 최신 파일 당겨오기
-      const { stdout } = await execPromise('git pull origin main', { cwd: gitRootDir });
+      // 악성 Git 폴더 제거
+      const oldGitPath = join(workspaceDir, '.git');
+      if (fs.existsSync(oldGitPath)) {
+        fs.rmSync(oldGitPath, { recursive: true, force: true });
+      }
+
+      const syncDir = join(workspaceDir, '.smarty_sync');
+      if (!fs.existsSync(syncDir)) fs.mkdirSync(syncDir, { recursive: true });
+
+      // 찾아낸 gitCmd로 강제 실행
+      if (!fs.existsSync(join(syncDir, '.git'))) {
+        await execPromise(`${gitCmd} init`, { cwd: syncDir });
+        await execPromise(`${gitCmd} branch -M main`, { cwd: syncDir });
+      }
+      await execPromise(`${gitCmd} remote remove origin`, { cwd: syncDir }).catch(()=>{});
+      await execPromise(`${gitCmd} remote add origin https://github.com/xeders26/smarty_update.git`, { cwd: syncDir });
+
+      // 서버 최신본 강제 덮어쓰기
+      await execPromise(`${gitCmd} fetch origin main`, { cwd: syncDir });
+      await execPromise(`${gitCmd} reset --hard origin/main`, { cwd: syncDir });
+
+      const syncStudyRoomDir = join(syncDir, 'StudyRoom');
+      if (fs.existsSync(syncStudyRoomDir)) {
+        fs.rmSync(studyRoomDir, { recursive: true, force: true });
+        fs.cpSync(syncStudyRoomDir, studyRoomDir, { recursive: true });
+      }
 
       const infoPath = join(studyRoomDir, 'studyRoom_info.json');
       let version = "1.0.0";
@@ -203,41 +276,10 @@ export function registerStudyRoomHandlers(): void {
         version = JSON.parse(fs.readFileSync(infoPath, 'utf-8')).version || "1.0.0";
       }
 
-      return { updated: !stdout.includes('Already up to date'), version };
+      return { updated: true, version };
     } catch (err) {
-      console.warn("Git Pull 에러:", err);
+      console.warn("Git Sync 에러:", err);
       return { updated: false, version: "오프라인" };
     }
-  })
-
-  ipcMain.handle('push-studyroom-git', async (_event, token) => {
-    try {
-      const studyRoomDir = getStudyRoomPath();
-      const gitRootDir = dirname(studyRoomDir); // 이제 이 경로는 AppData 쪽 안전한 경로가 됩니다.
-      const remoteUrl = `https://${token}@github.com/xeders26/smarty_update.git`;
-
-      const wrongGitPath = join(studyRoomDir, '.git');
-      if (fs.existsSync(wrongGitPath)) {
-        fs.rmSync(wrongGitPath, { recursive: true, force: true });
-      }
-
-      const correctGitPath = join(gitRootDir, '.git');
-      if (!fs.existsSync(correctGitPath)) {
-        await execPromise('git init', { cwd: gitRootDir });
-        await execPromise('git branch -M main', { cwd: gitRootDir });
-        await execPromise('git config user.name "SmartyAdmin"', { cwd: gitRootDir });
-        await execPromise('git config user.email "admin@smarty.com"', { cwd: gitRootDir });
-      }
-      
-      await execPromise('git add .', { cwd: gitRootDir });
-      await execPromise(`git commit -m "🚀 자료실 자동 배포 (버전 업데이트)"`, { cwd: gitRootDir }).catch(() => console.log("새로운 커밋 없음"));
-      
-      await execPromise(`git push -f "${remoteUrl}" HEAD:main`, { cwd: gitRootDir });
-      
-      return true;
-    } catch (err) {
-      console.error("Git Push 에러:", err);
-      throw err;
-    }
-  })
+  });
 }
