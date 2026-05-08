@@ -2,6 +2,8 @@
 /src/renderer/app/rcTab.ts
   *  🧑‍✈️ 스마티 원격 조종 탭 UI 초기화
   *  🚀 주요 기능: 조종 패널 리사이징, 블루투스 포트 관리, 실시간 터미널 모니터링, 상태 표시줄 개선등
+  *  🌟 SPP 블루투스 끊김 감지를 위한 Keep-Alive & Watchdog(Heartbeat) 시스템 적용
+  *  🌟 [추가] 조종 패널(cockpit-panel)에 연결 상태에 따른 레드/그린 언더글로우(Under-glow) LED 장착!
 =========================================*/
 export function initRcTabUI() {
   
@@ -20,7 +22,7 @@ export function initRcTabUI() {
     document.querySelectorAll('#hudPower').forEach(el => el.remove());
 
     // ==========================================
-    // 🎨 [추가] 디자인 수정용 CSS 강제 주입
+    // 🎨 [추가] 디자인 수정용 CSS 강제 주입 & LED 효과
     // ==========================================
     if (!document.getElementById('smartyRcDesignFix')) {
       const styleFix = document.createElement('style');
@@ -30,14 +32,34 @@ export function initRcTabUI() {
         #hudScreen::-webkit-scrollbar-track { background: #11141a; border-radius: 5px; }
         #hudScreen::-webkit-scrollbar-thumb { background: #3b4252; border-radius: 5px; border: 1px solid #11141a; }
         #hudScreen::-webkit-scrollbar-thumb:hover { background: #4c566a; }
-        .cockpit-panel { background: none !important; box-shadow: none !important; border: none !important; padding: 0 !important; }
+        
+        /* 🌟 조종 패널 게이밍 LED 언더글로우 효과 */
+        .cockpit-panel { 
+          background: #17181c !important; 
+          border-radius: 16px !important;
+          transition: box-shadow 0.4s ease-in-out, border-color 0.4s ease-in-out !important;
+        }
+        /* 끊김 상태 (Red LED) */
+        .disconnected-glow {
+          box-shadow: 0 0 45px rgba(255, 71, 87, 0.25), inset 0 0 10px rgba(255, 71, 87, 0.05) !important;
+          border: 1px solid rgba(255, 71, 87, 0.4) !important;
+        }
+        /* 연결 상태 (Green LED) */
+        .connected-glow {
+          box-shadow: 0 0 45px rgba(46, 204, 113, 0.35), inset 0 0 10px rgba(46, 204, 113, 0.1) !important;
+          border: 1px solid rgba(46, 204, 113, 0.5) !important;
+        }
+
         #rcArea { padding: 0 !important; overflow: hidden; }
       `;
       document.head.appendChild(styleFix);
     }
 
+    // 초기 상태: 붉은색 LED 켜기
+    cockpitPanel.classList.add('disconnected-glow');
+
     // ==========================================
-    // 🚀 모니터 동적 리사이징 (하단 짤림 완벽 방지 & 5px 여백)
+    // 🚀 모니터 동적 리사이징
     // ==========================================
     const updateRcScale = () => {
       if (rcArea.style.display === 'none') return;
@@ -62,7 +84,8 @@ export function initRcTabUI() {
 
       const panelHeight = cockpitPanel.offsetHeight || 520;
       const scaleY = currentHeight / panelHeight;
-      const finalScale = Math.min(scale, scaleY) * 0.96;
+      // LED 빛이 잘릴 수 있으므로 0.94로 약간 더 축소하여 여백 확보
+      const finalScale = Math.min(scale, scaleY) * 0.94;
 
       cockpitPanel.style.transform = `translate(-50%, -50%) scale(${finalScale})`;
     };
@@ -387,7 +410,7 @@ export function initRcTabUI() {
     if (controlWrapper) controlWrapper.addEventListener('mouseenter', loadBluetoothPorts);
 
     // ==========================================
-    // 📡 6. 통신 로직 및 완벽한 수신 엔진 (🚨 블루투스 고질병 완벽 수정)
+    // 📡 6. 통신 로직 및 완벽한 수신 엔진 (🚨 SPP 끊김 감지 시스템 탑재)
     // ==========================================
     let isConnected = false;
     let currentDirection = 10;
@@ -399,9 +422,22 @@ export function initRcTabUI() {
     let rxBuffer = ''; 
     const decoder = new TextDecoder(); 
 
+    let keepAliveTimer: any = null;
+    let rxWatchdogTimer: any = null;
+    let isWatchdogActive = false; 
+
     const forceDisconnectUI = () => {
       if (!isConnected) return;
       isConnected = false;
+
+      // 🌟 패널 배경 LED를 빨간색(Red)으로 변경
+      cockpitPanel.classList.remove('connected-glow');
+      cockpitPanel.classList.add('disconnected-glow');
+
+      if (keepAliveTimer) { clearInterval(keepAliveTimer); keepAliveTimer = null; }
+      if (rxWatchdogTimer) { clearTimeout(rxWatchdogTimer); rxWatchdogTimer = null; }
+      isWatchdogActive = false;
+
       const linkLight = document.getElementById('hudLink');
       const linkText = document.getElementById('hudLinkText');
       if (linkLight) { linkLight.style.background = '#ff4757'; linkLight.style.boxShadow = '0 0 10px #ff4757'; }
@@ -452,6 +488,10 @@ export function initRcTabUI() {
             isConnected = true;
             localStorage.setItem('last_smarty_port', selectedPort);
             
+            // 🌟 패널 배경 LED를 초록색(Green)으로 변경
+            cockpitPanel.classList.remove('disconnected-glow');
+            cockpitPanel.classList.add('connected-glow');
+
             const linkLight = document.getElementById('hudLink');
             if (linkLight) { linkLight.style.background = '#2ecc71'; linkLight.style.boxShadow = '0 0 15px #2ecc71'; }
             if (linkText) { linkText.textContent = '해제'; linkText.style.color = '#2ecc71'; }
@@ -462,6 +502,13 @@ export function initRcTabUI() {
             setTimeout(updateRcScale, 10);
             const screen = document.getElementById('hudScreen');
             if (screen) screen.innerHTML = `<div id="hudWelcome" style="color:#2ecc71; text-align:center; font-size:13px; font-weight:bold; margin-top: 15px;">-- 스마티 블루투스 통신 개시 --</div>`;
+
+            if (keepAliveTimer) clearInterval(keepAliveTimer);
+            keepAliveTimer = setInterval(() => {
+              if (isConnected) {
+                send2Bytes(68, currentDirection, true); 
+              }
+            }, 1000);
 
           } else { throw new Error("포트가 닫혀있거나 응답이 없습니다."); }
         } catch (error: any) {
@@ -481,6 +528,15 @@ export function initRcTabUI() {
       (window as any).electron.ipcRenderer.removeAllListeners('serial-data');
       (window as any).electron.ipcRenderer.on('serial-data', (event: any, rawData: any) => {
         try {
+          isWatchdogActive = true;
+          if (rxWatchdogTimer) clearTimeout(rxWatchdogTimer);
+          rxWatchdogTimer = setTimeout(() => {
+            if (isConnected && isWatchdogActive) {
+              console.warn("Watchdog timeout! Smarty stopped sending data.");
+              forceDisconnectUI();
+            }
+          }, 3500); 
+
           const rxLight = document.getElementById('hudRx');
           if (rxLight) {
             rxLight.style.background = '#2ecc71'; rxLight.style.boxShadow = '0 0 15px #2ecc71';
@@ -518,19 +574,21 @@ export function initRcTabUI() {
       });
     }
 
-    const send2Bytes = async (byte1: number, byte2: number) => {
+    const send2Bytes = async (byte1: number, byte2: number, silent = false) => {
       if (isConnected && (window as any).electron) {
         try {
           const data = new Uint8Array([byte1, byte2]);
           (window as any).electron.ipcRenderer.send('serial-write', data);
 
-          const txLight = document.getElementById('hudTx');
-          if (txLight) {
-            txLight.style.background = '#f39c12'; txLight.style.boxShadow = '0 0 15px #f39c12';
-            clearTimeout(txLightTimer);
-            txLightTimer = setTimeout(() => { txLight.style.background = '#34495e'; txLight.style.boxShadow = 'none'; }, 80);
+          if (!silent) {
+            const txLight = document.getElementById('hudTx');
+            if (txLight) {
+              txLight.style.background = '#f39c12'; txLight.style.boxShadow = '0 0 15px #f39c12';
+              clearTimeout(txLightTimer);
+              txLightTimer = setTimeout(() => { txLight.style.background = '#34495e'; txLight.style.boxShadow = 'none'; }, 80);
+            }
+            logToTerminal('TX', `[${byte1}, ${byte2}]`);
           }
-          logToTerminal('TX', `[${byte1}, ${byte2}]`);
         } catch (e) {
           forceDisconnectUI();
         }
@@ -548,7 +606,11 @@ export function initRcTabUI() {
       if (up && right) newDir = 1; else if (right && down) newDir = 3; else if (down && left) newDir = 5;
       else if (left && up) newDir = 7; else if (up) newDir = 0; else if (right) newDir = 2;
       else if (down) newDir = 4; else if (left) newDir = 6; else if (q) newDir = 9; else if (w) newDir = 8;
-      if (newDir !== currentDirection) { currentDirection = newDir; send2Bytes(68, currentDirection); }
+      
+      if (newDir !== currentDirection) { 
+        currentDirection = newDir; 
+        send2Bytes(68, currentDirection, false); 
+      }
     };
 
     let powerInterval: any = null;
@@ -568,8 +630,8 @@ export function initRcTabUI() {
     const handleKeyDown = (key: string) => {
       if (activeKeys.has(key)) return; 
       activeKeys.add(key); const nKey = key.toLowerCase(); 
-      if (nKey === 'a' || nKey === 'A') send2Bytes(70, 11); else if (nKey === 's' || nKey === 'S') send2Bytes(70, 21);
-      else if (nKey === 'z' || nKey === 'Z') send2Bytes(70, 31); else if (nKey === 'x' || nKey === 'X') send2Bytes(70, 41);
+      if (nKey === 'a' || nKey === 'A') send2Bytes(70, 11, false); else if (nKey === 's' || nKey === 'S') send2Bytes(70, 21, false);
+      else if (nKey === 'z' || nKey === 'Z') send2Bytes(70, 31, false); else if (nKey === 'x' || nKey === 'X') send2Bytes(70, 41, false);
       else if (nKey === '.' || nKey === 'pageup' || nKey === 'pgup') startPowerChange(1);
       else if (nKey === ',' || nKey === 'pagedown' || nKey === 'pgdn') startPowerChange(-1);
       else updateDirectionCommand();
@@ -585,8 +647,8 @@ export function initRcTabUI() {
         return; 
       }
       
-      if (nKey === 'a' || nKey === 'A') send2Bytes(70, 10); else if (nKey === 's' || nKey === 'S') send2Bytes(70, 20);
-      else if (nKey === 'z' || nKey === 'Z') send2Bytes(70, 30); else if (nKey === 'x' || nKey === 'X') send2Bytes(70, 40);
+      if (nKey === 'a' || nKey === 'A') send2Bytes(70, 10, false); else if (nKey === 's' || nKey === 'S') send2Bytes(70, 20, false);
+      else if (nKey === 'z' || nKey === 'Z') send2Bytes(70, 30, false); else if (nKey === 'x' || nKey === 'X') send2Bytes(70, 40, false);
       updateDirectionCommand();
     };
 
@@ -604,7 +666,7 @@ export function initRcTabUI() {
       lever.style.background = `linear-gradient(to right, #111 0%, #0984e3 0%, #00d2d3 ${percentage}%, #111 ${percentage}%)`;
     };
 
-    if (lever) { lever.addEventListener('input', () => { updateSpeed(); const val = parseInt(lever.value, 10); send2Bytes(80, val); }); }
+    if (lever) { lever.addEventListener('input', () => { updateSpeed(); const val = parseInt(lever.value, 10); send2Bytes(80, val, false); }); }
 
     const toggleButtonHighlight = (key: string, isActive: boolean) => {
       let cmdList = [key];
