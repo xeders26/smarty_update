@@ -1,5 +1,6 @@
 /*====================  
 src/renderer/app/appUI.ts
+  * 🌟 [업데이트] 투박한 스크롤바를 얇고 귀여운 디자인으로 전면 교체!
 ===============*/
 import * as Blockly from 'blockly';
 import { initSettingsModal } from './settings';
@@ -57,14 +58,64 @@ export function initAppUI(workspace: Blockly.WorkspaceSvg) {
   });
   themeObserver.observe(document.body, { attributes: true, attributeFilter:['class'] });
 
-  // 워크스페이스(배경) 기본 CSS
+  // 🌟 워크스페이스(배경) 및 귀여운 스크롤바 글로벌 CSS 주입
   if (!document.getElementById('smarty-app-base-css')) {
     const style = document.createElement('style');
     style.id = 'smarty-app-base-css';
     style.innerHTML = `
+      /* 테마별 스크롤바 컬러 변수 설정 */
+      body.dark-mode {
+        --smarty-scroll-color: #4c566a;
+        --smarty-scroll-hover: #00d2d3;
+      }
+      body:not(.dark-mode) {
+        --smarty-scroll-color: #bdc3c7;
+        --smarty-scroll-hover: #1dd1a1;
+      }
+
       body.dark-mode #minimapArea { background-color: #21252b !important; }
       body:not(.dark-mode) #minimapArea { background-color: #ecf0f1 !important; }
       body.dark-mode #serialMonitorContent { background-color: #21252b !important; color: #bdc3c7 !important; }
+
+      /* ==========================================
+         ✨ 1. 일반 패널 (코드창, 모니터) 스크롤바 커스텀
+         ========================================== */
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { 
+        background: var(--smarty-scroll-color); 
+        border-radius: 4px; 
+        border: 2px solid transparent; 
+        background-clip: padding-box; 
+      }
+      ::-webkit-scrollbar-thumb:hover { 
+        background-color: var(--smarty-scroll-hover); 
+      }
+
+      /* ==========================================
+         ✨ 2. Blockly 캔버스 & 툴박스(SVG) 스크롤바 커스텀
+         ========================================== */
+      /* 투박한 배경 제거 */
+      .blocklyScrollbarBackground { display: none !important; }
+      
+      /* 핸들 크기 및 여백 조정 */
+      .blocklyScrollbarVertical .blocklyScrollbarHandle { width: 6px !important; transform: translateX(6px); }
+      .blocklyScrollbarHorizontal .blocklyScrollbarHandle { height: 6px !important; transform: translateY(6px); }
+      
+      /* 기본 핸들 디자인 (둥글고 반투명하게) */
+      .blocklyScrollbarHandle {
+        fill: var(--smarty-scroll-color) !important;
+        fill-opacity: 0.6 !important;
+        rx: 3px !important; 
+        ry: 3px !important;
+        transition: fill-opacity 0.2s, fill 0.2s !important;
+      }
+      
+      /* 마우스 오버 시 예쁜 컬러로 발광 */
+      .blocklyScrollbarHandle:hover {
+        fill-opacity: 0.9 !important;
+        fill: var(--smarty-scroll-hover) !important;
+      }
     `;
     document.head.appendChild(style);
   }
@@ -148,7 +199,6 @@ export function initAppUI(workspace: Blockly.WorkspaceSvg) {
     setTimeout(() => Blockly.svgResize(workspace), 100);
   }
   
-  // 🌟 분리된 파일(settings.ts)의 설정 모달 초기화 함수 호출
   initSettingsModal({
     updateVisibility: (code, monitor) => {
       AppUIState.isCodeVisible = code;
