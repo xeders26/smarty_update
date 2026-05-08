@@ -179,25 +179,44 @@ export function registerStudyRoomHandlers(): void {
     return true;
   })
 
+  // =========================================================================
+  // 🌟 [핵심 해결] 오류를 내뿜던 병합(git pull)을 버리고, 강제 덮어쓰기(fetch+reset)로 교체!
+  // =========================================================================
   ipcMain.handle('sync-studyroom-git', async () => {
     try {
       const studyRoomDir = getStudyRoomPath();
       const gitRootDir = dirname(studyRoomDir); 
 
-      if (!fs.existsSync(join(gitRootDir, '.git'))) return { updated: false, version: "오프라인 (Git 미설정)" };
+      // 로컬에 .git 폴더 자체가 없으면 오류가 나지 않도록 초기화부터 진행
+      if (!fs.existsSync(join(gitRootDir, '.git'))) {
+        await execPromise('git init', { cwd: gitRootDir });
+        await execPromise('git branch -M main', { cwd: gitRootDir });
+      }
 
       await execPromise('git remote add origin https://github.com/xeders26/smarty_update.git', { cwd: gitRootDir }).catch(() => {});
 
-      const { stdout } = await execPromise('git pull origin main', { cwd: gitRootDir });
+      // 1. 업데이트 전 해시(버전) 기억
+      const oldHash = await execPromise('git rev-parse HEAD', { cwd: gitRootDir }).catch(() => ({ stdout: '' }));
       
+      // 2. 서버에서 최신 데이터 무조건 다운로드 (fetch)
+      await execPromise('git fetch origin main', { cwd: gitRootDir });
+      
+      // 3. 로컬 파일들의 상태를 묻지도 따지지도 않고 서버와 100% 똑같이 강제 일치! (충돌/병합 에러 완전 차단)
+      await execPromise('git reset --hard origin/main', { cwd: gitRootDir });
+      
+      // 4. 업데이트 후 해시 비교 (바뀌었다면 업데이트 된 것)
+      const newHash = await execPromise('git rev-parse HEAD', { cwd: gitRootDir }).catch(() => ({ stdout: '' }));
+      const isUpdated = oldHash.stdout.trim() !== newHash.stdout.trim();
+
       const infoPath = join(studyRoomDir, 'studyRoom_info.json');
       let version = "1.0.0";
       if (fs.existsSync(infoPath)) version = JSON.parse(fs.readFileSync(infoPath, 'utf-8')).version || "1.0.0";
 
-      return { updated: !stdout.includes('Already up to date'), version };
-    } catch (err) {
-      console.warn("Git Pull 에러:", err);
-      return { updated: false, version: "오프라인" };
+      return { updated: isUpdated, version };
+    } catch (err: any) {
+      console.warn("Git Sync 에러 발생:", err);
+      // 에러 메시지 프론트로 전달
+      return { updated: false, version: "오프라인", error: err.message || String(err) };
     }
   })
 

@@ -1,12 +1,8 @@
 /*========
   /src/renderer/app/studyRoomBoard.ts
   * - 예제 파일과 폴더를 트리 구조로 보여주는 사이드 패널입니다.
-  * - 파일을 클릭하면 상세 설명과 함께 블록 미리보기가 나타납니다.
-  * - 폴더를 클릭하면 해당 폴더의 하위 항목들이 새로운 칼럼으로 표시됩니다.
-  * - 🌟 [완벽수정] 자료실 우측 테두리가 화면 밖으로 잘리지 않도록 안전 여백 추가
-  * - 🌟 [디자인개선] 투박하고 두꺼운 Blockly 스크롤바를 얇고 귀엽게(Cute) 커스텀!
-  * - 🌟 [완벽수정] 네트워크 딜레이 제거! 클릭/호버 시 즉시 창이 열리고 백그라운드 동기화 진행
-  * - 🌟 [추가] 마우스 호버(Mouseover) 즉시 반응하여 안정적으로 열리도록 이벤트 추가
+  * - 🌟 [버그 완벽 해결] 창을 열 때마다 무조건 로컬 최신화! (캐싱 버그 제거)
+  * - 🌟 [버그 완벽 해결] 백그라운드 동기화 완료 시 열려있던 폴더 상태 보존 및 강제 렌더링!
   =========*/
 
 import * as Blockly from 'blockly';
@@ -23,7 +19,7 @@ export async function initStudyRoomBoard(
   let activeSelections: any[] = [];
   let currentVersion = "1.0.0"; 
 
-  // 1. 스크롤바 디자인 적용 (🌟 귀여운 스크롤바 CSS)
+  // 1. 스크롤바 디자인 적용
   if (!document.getElementById('explorer-scrollbar-style')) {
     const style = document.createElement('style');
     style.id = 'explorer-scrollbar-style';
@@ -32,34 +28,18 @@ export async function initStudyRoomBoard(
       .explorer-col::-webkit-scrollbar-thumb { background: #4cc71a; border-radius: 4px; }
       .explorer-col::-webkit-scrollbar-track { background: transparent; }
 
-      /* 🌟 Blockly 미리보기 창의 투박한 스크롤바를 얇고 귀엽게(Cute) 커스텀! */
-      #blockly-preview-div .blocklyScrollbarBackground {
-        display: none !important; 
-      }
-      #blockly-preview-div .blocklyScrollbarVertical .blocklyScrollbarHandle {
-        width: 6px !important; 
-        transform: translateX(6px); 
-      }
-      #blockly-preview-div .blocklyScrollbarHorizontal .blocklyScrollbarHandle {
-        height: 6px !important; 
-        transform: translateY(6px); 
-      }
+      #blockly-preview-div .blocklyScrollbarBackground { display: none !important; }
+      #blockly-preview-div .blocklyScrollbarVertical .blocklyScrollbarHandle { width: 6px !important; transform: translateX(6px); }
+      #blockly-preview-div .blocklyScrollbarHorizontal .blocklyScrollbarHandle { height: 6px !important; transform: translateY(6px); }
       #blockly-preview-div .blocklyScrollbarHandle {
-        fill: #4cc71a !important; 
-        fill-opacity: 0.5 !important; 
-        rx: 3px !important; 
-        ry: 3px !important;
-        transition: fill-opacity 0.2s, fill 0.2s; 
+        fill: #4cc71a !important; fill-opacity: 0.5 !important; rx: 3px !important; ry: 3px !important; transition: fill-opacity 0.2s, fill 0.2s; 
       }
-      #blockly-preview-div .blocklyScrollbarHandle:hover {
-        fill-opacity: 0.9 !important; 
-        fill: #3da115 !important;
-      }
+      #blockly-preview-div .blocklyScrollbarHandle:hover { fill-opacity: 0.9 !important; fill: #3da115 !important; }
     `;
     document.head.appendChild(style);
   }
 
-  // 2. 창 밖(외부) 크기 조절 리사이저 (두께 5px)
+  // 2. 창 밖(외부) 크기 조절 리사이저
   const createSiblingResizer = (targetElement: HTMLElement, isLeft: boolean, className: string) => {
     let resizer = document.createElement('div');
     resizer.className = className;
@@ -78,41 +58,32 @@ export async function initStudyRoomBoard(
         const newWidth = startWidth + dx;
         if (newWidth > 350) { 
           targetElement.style.flexGrow = '0';
-          targetElement.style.width = newWidth + 'px';
-          targetElement.style.minWidth = newWidth + 'px';
+          targetElement.style.width = newWidth + 'px'; targetElement.style.minWidth = newWidth + 'px';
           if (previewWorkspace) Blockly.svgResize(previewWorkspace);
         }
       } else {
         const dx = e.clientX - startX;
         const newWidth = startWidth + dx;
-        if (newWidth > 150) { 
-          targetElement.style.width = newWidth + 'px';
-          targetElement.style.minWidth = newWidth + 'px';
-        }
+        if (newWidth > 150) { targetElement.style.width = newWidth + 'px'; targetElement.style.minWidth = newWidth + 'px'; }
       }
     };
 
     const onMouseUp = () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-      document.body.style.cursor = 'default';
-      resizer.style.background = 'transparent';
+      document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp);
+      document.body.style.cursor = 'default'; resizer.style.background = 'transparent';
     };
 
     resizer.addEventListener('mousedown', (e: MouseEvent) => {
       e.preventDefault(); e.stopPropagation();
-      startX = e.clientX;
-      startWidth = targetElement.offsetWidth;
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-      document.body.style.cursor = 'col-resize';
-      resizer.style.background = 'rgba(76, 199, 26, 0.8)';
+      startX = e.clientX; startWidth = targetElement.offsetWidth;
+      document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp);
+      document.body.style.cursor = 'col-resize'; resizer.style.background = 'rgba(76, 199, 26, 0.8)';
     });
 
     return resizer;
   };
 
-  // 3. 로컬 자료실 데이터 로딩
+  // 3. 로컬 자료실 데이터 로딩 (가장 중요한 부분)
   const fetchLocalTree = async () => {
     try {
       let rawTree = [];
@@ -151,21 +122,42 @@ export async function initStudyRoomBoard(
   };
   await fetchLocalTree();
 
+  // 🌟 [핵심 함수] 화면 갱신 시, 유저가 열어놓은 폴더 위치(Selection)를 기억하는 특수 함수
+  const refreshDataAndKeepSelection = async () => {
+    await fetchLocalTree();
+    
+    // 데이터 객체 주소가 통째로 바뀌므로, 기존 선택 패스(relPath)를 기반으로 다시 매칭!
+    const newSelections: any[] = [];
+    let currentLevel = studyRoomData;
+    
+    for (const oldSel of activeSelections) {
+      if (!oldSel) break;
+      const found = currentLevel.find((i: any) => i.relPath === oldSel.relPath);
+      if (found) {
+        newSelections.push(found);
+        currentLevel = found.children || [];
+      } else {
+        break; // 폴더가 숨김 처리되었거나 삭제되었다면 매칭 중지
+      }
+    }
+    activeSelections = newSelections;
+
+    const explorerContainer = document.getElementById('my-custom-explorer');
+    if (explorerContainer && explorerContainer.style.display === 'flex') {
+      await renderColumns();
+    }
+  };
+
   // 4. 컨테이너 세팅 
   const explorerContainer = document.getElementById('my-custom-explorer');
   if (!explorerContainer) return;
 
   explorerContainer.style.transition = 'opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
-  explorerContainer.style.position = 'absolute';
-  explorerContainer.style.top = '0';
-  explorerContainer.style.bottom = '0';
-  explorerContainer.style.right = '15px'; 
-  explorerContainer.style.width = 'auto';
-  explorerContainer.style.height = 'auto'; 
-  
+  explorerContainer.style.position = 'absolute'; explorerContainer.style.top = '0';
+  explorerContainer.style.bottom = '0'; explorerContainer.style.right = '15px'; 
+  explorerContainer.style.width = 'auto'; explorerContainer.style.height = 'auto'; 
   explorerContainer.style.maxWidth = 'calc(100% - 100px)'; 
-  explorerContainer.style.boxSizing = 'border-box';
-  explorerContainer.style.overflowX = 'auto'; 
+  explorerContainer.style.boxSizing = 'border-box'; explorerContainer.style.overflowX = 'auto'; 
 
   const closeExplorerWindow = () => {
     if (explorerContainer.style.display === 'none') return;
@@ -175,10 +167,7 @@ export async function initStudyRoomBoard(
       const tb = workspace.getToolbox();
       if (tb && typeof tb.clearSelection === 'function') tb.clearSelection();
     }
-    if (previewWorkspace) {
-      previewWorkspace.dispose();
-      previewWorkspace = null;
-    }
+    if (previewWorkspace) { previewWorkspace.dispose(); previewWorkspace = null; }
   };
   (window as any).closeExplorerWindow = closeExplorerWindow;
 
@@ -192,22 +181,17 @@ export async function initStudyRoomBoard(
   };
   document.addEventListener('pointerdown', handleOutsideClick, true);
   document.addEventListener('mousedown', handleOutsideClick, true);
-  document.addEventListener('touchstart', handleOutsideClick, true);
 
   // 5. 헬프 패널 업데이트 
   function updateHelpPanel(item: any) {
     const hp = document.getElementById('helpPanel');
     if (!hp) return;
 
-    if (previewWorkspace) {
-      previewWorkspace.dispose();
-      previewWorkspace = null;
-    }
+    if (previewWorkspace) { previewWorkspace.dispose(); previewWorkspace = null; }
 
     if (item.type === 'file') {
       hp.innerHTML = `
         <div style="display: flex; flex-direction: row; width: 100%; height: 100%; gap: 0;">
-          
           <div id="hp-text-col" style="width: 40%; min-width: 200px; display: flex; flex-direction: column; overflow-y: auto; padding-right: 15px; box-sizing: border-box;">
             <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 700; font-size: 21px; color: #4cc71a; margin-bottom: 12px; border-bottom: 1px solid #3c3c3c; padding-bottom: 8px; pointer-events: none;">
               📝 ${item.name} 자료
@@ -216,16 +200,13 @@ export async function initStudyRoomBoard(
               ${item.help || '저장된 설명이 없습니다.'}
             </div>
           </div>
-
           <div id="hp-inner-resizer" style="width: 5px; cursor: col-resize; margin: 0 2px; flex-shrink: 0; background: transparent; transition: background 0.2s; border-radius: 3px;"></div>
-
           <div id="hp-block-col" style="flex: 1; min-width: 300px; display: flex; flex-direction: column; background: rgba(0,0,0,0.3); border: 1px solid #3c3c3c; border-radius: 12px; overflow: hidden;">
             <div style="padding: 10px; background: rgba(255,255,255,0.05); color: #aaa; font-size: 13px; font-weight: bold; text-align: center; border-bottom: 1px solid #3c3c3c; pointer-events: none;">
               🧩 블록 미리보기 (읽기 전용)
             </div>
             <div id="blockly-preview-div" style="flex: 1; width: 100%; height: 100%;"></div>
           </div>
-
         </div>
       `;
 
@@ -234,15 +215,9 @@ export async function initStudyRoomBoard(
         if (!previewDiv) return;
 
         previewWorkspace = Blockly.inject(previewDiv, {
-          readOnly: true,
-          scrollbars: true,
-          trashcan: false,
-          renderer: 'zelos', 
-          theme: workspace.getTheme(), 
-          move: { scrollbars: true, drag: true, wheel: true },
-          zoom: { controls: false, wheel: false, startScale: 0.7 }
+          readOnly: true, scrollbars: true, trashcan: false, renderer: 'zelos', 
+          theme: workspace.getTheme(), move: { scrollbars: true, drag: true, wheel: true }, zoom: { controls: false, wheel: false, startScale: 0.7 }
         });
-
         Blockly.svgResize(previewWorkspace);
 
         try {
@@ -254,61 +229,37 @@ export async function initStudyRoomBoard(
             const customColors = (window as any).__smartyBlockColors || (window as any).__blockColorMap;
             if (customColors) {
               previewWorkspace.getAllBlocks(false).forEach(block => {
-                if (!block.isShadow() && customColors[block.type] && typeof block.setColour === 'function') {
-                  block.setColour(customColors[block.type]);
-                }
+                if (!block.isShadow() && customColors[block.type] && typeof block.setColour === 'function') block.setColour(customColors[block.type]);
               });
             }
           }
         } catch (err) {
-          previewDiv.innerHTML = `
-            <div style="color:#ff6b6b; padding:20px; text-align:center; font-family: Pretendard; line-height: 1.5;">
-              <b>블록 데이터를 불러오지 못했습니다 😭</b>
-            </div>
-          `;
+          previewDiv.innerHTML = `<div style="color:#ff6b6b; padding:20px; text-align:center; font-family: Pretendard; line-height: 1.5;"><b>블록 데이터를 불러오지 못했습니다 😭</b></div>`;
         }
 
-        const innerResizer = document.getElementById('hp-inner-resizer');
-        const textCol = document.getElementById('hp-text-col');
+        const innerResizer = document.getElementById('hp-inner-resizer'); const textCol = document.getElementById('hp-text-col');
         if (innerResizer && textCol && hp) {
           let innerStartX = 0, innerStartWidth = 0;
           const onInnerMove = (e: MouseEvent) => {
             const newWidth = innerStartWidth + (e.clientX - innerStartX);
-            if (newWidth > 150 && newWidth < hp.clientWidth - 300) {
-              textCol.style.width = newWidth + 'px';
-              if (previewWorkspace) Blockly.svgResize(previewWorkspace);
-            }
+            if (newWidth > 150 && newWidth < hp.clientWidth - 300) { textCol.style.width = newWidth + 'px'; if (previewWorkspace) Blockly.svgResize(previewWorkspace); }
           };
-          const onInnerUp = () => {
-            document.removeEventListener('mousemove', onInnerMove);
-            document.removeEventListener('mouseup', onInnerUp);
-            document.body.style.cursor = 'default';
-            innerResizer.style.background = 'transparent';
-          };
+          const onInnerUp = () => { document.removeEventListener('mousemove', onInnerMove); document.removeEventListener('mouseup', onInnerUp); document.body.style.cursor = 'default'; innerResizer.style.background = 'transparent'; };
           innerResizer.addEventListener('mousedown', (e) => {
-            e.preventDefault(); e.stopPropagation();
-            innerStartX = e.clientX;
-            innerStartWidth = textCol.offsetWidth;
-            document.addEventListener('mousemove', onInnerMove);
-            document.addEventListener('mouseup', onInnerUp);
-            document.body.style.cursor = 'col-resize';
-            innerResizer.style.background = 'rgba(76, 199, 26, 0.8)';
+            e.preventDefault(); e.stopPropagation(); innerStartX = e.clientX; innerStartWidth = textCol.offsetWidth;
+            document.addEventListener('mousemove', onInnerMove); document.addEventListener('mouseup', onInnerUp);
+            document.body.style.cursor = 'col-resize'; innerResizer.style.background = 'rgba(76, 199, 26, 0.8)';
           });
           innerResizer.addEventListener('mouseenter', () => innerResizer.style.background = 'rgba(76, 199, 26, 0.4)');
           innerResizer.addEventListener('mouseleave', () => innerResizer.style.background = 'transparent');
         }
-
       }, 100);
 
     } else {
       hp.innerHTML = `
         <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; text-align: center; pointer-events: none;">
-          <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 700; font-size: 24px; color: #4cc71a; margin-bottom: 15px;">
-            📁 ${item.name} 폴더
-          </div>
-          <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 500; color: #aaaaaa; line-height: 1.6; font-size: 16px;">
-            왼쪽 목록에서 파일(📝)을 클릭하여 자료실 내용과 블록 코드를 확인하세요!
-          </div>
+          <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 700; font-size: 24px; color: #4cc71a; margin-bottom: 15px;">📁 ${item.name} 폴더</div>
+          <div style="font-family: 'Pretendard Variable', Pretendard, sans-serif; font-weight: 500; color: #aaaaaa; line-height: 1.6; font-size: 16px;">왼쪽 목록에서 파일(📝)을 클릭하여 자료실 내용과 블록 코드를 확인하세요!</div>
         </div>
       `;
     }
@@ -316,43 +267,28 @@ export async function initStudyRoomBoard(
 
   // 6. 칼럼 렌더링
   async function renderColumns() {
-    if (explorerContainer!.style.display !== 'flex') {
-      explorerContainer!.style.display = 'flex';
-    }
+    if (explorerContainer!.style.display !== 'flex') explorerContainer!.style.display = 'flex';
 
     let versionDiv = document.getElementById('smarty-studyroom-version');
     if (!versionDiv) {
-      versionDiv = document.createElement('div');
-      versionDiv.id = 'smarty-studyroom-version';
-      versionDiv.style.cssText = `
-        position: absolute; bottom: 8px; left: 12px;
-        font-family: 'Pretendard Variable', Pretendard, sans-serif;
-        font-size: 11px; color: rgba(255, 255, 255, 0.2); 
-        pointer-events: none; z-index: 100;
-      `;
+      versionDiv = document.createElement('div'); versionDiv.id = 'smarty-studyroom-version';
+      versionDiv.style.cssText = `position: absolute; bottom: 8px; left: 12px; font-family: 'Pretendard Variable', Pretendard, sans-serif; font-size: 11px; color: rgba(255, 255, 255, 0.2); pointer-events: none; z-index: 100;`;
       explorerContainer!.appendChild(versionDiv);
     }
     versionDiv.innerHTML = `자료실 버전: v${currentVersion}`;
 
     let helpPanel = document.getElementById('helpPanel');
     if (!helpPanel) {
-      helpPanel = document.createElement('div');
-      helpPanel.id = 'helpPanel';
-      helpPanel.style.cssText = `
-        flex-grow: 1; min-width: 480px; height: 100%; background: rgba(20, 20, 20, 0.4); padding: 30px; box-sizing: border-box;
-        border-left: 1px solid #3c3c3c; color: #d4d4d4; font-size: 16px; overflow: hidden; cursor: default;
-      `;
+      helpPanel = document.createElement('div'); helpPanel.id = 'helpPanel';
+      helpPanel.style.cssText = `flex-grow: 1; min-width: 480px; height: 100%; background: rgba(20, 20, 20, 0.4); padding: 30px; box-sizing: border-box; border-left: 1px solid #3c3c3c; color: #d4d4d4; font-size: 16px; overflow: hidden; cursor: default;`;
       helpPanel.innerHTML = `
         <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; text-align: center; pointer-events: none;">
           <div style="font-size: 50px; margin-bottom: 20px;">💡</div>
           <div style="font-size: 20px; font-weight: 600; color: #888; line-height: 1.5;">목록에서 자료실 파일을 선택하면<br>상세 설명과 블록 설계도가 여기에 표시됩니다.</div>
         </div>
       `;
-      helpPanel.addEventListener('wheel', (e) => e.stopPropagation());
-      explorerContainer!.appendChild(helpPanel);
-
-      const hpResizer = createSiblingResizer(helpPanel, true, 'hp-resizer');
-      explorerContainer!.insertBefore(hpResizer, helpPanel);
+      helpPanel.addEventListener('wheel', (e) => e.stopPropagation()); explorerContainer!.appendChild(helpPanel);
+      const hpResizer = createSiblingResizer(helpPanel, true, 'hp-resizer'); explorerContainer!.insertBefore(hpResizer, helpPanel);
     }
 
     let neededCols: any[] = [];
@@ -361,96 +297,54 @@ export async function initStudyRoomBoard(
     
     while (true) {
       neededCols.push({ depth: tempDepth, data: tempDir });
-      
       if (activeSelections[tempDepth] && activeSelections[tempDepth].type === 'folder') {
-        let children = activeSelections[tempDepth].children || [];
-        tempDir = children;
-        tempDepth++;
-      } else {
-        break;
-      }
+        let children = activeSelections[tempDepth].children || []; tempDir = children; tempDepth++;
+      } else { break; }
     }
 
-    Array.from(explorerContainer!.querySelectorAll('.explorer-col')).forEach((col: any) => {
-      if (parseInt(col.dataset.depth) >= neededCols.length) col.remove();
-    });
-    Array.from(explorerContainer!.querySelectorAll('.col-resizer')).forEach((resizer: any) => {
-      if (parseInt(resizer.dataset.depth) >= neededCols.length) resizer.remove();
-    });
+    Array.from(explorerContainer!.querySelectorAll('.explorer-col')).forEach((col: any) => { if (parseInt(col.dataset.depth) >= neededCols.length) col.remove(); });
+    Array.from(explorerContainer!.querySelectorAll('.col-resizer')).forEach((resizer: any) => { if (parseInt(resizer.dataset.depth) >= neededCols.length) resizer.remove(); });
 
     neededCols.forEach((colInfo) => {
-      const idx = colInfo.depth;
-      const dirData = colInfo.data;
-
+      const idx = colInfo.depth; const dirData = colInfo.data;
       let col = explorerContainer!.querySelector(`.explorer-col[data-depth="${idx}"]`) as any;
       let needsRebuild = false;
 
       if (!col) {
         needsRebuild = true;
-        col = document.createElement('div');
-        col.className = 'explorer-col';
-        col.dataset.depth = idx.toString();
-        col.style.cssText = `
-          width: 220px; min-width: 200px; height: 100%; background: transparent; border-right: 1px solid #3c3c3c;
-          overflow-y: auto; padding: 10px; box-sizing: border-box; flex-shrink: 0;
-        `;
-        col.addEventListener('mousedown', (e) => e.stopPropagation());
-        col.addEventListener('pointerdown', (e) => e.stopPropagation()); 
-        col.addEventListener('wheel', (e) => e.stopPropagation());
+        col = document.createElement('div'); col.className = 'explorer-col'; col.dataset.depth = idx.toString();
+        col.style.cssText = `width: 220px; min-width: 200px; height: 100%; background: transparent; border-right: 1px solid #3c3c3c; overflow-y: auto; padding: 10px; box-sizing: border-box; flex-shrink: 0;`;
+        col.addEventListener('mousedown', (e) => e.stopPropagation()); col.addEventListener('pointerdown', (e) => e.stopPropagation()); col.addEventListener('wheel', (e) => e.stopPropagation());
         
         const hpResizer = explorerContainer!.querySelector('.hp-resizer');
         explorerContainer!.insertBefore(col, hpResizer || document.getElementById('helpPanel'));
-      } else if (col.currentData !== dirData) {
-        needsRebuild = true;
-      }
+      } else if (col.currentData !== dirData) { needsRebuild = true; }
 
       if (needsRebuild) {
-        col.innerHTML = '';
-        col.currentData = dirData;
+        col.innerHTML = ''; col.currentData = dirData;
 
         dirData.forEach((item: any) => {
           if (item.name === 'visible.json' || item.name === 'studyRoom_info.json') return; 
 
-          const btn = document.createElement('div');
-          const isFolder = item.type === 'folder';
+          const btn = document.createElement('div'); const isFolder = item.type === 'folder';
           btn.innerHTML = (isFolder ? '📁 ' : '📝 ') + item.name + (isFolder ? '<span style="float:right; color:#aaaaaa;">▶</span>' : '');
           (btn as any).itemData = item;
 
-          btn.style.cssText = `
-            padding: 8px 12px; margin-bottom: 2px; cursor: pointer; border-radius: 6px;
-            border: 1px solid transparent; background: transparent; color: #d4d4d4;
-            font-family: 'Pretendard Variable', Pretendard, sans-serif; font-size: 14px; font-weight: 500;
-            transition: all 0.2s; user-select: none;
-          `;
+          btn.style.cssText = `padding: 8px 12px; margin-bottom: 2px; cursor: pointer; border-radius: 6px; border: 1px solid transparent; background: transparent; color: #d4d4d4; font-family: 'Pretendard Variable', Pretendard, sans-serif; font-size: 14px; font-weight: 500; transition: all 0.2s; user-select: none;`;
 
           btn.onmouseenter = async () => {
             if (activeSelections[idx] !== item) btn.style.background = 'rgba(255,255,255,0.1)';
             updateHelpPanel(item);
-            
-            if (activeSelections[idx] !== item) {
-              activeSelections[idx] = item;
-              activeSelections.splice(idx + 1);
-              await renderColumns();
-            }
+            if (activeSelections[idx] !== item) { activeSelections[idx] = item; activeSelections.splice(idx + 1); await renderColumns(); }
           };
 
-          btn.onmouseleave = () => {
-            if (activeSelections[idx] !== item) btn.style.background = 'transparent';
-          };
+          btn.onmouseleave = () => { if (activeSelections[idx] !== item) btn.style.background = 'transparent'; };
 
           btn.onclick = async (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            if (activeSelections[idx] === item) {
-              activeSelections.splice(idx);
-            } else {
-              activeSelections[idx] = item;
-              activeSelections.splice(idx + 1);
-              if (item.type === 'file') {
-                closeExplorerWindow();
-                loadFileCb(item);
-                return; 
-              }
+            e.stopPropagation(); e.preventDefault();
+            if (activeSelections[idx] === item) { activeSelections.splice(idx); } else {
+              activeSelections[idx] = item; activeSelections.splice(idx + 1);
+              if (item.type === 'file') { closeExplorerWindow(); loadFileCb(item); return; }
             }
             await renderColumns(); 
           };
@@ -463,56 +357,43 @@ export async function initStudyRoomBoard(
       }
 
       Array.from(col.children).forEach((btn: any) => {
-        const item = btn.itemData;
-        if (!item) return;
-        const isActive = activeSelections[idx] === item;
-        if (isActive) {
-          btn.style.borderColor = '#4cc71a';
-          btn.style.background = 'rgba(76, 199, 26, 0.2)';
-          btn.style.color = '#ffffff';
-          btn.style.fontWeight = '700';
-        } else {
-          btn.style.borderColor = 'transparent';
-          btn.style.background = 'transparent';
-          btn.style.color = '#d4d4d4';
-          btn.style.fontWeight = '500';
-        }
+        const item = btn.itemData; if (!item) return;
+        if (activeSelections[idx] === item) { btn.style.borderColor = '#4cc71a'; btn.style.background = 'rgba(76, 199, 26, 0.2)'; btn.style.color = '#ffffff'; btn.style.fontWeight = '700'; } 
+        else { btn.style.borderColor = 'transparent'; btn.style.background = 'transparent'; btn.style.color = '#d4d4d4'; btn.style.fontWeight = '500'; }
       });
 
       let resizer = explorerContainer!.querySelector(`.col-resizer[data-depth="${idx}"]`) as any;
       if (!resizer) {
-        resizer = createSiblingResizer(col, false, 'col-resizer');
-        resizer.dataset.depth = idx.toString();
+        resizer = createSiblingResizer(col, false, 'col-resizer'); resizer.dataset.depth = idx.toString();
         explorerContainer!.insertBefore(resizer, col.nextSibling);
       }
     });
 
-    setTimeout(() => {
-       if (previewWorkspace) Blockly.svgResize(previewWorkspace);
-    }, 150);
+    setTimeout(() => { if (previewWorkspace) Blockly.svgResize(previewWorkspace); }, 150);
   }
 
-  // 🌟 7. 창 열기 로직 (완벽 개선: 딜레이 0초, 호버/클릭 동시 대응)
+  // 🌟 7. 창 열기 로직 (완벽 개선: 열기 직전 무조건 최신 데이터 강제 조회!)
   let isSyncing = false;
 
   (window as any).openExplorerWindow = async (forceOpen = false) => {
-    
-    // 이미 열려있는데 다시 실행되었을 때의 처리
     if (explorerContainer!.style.display === 'flex') {
-      if (!forceOpen) closeExplorerWindow(); // 마우스 호버(forceOpen)가 아니라 클릭이었다면 닫기 토글
+      if (!forceOpen) closeExplorerWindow(); 
       return;
     }
 
-    // 🚀 [핵심 1] 화면 로딩을 네트워크(Git)보다 무조건 우선! 즉시 띄웁니다!
     explorerContainer!.style.display = 'flex';
     explorerContainer!.style.opacity = '0';
     explorerContainer!.style.animation = 'none';
-    activeSelections = [];
+    activeSelections = []; // 새 창 열 때는 초기화
+
+    // 🚀 [정공법 1] 화면을 렌더링하기 직전 0.01초 만에 무조건 로컬 파일 시스템 최신화! 
+    await fetchLocalTree();
     await renderColumns();
+    
     void explorerContainer!.offsetWidth; 
     explorerContainer!.style.animation = 'smartyBoardOpen 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards';
 
-    // 🚀 [핵심 2] 화면이 열린 뒤, 백그라운드에서 조용히 Git 버전 체크 시작
+    // 🚀 백그라운드 동기화 진행
     if (isSyncing) return;
     isSyncing = true;
 
@@ -528,24 +409,23 @@ export async function initStudyRoomBoard(
     try {
       if ((window as any).api && (window as any).api.syncStudyRoomFromGit) {
         const syncResult = await (window as any).api.syncStudyRoomFromGit();
+        
+        // 🚀 [정공법 2] 깃허브 응답(updated)을 맹신하지 않고, 통신 완료 후 무조건 화면 강제 갱신!
+        await refreshDataAndKeepSelection();
+
         if (syncResult && syncResult.updated) {
            syncAlert.innerHTML = `🎉 최신 버전(${syncResult.version})으로 업데이트 되었습니다!`;
-           // 업데이트가 발생하면 백그라운드에서 데이터 다시 가져와서 화면만 새로고침
-           await fetchLocalTree();
-           await renderColumns();
         } else if (syncResult && syncResult.error) {
-           syncAlert.style.borderColor = "#ff6b6b";
-           syncAlert.style.color = "#ff6b6b";
+           syncAlert.style.borderColor = "#ff6b6b"; syncAlert.style.color = "#ff6b6b";
            syncAlert.innerHTML = `❌ 동기화 실패: ${syncResult.error.substring(0, 50)}`;
         } else {
            syncAlert.innerHTML = `✅ 이미 최신 자료실입니다.`;
         }
       } else {
-        syncAlert.innerHTML = `⚠️ 오프라인 모드로 실행합니다. (동기화 API 없음)`;
+        syncAlert.innerHTML = `⚠️ 오프라인 모드로 실행합니다.`;
       }
     } catch (err) {
-      syncAlert.style.borderColor = "#ff6b6b";
-      syncAlert.style.color = "#ff6b6b";
+      syncAlert.style.borderColor = "#ff6b6b"; syncAlert.style.color = "#ff6b6b";
       syncAlert.innerHTML = `❌ 인터넷 연결 불안정 (오프라인 모드 실행)`;
     } finally {
       setTimeout(() => syncAlert.remove(), 2500); 
@@ -553,13 +433,11 @@ export async function initStudyRoomBoard(
     }
   };
 
-  // 기존 클릭 대응
   workspace.registerToolboxCategoryCallback('STUDYROOM_CATEGORY', () => {
     (window as any).openExplorerWindow();
     return [];
   });
 
-  // 🚀 [핵심 3] 마우스만 올려도(Hover) 즉시 창이 열리도록 툴박스에 마우스오버 이벤트 추가
   setTimeout(() => {
     const toolboxDiv = workspace.getInjectionDiv().querySelector('.blocklyToolboxDiv') as HTMLElement;
     if (toolboxDiv) {
@@ -568,12 +446,16 @@ export async function initStudyRoomBoard(
         const row = target.closest('.blocklyTreeRow') as HTMLElement;
         if (row) {
           const label = row.querySelector('.blocklyTreeLabel') as HTMLElement;
-          // '자료실' 또는 'Study' 카테고리 위에 마우스가 올라가면 즉시 열기 (forceOpen = true)
           if (label && (label.innerText.includes('자료실') || label.innerText.includes('Study'))) {
             (window as any).openExplorerWindow(true);
           }
         }
       });
     }
-  }, 1000); // UI가 전부 렌더링된 뒤 1초 후에 이벤트 안전 등록
+  }, 1000);
+
+  // 🚀 [정공법 3] 외부(환경설정 모달 등)에서 강제 업데이트 버튼을 눌렀을 때도 실시간 즉각 반영되도록 이벤트 리스너 추가!
+  window.addEventListener('smartyStudyRoomUpdated', async () => {
+    await refreshDataAndKeepSelection();
+  });
 }

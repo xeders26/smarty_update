@@ -1,3 +1,7 @@
+/*========================================================= 
+/src/renderer/app/settings.ts
+⚙️ settings.ts - 환경설정 및 관리자 Git 연동 UI
+==========================================================*/
 import * as Blockly from 'blockly';
 import pkg from '../../../package.json'; 
 
