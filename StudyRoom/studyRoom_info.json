@@ -1,7 +1,7 @@
 {
-  "version": "1.0.105",
+  "version": "1.0.106",
   "visible": {
-    "스마티 예제 모음": false,
+    "스마티 예제 모음": true,
     "blink": true,
     "BT 송수신": true,
     "BT 송신2PC": true,
@@ -42,15 +42,15 @@
     "정답/레드팀/3. 받기 완성하기 정답.json": false,
     "정답/블루팀": true,
     "정답/블루팀/3. 받기 완성하기 정답.json": false,
-    "스마티 예제 모음/blink.json": false,
-    "스마티 예제 모음/BT 송수신.json": false,
-    "스마티 예제 모음/BT 송신2PC.json": false,
-    "스마티 예제 모음/DC모터 구동하기.json": false,
-    "스마티 예제 모음/math.json": false,
-    "스마티 예제 모음/메카넘구동.json": false,
-    "스마티 예제 모음/범퍼 LED.json": false,
-    "스마티 예제 모음/서보모터 구동하기.json": false,
-    "스마티 예제 모음/스위치&LED.json": false,
-    "스마티 예제 모음/키보드 입력 받기.json": false
+    "스마티 예제 모음/blink.json": true,
+    "스마티 예제 모음/BT 송수신.json": true,
+    "스마티 예제 모음/BT 송신2PC.json": true,
+    "스마티 예제 모음/DC모터 구동하기.json": true,
+    "스마티 예제 모음/math.json": true,
+    "스마티 예제 모음/메카넘구동.json": true,
+    "스마티 예제 모음/범퍼 LED.json": true,
+    "스마티 예제 모음/서보모터 구동하기.json": true,
+    "스마티 예제 모음/스위치&LED.json": true,
+    "스마티 예제 모음/키보드 입력 받기.json": true
   }
 }
