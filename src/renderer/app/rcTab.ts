@@ -408,9 +408,8 @@ export function initRcTabUI() {
     };
     loadBluetoothPorts();
     if (controlWrapper) controlWrapper.addEventListener('mouseenter', loadBluetoothPorts);
-
     // ==========================================
-    // 📡 6. 통신 로직 및 완벽한 수신 엔진 (🚨 SPP 끊김 감지 시스템 탑재)
+    // 📡 6. 통신 로직 및 완벽한 수신 엔진 (🚨 오작동 유발 Ping 시스템 완벽 제거)
     // ==========================================
     let isConnected = false;
     let currentDirection = 10;
@@ -422,9 +421,7 @@ export function initRcTabUI() {
     let rxBuffer = ''; 
     const decoder = new TextDecoder(); 
 
-    let keepAliveTimer: any = null;
-    let rxWatchdogTimer: any = null;
-    let isWatchdogActive = false; 
+    // 🗑️ (Ping 및 Watchdog 변수 삭제 완료)
 
     const forceDisconnectUI = () => {
       if (!isConnected) return;
@@ -434,9 +431,7 @@ export function initRcTabUI() {
       cockpitPanel.classList.remove('connected-glow');
       cockpitPanel.classList.add('disconnected-glow');
 
-      if (keepAliveTimer) { clearInterval(keepAliveTimer); keepAliveTimer = null; }
-      if (rxWatchdogTimer) { clearTimeout(rxWatchdogTimer); rxWatchdogTimer = null; }
-      isWatchdogActive = false;
+      // 🗑️ (Ping 및 Watchdog 초기화 로직 삭제 완료)
 
       const linkLight = document.getElementById('hudLink');
       const linkText = document.getElementById('hudLinkText');
@@ -503,12 +498,7 @@ export function initRcTabUI() {
             const screen = document.getElementById('hudScreen');
             if (screen) screen.innerHTML = `<div id="hudWelcome" style="color:#2ecc71; text-align:center; font-size:13px; font-weight:bold; margin-top: 15px;">-- 스마티 블루투스 통신 개시 --</div>`;
 
-            if (keepAliveTimer) clearInterval(keepAliveTimer);
-            keepAliveTimer = setInterval(() => {
-              if (isConnected) {
-                send2Bytes(68, currentDirection, true); 
-              }
-            }, 1000);
+            // 🗑️ (Ping 송신 타이머 완전 삭제 완료)
 
           } else { throw new Error("포트가 닫혀있거나 응답이 없습니다."); }
         } catch (error: any) {
@@ -528,14 +518,7 @@ export function initRcTabUI() {
       (window as any).electron.ipcRenderer.removeAllListeners('serial-data');
       (window as any).electron.ipcRenderer.on('serial-data', (event: any, rawData: any) => {
         try {
-          isWatchdogActive = true;
-          if (rxWatchdogTimer) clearTimeout(rxWatchdogTimer);
-          rxWatchdogTimer = setTimeout(() => {
-            if (isConnected && isWatchdogActive) {
-              console.warn("Watchdog timeout! Smarty stopped sending data.");
-              forceDisconnectUI();
-            }
-          }, 3500); 
+          // 🗑️ (Watchdog 수신 감시 로직 완전 삭제 완료)
 
           const rxLight = document.getElementById('hudRx');
           if (rxLight) {
@@ -596,7 +579,7 @@ export function initRcTabUI() {
     };
 
     // ==========================================
-    // 🎚️ 7. 조종 로직 및 UI 연동
+    // 🎚️ 7. 조종 로직 및 UI 연동 (수정 사항 없음, 완벽함!)
     // ==========================================
     const updateDirectionCommand = () => {
       const up = activeKeys.has('ArrowUp'); const down = activeKeys.has('ArrowDown');
