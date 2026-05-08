@@ -54,19 +54,14 @@ export function initRcTabUI() {
 
       const terminalWrapper = document.getElementById('smartyTerminalWrapper');
       if (terminalWrapper && terminalWrapper.style.display !== 'none') {
-        // 터미널이 켜져 있을 땐 화면에 맞게 동적 높이 계산
         const unscaledScreenHeight = currentHeight / scale;
         let newTermHeight = unscaledScreenHeight - 390; 
         if (newTermHeight < 100) newTermHeight = 100; 
         terminalWrapper.style.height = `${newTermHeight}px`;
       }
 
-      // 🌟 [핵심] 조종 패널 전체 높이가 화면 높이를 넘어가지 않도록 강제 제한! (하단 짤림 방지)
-      // 패널의 실제 높이를 계산한 뒤, 가로 비율(scale)과 세로 비율(scaleY) 중 더 작은 것을 선택합니다.
       const panelHeight = cockpitPanel.offsetHeight || 520;
       const scaleY = currentHeight / panelHeight;
-      
-      // 상하좌우 여백(약 5px)을 주기 위해 최종 배율에 0.96을 곱합니다.
       const finalScale = Math.min(scale, scaleY) * 0.96;
 
       cockpitPanel.style.transform = `translate(-50%, -50%) scale(${finalScale})`;
@@ -308,9 +303,8 @@ export function initRcTabUI() {
 
       const customStatusBar = document.createElement('div');
       customStatusBar.id = 'smartyCustomStatusBar';
-      customStatusBar.style.cssText = `display:flex; gap: 20px; align-items:center; margin-left: 5px; height: 100%;`; // 🌟 높이 100% 추가
+      customStatusBar.style.cssText = `display:flex; gap: 20px; align-items:center; margin-left: 5px; height: 100%;`; 
       
-      // 🌟 [수정] 둥근 사각형(border-radius:6px), 은은한 주황색(테두리), 수직 중앙정렬(margin-top:0) 적용
       customStatusBar.innerHTML = `
         <div id="btnConnectToggle" style="text-align: center; cursor: pointer; padding: 5px; border-radius: 8px; transition: 0.2s;">
           <div id="hudLink" style="width:16px; height:16px; border-radius:50%; background:#ff4757; margin:0 auto 4px; box-shadow:0 0 10px #ff4757; transition:0.3s;"></div>
@@ -342,7 +336,6 @@ export function initRcTabUI() {
         toggleBtn.addEventListener('mouseleave', () => toggleBtn.style.backgroundColor = 'transparent');
       }
 
-      // Clear 버튼 Hover 애니메이션 효과
       const clearBtn = document.getElementById('hudClearBtn');
       if (clearBtn) {
         clearBtn.addEventListener('click', () => {
@@ -394,7 +387,7 @@ export function initRcTabUI() {
     if (controlWrapper) controlWrapper.addEventListener('mouseenter', loadBluetoothPorts);
 
     // ==========================================
-    // 📡 6. 통신 로직 및 완벽한 수신 엔진
+    // 📡 6. 통신 로직 및 완벽한 수신 엔진 (🚨 블루투스 고질병 완벽 수정)
     // ==========================================
     let isConnected = false;
     let currentDirection = 10;
@@ -407,6 +400,7 @@ export function initRcTabUI() {
     const decoder = new TextDecoder(); 
 
     const forceDisconnectUI = () => {
+      if (!isConnected) return;
       isConnected = false;
       const linkLight = document.getElementById('hudLink');
       const linkText = document.getElementById('hudLinkText');
@@ -420,13 +414,22 @@ export function initRcTabUI() {
       currentDirection = 10;
       activeKeys.clear();
       rxBuffer = ''; 
+
+      const screen = document.getElementById('hudScreen');
+      if (screen) {
+        const alertMsg = document.createElement('div');
+        alertMsg.style.cssText = `color:#ff4757; text-align:center; font-size:13px; font-weight:bold; margin-top: 15px; background: rgba(255, 71, 87, 0.1); padding: 5px; border-radius: 5px; border: 1px dashed #ff4757;`;
+        alertMsg.innerHTML = `⚠️ 스마티 연결 끊김 감지 ⚠️`;
+        screen.appendChild(alertMsg);
+        screen.scrollTop = screen.scrollHeight;
+      }
     };
 
     const toggleConnectBtn = document.getElementById('btnConnectToggle');
     if (toggleConnectBtn && portSelect) {
       toggleConnectBtn.addEventListener('click', async () => {
         if (isConnected) {
-          (window as any).electron.ipcRenderer.send('serial-disconnect');
+          if ((window as any).electron) (window as any).electron.ipcRenderer.send('serial-disconnect');
           forceDisconnectUI();
           return;
         }
@@ -437,6 +440,11 @@ export function initRcTabUI() {
         try {
           const linkText = document.getElementById('hudLinkText');
           if (linkText) linkText.textContent = '연결중..';
+
+          if ((window as any).electron) {
+            (window as any).electron.ipcRenderer.send('serial-disconnect');
+            await new Promise(resolve => setTimeout(resolve, 1000)); 
+          }
 
           const success = await (window as any).electron.ipcRenderer.invoke('serial-connect', { path: selectedPort, baudRate: 9600 });
           
@@ -453,19 +461,23 @@ export function initRcTabUI() {
 
             setTimeout(updateRcScale, 10);
             const screen = document.getElementById('hudScreen');
-            if (screen) screen.innerHTML = `<div id="hudWelcome" style="color:#2ecc71; text-align:center; font-size:13px; font-weight:bold; margin-top: 15px;">-- 스마티 통신 개시 --</div>`;
+            if (screen) screen.innerHTML = `<div id="hudWelcome" style="color:#2ecc71; text-align:center; font-size:13px; font-weight:bold; margin-top: 15px;">-- 스마티 블루투스 통신 개시 --</div>`;
 
-          } else { throw new Error("포트가 사용 중이거나 응답이 없습니다."); }
+          } else { throw new Error("포트가 닫혀있거나 응답이 없습니다."); }
         } catch (error: any) {
           forceDisconnectUI();
-          alert("🚨 연결 실패!\n사유: " + error.message);
+          alert("🚨 연결 실패!\n사유: " + error.message + "\n\n💡 조치방법: 스마티 전원을 껐다 켜거나 잠시 후 다시 눌러주세요.");
         }
       });
     }
+
     if ((window as any).electron) {
       (window as any).electron.ipcRenderer.removeAllListeners('serial-disconnected');
       (window as any).electron.ipcRenderer.on('serial-disconnected', () => { forceDisconnectUI(); });
       
+      (window as any).electron.ipcRenderer.removeAllListeners('serial-error');
+      (window as any).electron.ipcRenderer.on('serial-error', () => { forceDisconnectUI(); });
+
       (window as any).electron.ipcRenderer.removeAllListeners('serial-data');
       (window as any).electron.ipcRenderer.on('serial-data', (event: any, rawData: any) => {
         try {
@@ -508,16 +520,20 @@ export function initRcTabUI() {
 
     const send2Bytes = async (byte1: number, byte2: number) => {
       if (isConnected && (window as any).electron) {
-        const data = new Uint8Array([byte1, byte2]);
-        (window as any).electron.ipcRenderer.send('serial-write', data);
+        try {
+          const data = new Uint8Array([byte1, byte2]);
+          (window as any).electron.ipcRenderer.send('serial-write', data);
 
-        const txLight = document.getElementById('hudTx');
-        if (txLight) {
-          txLight.style.background = '#f39c12'; txLight.style.boxShadow = '0 0 15px #f39c12';
-          clearTimeout(txLightTimer);
-          txLightTimer = setTimeout(() => { txLight.style.background = '#34495e'; txLight.style.boxShadow = 'none'; }, 80);
+          const txLight = document.getElementById('hudTx');
+          if (txLight) {
+            txLight.style.background = '#f39c12'; txLight.style.boxShadow = '0 0 15px #f39c12';
+            clearTimeout(txLightTimer);
+            txLightTimer = setTimeout(() => { txLight.style.background = '#34495e'; txLight.style.boxShadow = 'none'; }, 80);
+          }
+          logToTerminal('TX', `[${byte1}, ${byte2}]`);
+        } catch (e) {
+          forceDisconnectUI();
         }
-        logToTerminal('TX', `[${byte1}, ${byte2}]`);
       }
     };
 
@@ -590,7 +606,6 @@ export function initRcTabUI() {
 
     if (lever) { lever.addEventListener('input', () => { updateSpeed(); const val = parseInt(lever.value, 10); send2Bytes(80, val); }); }
 
-    // 🌟 [수정됨] Q와 W 키가 눌렸을 때 버튼에 빛이 들어오도록(active-sim) 매핑
     const toggleButtonHighlight = (key: string, isActive: boolean) => {
       let cmdList = [key];
       if (key === 'ArrowUp') cmdList =['Up', 'up']; 
@@ -599,8 +614,6 @@ export function initRcTabUI() {
       else if (key === 'ArrowRight') cmdList =['Right', 'right'];
       else if (key === 'PageUp' || key === '.') cmdList =['PgUp', 'pgup', 'PowerUp', 'powerup', '.'];
       else if (key === 'PageDown' || key === ',') cmdList =['PgDn', 'pgdn', 'PowerDown', 'powerdown', ','];
-      
-      // 🌟 Q, W 추가!
       else if (key === 'q' || key === 'Q') cmdList = ['q', 'Q', 'turnleft', 'TurnLeft'];
       else if (key === 'w' || key === 'W') cmdList = ['w', 'W', 'turnright', 'TurnRight'];
       
@@ -610,17 +623,13 @@ export function initRcTabUI() {
       }
     };
 
-    // 🌟 [수정됨] 마우스로 Q, W 버튼을 클릭했을 때 키보드를 누른 것과 같은 효과를 주도록 매핑
     const mapCmdToKey = (cmd: string | null) => {
       if (!cmd) return ''; const lCmd = cmd.toLowerCase();
       if (lCmd === 'up') return 'ArrowUp'; if (lCmd === 'down') return 'ArrowDown';
       if (lCmd === 'left') return 'ArrowLeft'; if (lCmd === 'right') return 'ArrowRight';
       if (lCmd === 'pgup' || lCmd === 'powerup') return 'PageUp'; if (lCmd === 'pgdn' || lCmd === 'powerdown') return 'PageDown';
-      
-      // 🌟 Q, W 추가!
       if (lCmd === 'q' || lCmd === 'turnleft') return 'q';
       if (lCmd === 'w' || lCmd === 'turnright') return 'w';
-      
       return cmd; 
     };
 
