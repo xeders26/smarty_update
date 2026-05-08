@@ -1,7 +1,8 @@
 /*============================
   src/main/updater.ts    
+  * 🌟 [업데이트] 이미지 왜곡 방지 및 고해상도 아이콘 적용 완료!
 =============================*/
-import { app, ipcMain, dialog, BrowserWindow } from 'electron'
+import { app, ipcMain, dialog, BrowserWindow, nativeImage } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import { is } from '@electron-toolkit/utils'
 import * as fs from 'fs'
@@ -15,6 +16,23 @@ function getMainWindow(): BrowserWindow | undefined {
   return BrowserWindow.getAllWindows().find(w => !w.isDestroyed() && w.isVisible());
 }
 
+// 🌟 다이얼로그(시스템 알림창)용 고해상도 네이티브 아이콘 생성 함수
+function getSmartyNativeIcon(): Electron.NativeImage | undefined {
+  try {
+    let iconPath = path.join(__dirname, '../renderer/assets/logo.png');
+    if (!fs.existsSync(iconPath)) {
+      iconPath = path.join(app.getAppPath(), 'out', 'renderer', 'assets', 'logo.png');
+    }
+    if (fs.existsSync(iconPath)) {
+      // 다이얼로그 창에서 아이콘이 깨지거나 너무 거대해지는 것을 방지 (64x64 최적화)
+      return nativeImage.createFromPath(iconPath).resize({ width: 64, height: 64 });
+    }
+  } catch (err) {
+    console.error("네이티브 아이콘 로드 실패:", err);
+  }
+  return undefined;
+}
+
 // 🌟 다운로드 미니 창 생성 (로고 이미지 포함)
 function createProgressWindow() {
   if (progressWindow) return; 
@@ -25,42 +43,38 @@ function createProgressWindow() {
     parent: mainWindow, 
     modal: true,        
     width: 450,
-    height: 250, // 👈 로고가 들어가므로 높이를 살짝 키웠습니다.
+    height: 250, 
     resizable: false,
     minimizable: false,
     maximizable: false,
     alwaysOnTop: true,  
     autoHideMenuBar: true,
     title: "스마티 업데이트 다운로드",
+    icon: getSmartyNativeIcon(), // 👈 창 자체의 좌측 상단 및 작업표시줄 아이콘도 이쁘게 적용
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true
     }
   });
 
-  // 🌟 로고 이미지를 읽어서 Base64 문자열로 변환 (경로 오류 원천 차단!)
+  // 🌟 로고 이미지를 읽어서 Base64 문자열로 변환
   let logoBase64 = '';
   try {
-    // 빌드된 후의 경로를 추적합니다. (asar 패키징 내부에서도 작동하도록)
-    const logoPath = path.join(__dirname, '../renderer/assets/logo.png');
+    let logoPath = path.join(__dirname, '../renderer/assets/logo.png');
+    if (!fs.existsSync(logoPath)) {
+      logoPath = path.join(app.getAppPath(), 'out', 'renderer', 'assets', 'logo.png');
+    }
     
     if (fs.existsSync(logoPath)) {
       const imgData = fs.readFileSync(logoPath);
       logoBase64 = `data:image/png;base64,${imgData.toString('base64')}`;
-    } else {
-      // 혹시 경로가 다를 경우를 대비한 대체 경로 탐색
-      const altPath = path.join(app.getAppPath(), 'out', 'renderer', 'assets', 'logo.png');
-      if (fs.existsSync(altPath)) {
-        const imgData = fs.readFileSync(altPath);
-        logoBase64 = `data:image/png;base64,${imgData.toString('base64')}`;
-      }
     }
   } catch (err) {
     console.error("로고 이미지 로드 실패:", err);
   }
 
-  // 로고가 있으면 img 태그 생성, 없으면 빈 문자열
-  const logoHtml = logoBase64 ? `<img src="${logoBase64}" alt="Smarty Logo" style="max-height: 50px; margin-bottom: 15px;">` : '';
+  // 🌟 [핵심] width: auto; object-fit: contain; 적용하여 절대 찌그러지지 않게 방지!
+  const logoHtml = logoBase64 ? `<img src="${logoBase64}" class="smarty-logo" alt="Smarty Logo">` : '';
 
   const html = `
     <!DOCTYPE html>
@@ -77,6 +91,17 @@ function createProgressWindow() {
           justify-content: center; 
           height: 100vh; 
           margin: 0; 
+        }
+        /* 🌟 이미지 왜곡 방지 및 렌더링 최적화 CSS */
+        .smarty-logo {
+          width: auto;
+          height: auto;
+          max-width: 80%;
+          max-height: 65px;
+          object-fit: contain; 
+          margin-bottom: 15px;
+          image-rendering: -webkit-optimize-contrast; /* 이미지를 더 선명하게 렌더링 */
+          -webkit-user-drag: none; /* 드래그 방지 */
         }
         h2 { font-size: 17px; color: #333; margin-top: 0; margin-bottom: 20px; }
         .progress-container { width: 85%; background: #e0e0e0; border-radius: 12px; overflow: hidden; height: 24px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
@@ -104,7 +129,13 @@ export function registerUpdateHandlers(): void {
     const mainWindow = getMainWindow();
 
     if (!app.isPackaged) {
-      const opts = { type: 'info' as const, title: '개발 모드 안내 🛠️', message: '개발 모드로 실행 중입니다.\n업데이트 기능은 빌드 후에 작동합니다!', buttons:['알겠습니다'] };
+      const opts = { 
+        icon: getSmartyNativeIcon(), // 🌟 다이얼로그 아이콘 적용
+        type: 'info' as const, 
+        title: '개발 모드 안내 🛠️', 
+        message: '개발 모드로 실행 중입니다.\n업데이트 기능은 빌드 후에 작동합니다!', 
+        buttons:['알겠습니다'] 
+      };
       if (mainWindow) dialog.showMessageBox(mainWindow, opts);
       else dialog.showMessageBox(opts);
       return { success: false, reason: 'dev-mode' };
@@ -115,7 +146,13 @@ export function registerUpdateHandlers(): void {
       await autoUpdater.checkForUpdates();
       
       if (isManualCheck) {
-        const opts = { type: 'info' as const, title: '업데이트 확인', message: `현재 최신 버전(v${app.getVersion()})을 사용 중입니다!\n더 이상 업데이트할 내용이 없습니다.`, buttons: ['확인'] };
+        const opts = { 
+          icon: getSmartyNativeIcon(), 
+          type: 'info' as const, 
+          title: '업데이트 확인', 
+          message: `현재 최신 버전(v${app.getVersion()})을 사용 중입니다!\n더 이상 업데이트할 내용이 없습니다.`, 
+          buttons: ['확인'] 
+        };
         if (mainWindow) dialog.showMessageBox(mainWindow, opts);
         else dialog.showMessageBox(opts);
         isManualCheck = false; 
@@ -157,6 +194,7 @@ function checkUpdateSuccessNotify() {
     if (lastVersion && lastVersion !== currentVersion) {
       const mainWindow = getMainWindow();
       const opts = {
+        icon: getSmartyNativeIcon(), // 🌟 다이얼로그 아이콘 적용
         type: 'info' as const,
         title: '🎉 업데이트 완료!',
         message: `스마티가 성공적으로 최신 버전(v${currentVersion})으로 업데이트 되었습니다!`,
@@ -193,7 +231,13 @@ export function setupAutoUpdater(): void {
   autoUpdater.on('update-not-available', () => {
     if (isManualCheck) {
       const mainWindow = getMainWindow();
-      const opts = { type: 'info' as const, title: '업데이트 확인', message: `현재 최신 버전(v${app.getVersion()})을 사용 중입니다!`, buttons: ['확인'] };
+      const opts = { 
+        icon: getSmartyNativeIcon(),
+        type: 'info' as const, 
+        title: '업데이트 확인', 
+        message: `현재 최신 버전(v${app.getVersion()})을 사용 중입니다!`, 
+        buttons: ['확인'] 
+      };
       if (mainWindow) dialog.showMessageBox(mainWindow, opts);
       else dialog.showMessageBox(opts);
       isManualCheck = false; 
@@ -215,6 +259,7 @@ export function setupAutoUpdater(): void {
     
     const mainWindow = getMainWindow();
     const dialogOpts = {
+      icon: getSmartyNativeIcon(), // 🌟 다이얼로그 아이콘 적용
       type: 'info' as const,
       buttons:['지금 껐다 켜기 (업데이트)', '나중에 (내가 끌 때)'],
       title: '스마티 업데이트 준비 완료! 🎁',
