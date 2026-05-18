@@ -39,7 +39,7 @@
                       "id": "mqv@GsAk,K1g4KaGy1Bc",
                       "fields": {
                         "DIR": "2",
-                        "COLOR": "2",
+                        "COLOR": "0",
                         "STATE": "0"
                       },
                       "next": {
@@ -81,7 +81,7 @@
                                       "id": "3Xunif!380*ncIeKtEMa",
                                       "fields": {
                                         "DIR": "2",
-                                        "COLOR": "2",
+                                        "COLOR": "0",
                                         "STATE": "0"
                                       },
                                       "next": {
@@ -89,62 +89,12 @@
                                           "type": "arduino_delay",
                                           "id": ",)Zk3*_P?L{O)kZ}KW6k",
                                           "inputs": {
-                                            "MS": {
-                                              "shadow": {
+                                            "초": {
+                                              "block": {
                                                 "type": "math_number",
-                                                "id": "PiJMVQU[N~O!=:w|Jf{,",
+                                                "id": "7X-72Q5DfuUZNo{l;LkO",
                                                 "fields": {
-                                                  "NUM": 1000
-                                                }
-                                              }
-                                            }
-                                          },
-                                          "next": {
-                                            "block": {
-                                              "type": "turnBumpLED",
-                                              "id": "#gk[._^.`^DF}/(eU_Hj",
-                                              "fields": {
-                                                "DIR": "2",
-                                                "COLOR": "0",
-                                                "STATE": "0"
-                                              },
-                                              "next": {
-                                                "block": {
-                                                  "type": "turnBumpLED",
-                                                  "id": "oDi:IR72$(@@i6Mt(-dn",
-                                                  "fields": {
-                                                    "DIR": "2",
-                                                    "COLOR": "1",
-                                                    "STATE": "0"
-                                                  },
-                                                  "next": {
-                                                    "block": {
-                                                      "type": "turnBumpLED",
-                                                      "id": "AJv3bbHVxm`bT#u[4DEw",
-                                                      "fields": {
-                                                        "DIR": "2",
-                                                        "COLOR": "2",
-                                                        "STATE": "1"
-                                                      },
-                                                      "next": {
-                                                        "block": {
-                                                          "type": "arduino_delay",
-                                                          "id": "x;yR#h#3av*5h!90@`=}",
-                                                          "inputs": {
-                                                            "MS": {
-                                                              "shadow": {
-                                                                "type": "math_number",
-                                                                "id": "?2KpS$`hJa,e2_^[@Ie*",
-                                                                "fields": {
-                                                                  "NUM": 1000
-                                                                }
-                                                              }
-                                                            }
-                                                          }
-                                                        }
-                                                      }
-                                                    }
-                                                  }
+                                                  "NUM": 1
                                                 }
                                               }
                                             }
