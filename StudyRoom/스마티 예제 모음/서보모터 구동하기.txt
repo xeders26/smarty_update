@@ -8,9 +8,9 @@
 <ol style="line-height: 1.5; margin: 0 0 15px 25px; padding: 0;">
   <li style="margin-bottom: 5px;"><b>초기 설정 (setup):</b> 스마티 로봇을 시작할 준비를 합니다.</li>
   <li style="margin-bottom: 5px;"><b>서보 모터 S1 0도 이동:</b> 1번 서보 모터(S1)의 각도를 <b>0도</b>로 회전시킵니다.</li>
-  <li style="margin-bottom: 5px;"><b>1000 밀리초(ms) 기다리기:</b> 모터가 0도 위치까지 물리적으로 이동할 수 있도록 1초(1000ms) 동안 대기합니다.</li>
+  <li style="margin-bottom: 5px;"><b>1 초(s) 기다리기:</b> 모터가 0도 위치까지 물리적으로 이동할 수 있도록 1초(1000ms) 동안 대기합니다.</li>
   <li style="margin-bottom: 5px;"><b>서보 모터 S1 90도 이동:</b> 1번 서보 모터(S1)의 각도를 <b>90도</b>로 회전시킵니다.</li>
-  <li><b>1000 밀리초(ms) 기다리기:</b> 모터가 90도 위치까지 이동할 수 있도록 다시 1초 동안 대기합니다.</li>
+  <li><b>1 초(s) 기다리기:</b> 모터가 90도 위치까지 이동할 수 있도록 다시 1초 동안 대기합니다.</li>
 </ol>
 
 <div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #f39c12; border-radius: 4px; margin-top: 15px;">
