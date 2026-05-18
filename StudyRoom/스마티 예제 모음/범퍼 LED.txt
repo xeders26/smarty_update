@@ -1,0 +1,18 @@
+<h2 style="color: #3498db; margin: 0 0 5px 0;">🌈 기초 예제: 범퍼 LED 색상 바꾸기 (빨-초-파)</h2>
+<hr style="margin: 5px 0 15px 0; border-color: #555;">
+
+<p style="margin: 0 0 15px 0; line-height: 1.5;">스마티 로봇의 범퍼에 있는 LED를 제어하는 방법을 배웁니다.<br>
+빛의 3원색인 <b>빨강(Red), 초록(Green), 파랑(Blue) 불빛이 1초마다 차례대로 켜지는 예제</b>입니다.</p>
+
+<h3 style="color: #3498db; margin: 0 0 10px 0;">🧩 블록 동작 흐름</h3>
+<ol style="line-height: 1.5; margin: 0 0 15px 25px; padding: 0;">
+  <li style="margin-bottom: 5px;"><b>초기 설정 (setup):</b> 스마티 로봇을 시작할 준비를 합니다.</li>
+  <li style="margin-bottom: 5px;"><b>🔴 빨간색 켜기:</b> 범퍼 LED의 빨간색만 켜고(ON), 초록색과 파란색은 끕니다(OFF). 그 상태로 1초(1000ms) 동안 기다립니다.</li>
+  <li style="margin-bottom: 5px;"><b>🟢 초록색 켜기:</b> 범퍼 LED의 초록색만 켜고(ON), 나머지 색상은 끕니다(OFF). 그 상태로 1초 동안 기다립니다.</li>
+  <li><b>🔵 파란색 켜기:</b> 범퍼 LED의 파란색만 켜고(ON), 나머지 색상은 끕니다(OFF). 그 상태로 다시 1초 동안 기다립니다.</li>
+</ol>
+
+<div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #f39c12; border-radius: 4px; margin-top: 15px;">
+  <b style="color: #f39c12;">💡 핵심 포인트</b>
+  <div style="margin-top: 5px; color: #e0e0e0; line-height: 1.5;">범퍼 LED는 빨강, 초록, 파랑 3가지 불빛을 낼 수 있습니다. 이 예제에서는 한 번에 하나의 색깔만 켰지만, 만약 <b>빨강과 초록을 동시에 켜면(ON) 어떻게 될까요? 노란색(Yellow) 불빛이 만들어집니다!</b> <br>빛을 섞어 다양한 색상을 만들어내는 마법을 직접 실험해 보세요! (예: 빨강+파랑=보라, 초록+파랑=하늘색)</div>
+</div>

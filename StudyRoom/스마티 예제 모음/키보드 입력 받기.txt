@@ -1,0 +1,24 @@
+<h2 style="color: #3498db; margin: 0 0 5px 0;">💻 기초 예제: 시리얼 모니터로 숫자 주고받기 (에코 통신)</h2>
+<hr style="margin: 5px 0 15px 0; border-color: #555;">
+
+<p style="margin: 0 0 15px 0; line-height: 1.5;">로봇과 컴퓨터(PC)가 <b>시리얼 모니터(Serial Monitor)</b>를 통해 데이터를 주고받는 기초 예제입니다.<br>
+PC에서 숫자를 입력해 전송하면, 로봇이 그 숫자를 확인하고 다시 PC 화면에 메아리(Echo)처럼 띄워 줍니다.</p>
+
+<h3 style="color: #3498db; margin: 0 0 10px 0;">🧩 블록 동작 흐름</h3>
+<ol style="line-height: 1.5; margin: 0 0 15px 25px; padding: 0;">
+  <li style="margin-bottom: 5px;"><b>초기 설정 (setup):</b> 스마티 로봇을 시작할 준비를 합니다. (이때 PC와 통신할 준비도 함께 마칩니다.)</li>
+  <li style="margin-bottom: 5px;"><b>데이터 수신 확인 (만약 ~라면):</b> <code style="color: #f1c40f;">[시리얼 데이터가 있는가?]</code> 블록을 사용하여 컴퓨터에서 로봇으로 넘어온 통신 데이터가 있는지 계속해서 감시합니다.</li>
+  <li style="margin-bottom: 5px;"><b>숫자 읽기 및 출력 (에코):</b> PC에서 보낸 데이터가 있다면, <code style="color: #f1c40f;">[시리얼 정수(int) 읽기]</code> 블록을 사용해 <b>'숫자'</b>만 쏙 뽑아 읽어옵니다. 그리고 그 숫자를 <code style="color: #f1c40f;">[시리얼 출력(줄바꿈)]</code> 블록을 통해 PC 화면으로 다시 전송합니다.</li>
+  <li><b>1000 밀리초(ms) 기다리기:</b> 통신이 너무 빠르게 엉키지 않도록 1초(1000ms) 동안 여유를 두고 대기한 뒤 처음으로 돌아갑니다.</li>
+</ol>
+
+<div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #f39c12; border-radius: 4px; margin-top: 15px;">
+  <b style="color: #f39c12;">💡 핵심 포인트</b>
+  <div style="margin-top: 5px; color: #e0e0e0; line-height: 1.5;">코딩 프로그램(아두이노 IDE 등)의 우측 상단에 있는 <b>돋보기 아이콘(시리얼 모니터)</b>을 열고 키보드로 숫자를 친 뒤 엔터를 눌러보세요! 내가 보낸 숫자를 로봇이 똑같이 대답해 줍니다.<br><br>※ 글자(String)가 아니라 <b>정수(int)를 읽는 블록</b>을 썼기 때문에, 글자를 섞어 보내면 로봇이 숫자만 똑똑하게 골라내거나 0으로 인식할 수 있습니다. 데이터를 어떻게 읽어오는지 테스트해 보기 딱 좋은 예제입니다!</div>
+</div>
+
+<!-- 👇 전체 블록 이미지 추가 부분 👇 -->
+<h3 style="color: #3498db; margin: 25px 0 10px 0;">🖼️ 전체 블록 코드</h3>
+<div style="text-align: center; margin-bottom: 15px;">
+  <img src="키보드 입력 받기.png" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+</div>
