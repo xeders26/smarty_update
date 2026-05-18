@@ -9,7 +9,7 @@ PC에서 숫자를 입력해 전송하면, 로봇이 그 숫자를 확인하고 
   <li style="margin-bottom: 5px;"><b>초기 설정 (setup):</b> 스마티 로봇을 시작할 준비를 합니다. (이때 PC와 통신할 준비도 함께 마칩니다.)</li>
   <li style="margin-bottom: 5px;"><b>데이터 수신 확인 (만약 ~라면):</b> <code style="color: #f1c40f;">[시리얼 데이터가 있는가?]</code> 블록을 사용하여 컴퓨터에서 로봇으로 넘어온 통신 데이터가 있는지 계속해서 감시합니다.</li>
   <li style="margin-bottom: 5px;"><b>숫자 읽기 및 출력 (에코):</b> PC에서 보낸 데이터가 있다면, <code style="color: #f1c40f;">[시리얼 정수(int) 읽기]</code> 블록을 사용해 <b>'숫자'</b>만 쏙 뽑아 읽어옵니다. 그리고 그 숫자를 <code style="color: #f1c40f;">[시리얼 출력(줄바꿈)]</code> 블록을 통해 PC 화면으로 다시 전송합니다.</li>
-  <li><b>1000 밀리초(ms) 기다리기:</b> 통신이 너무 빠르게 엉키지 않도록 1초(1000ms) 동안 여유를 두고 대기한 뒤 처음으로 돌아갑니다.</li>
+  <li><b>1 초(s) 기다리기:</b> 통신이 너무 빠르게 엉키지 않도록 1초(1000ms) 동안 여유를 두고 대기한 뒤 처음으로 돌아갑니다.</li>
 </ol>
 
 <div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #f39c12; border-radius: 4px; margin-top: 15px;">
