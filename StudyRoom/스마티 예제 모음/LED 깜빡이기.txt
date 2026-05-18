@@ -7,9 +7,9 @@
 <ol style="line-height: 1.4; margin: 0 0 15px 25px; padding: 0;">
   <li style="margin-bottom: 5px;"><b>스마티 시작하기 (setup):</b> 전원이 켜지면 로봇을 초기화합니다.</li>
   <li style="margin-bottom: 5px;"><b>내장 LED1 켜기(ON):</b> 로봇 윗면의 LED 불빛을 켭니다.</li>
-  <li style="margin-bottom: 5px;"><b>1000 밀리초(ms) 기다리기:</b> 1초(1000ms) 동안 켜진 상태를 그대로 유지합니다.</li>
+  <li style="margin-bottom: 5px;"><b>1 초(s) 기다리기:</b> 1초(1000ms) 동안 켜진 상태를 그대로 유지합니다.</li>
   <li style="margin-bottom: 5px;"><b>내장 LED1 끄기(OFF):</b> 불빛을 다시 끕니다.</li>
-  <li><b>1000 밀리초(ms) 기다리기:</b> 1초 동안 꺼진 상태를 유지합니다.</li>
+  <li><b>1 초(s) 기다리기:</b> 1초 동안 꺼진 상태를 유지합니다.</li>
 </ol>
 
 <div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #f39c12; border-radius: 4px; margin-top: 15px;">
