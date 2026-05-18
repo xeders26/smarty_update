@@ -88,7 +88,7 @@ export const TextBlocksHelp: Record<string, string> = {
     
     <div style="background:rgba(255,255,255,0.05); padding:6px 12px; border-left:3px solid #9b59b6 !important; font-family: monospace; border-radius: 4px;">
       <span style="color:#bdc3c7; font-size: 0.85em;">C++ 변환 코드:</span><br>
-      <span style="color:#9aa5a6;">while(String(A) != String(B)) { delay(10); }</span>
+      <span style="color:#9aa5a6;">while(String(A) != String(B)) { delay(0.01); }</span>
     </div>
   `,
 
@@ -117,7 +117,7 @@ export const TextBlocksHelp: Record<string, string> = {
     
     <div style="background:rgba(255,255,255,0.05); padding:6px 12px; border-left:3px solid #9b59b6 !important; font-family: monospace; border-radius: 4px;">
       <span style="color:#bdc3c7; font-size: 0.85em;">C++ 변환 코드:</span><br>
-      <span style="color:#9aa5a6;">while(String(A) == String(B)) { delay(10); }</span>
+      <span style="color:#9aa5a6;">while(String(A) == String(B)) { delay(0.01); }</span>
     </div>
   `,
 

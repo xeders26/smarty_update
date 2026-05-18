@@ -11,9 +11,9 @@ void setup()
 void loop()
 {
   writeDIO(D1, true); // D1 포트에 5v를 출력합니다.
-  delay(1000);        // 1초동안 대기합니다.
+  delay(1.0);        // 1초동안 대기합니다.
   writeDIO(D1, false); // D1 포트에서 출력을 정지합니다(0v 출력)
-  delay(1000);        // 1초동안 대기합니다.
+  delay(1.0);        // 1초동안 대기합니다.
 
 
 }

@@ -69,12 +69,12 @@
                   "type": "arduino_delay",
                   "id": "XQWvVK:O6G^5sy!B%=$q",
                   "inputs": {
-                    "MS": {
+                    "초": {
                       "shadow": {
                         "type": "math_number",
                         "id": "He7LFn{dFF*^=eW4tmRo",
                         "fields": {
-                          "NUM": 2000
+                          "NUM": 2
                         }
                       }
                     }
@@ -111,12 +111,12 @@
                           "type": "arduino_delay",
                           "id": "?~!wJ#Bv/!HH^Unbbq3A",
                           "inputs": {
-                            "MS": {
+                            "초": {
                               "shadow": {
                                 "type": "math_number",
                                 "id": "c3DPK)Zl~rRw^MSb^lCd",
                                 "fields": {
-                                  "NUM": 2000
+                                  "NUM": 2
                                 }
                               }
                             }
@@ -153,12 +153,12 @@
                                   "type": "arduino_delay",
                                   "id": "`K;85GGMk}Um=cSw!2Ak",
                                   "inputs": {
-                                    "MS": {
+                                    "초": {
                                       "shadow": {
                                         "type": "math_number",
                                         "id": "$^0n!A9#?vj4EIDeDQ6d",
                                         "fields": {
-                                          "NUM": 2000
+                                          "NUM": 2
                                         }
                                       }
                                     }
@@ -195,12 +195,12 @@
                                           "type": "arduino_delay",
                                           "id": "aUAh1^vU_g_hZ)B(6T4_",
                                           "inputs": {
-                                            "MS": {
+                                            "초": {
                                               "shadow": {
                                                 "type": "math_number",
                                                 "id": "`@GJU:a4j+*S^e-ld]H9",
                                                 "fields": {
-                                                  "NUM": 2000
+                                                  "NUM": 2
                                                 }
                                               }
                                             }

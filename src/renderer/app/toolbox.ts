@@ -93,7 +93,7 @@ function getBaseToolbox() {
           {
             kind: 'block',
             type: 'arduino_delay',
-            inputs: { MS: { shadow: { type: 'math_number', fields: { NUM: 1000 } } } }
+            inputs: { 초: { shadow: { type: 'math_number', fields: { NUM: 1.0 } } } }
           },
           { kind: 'block', type: 'smarty_wait' },
           { kind: 'block', type: 'smarty_wait_until' },

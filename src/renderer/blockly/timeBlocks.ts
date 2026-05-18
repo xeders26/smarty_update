@@ -8,7 +8,7 @@ export function initTimeBlocks(arduinoGenerator: any) {
   // [모양 정의]
   // ==========================================
 
-  Blockly.Blocks['arduino_delay'] = { init: function(this: any) { this.appendValueInput("MS").setCheck("Number").appendField("⏱️"); this.appendDummyInput().appendField("밀리초(ms) 기다리기"); this.setInputsInline(true); this.setPreviousStatement(true, null); this.setNextStatement(true, null); this.setColour(45); } };
+  Blockly.Blocks['arduino_delay'] = { init: function(this: any) { this.appendValueInput("초").setCheck("Number").appendField("⏱️"); this.appendDummyInput().appendField("초 기다리기"); this.setInputsInline(true); this.setPreviousStatement(true, null); this.setNextStatement(true, null); this.setColour(45); } };
   
   Blockly.Blocks['smarty_timer'] = {
     init: function (this: any) {
@@ -90,14 +90,20 @@ export function initTimeBlocks(arduinoGenerator: any) {
     } 
   };
 
-  Blockly.Blocks['arduino_timer'] = { init: function(this: any) { this.appendDummyInput().appendField("⏳ 시작 후 흐른 시간").appendField(new Blockly.FieldDropdown([["밀리초(millis)", "millis"],["마이크로초(micros)", "micros"]]), "UNIT"); this.setOutput(true, "Number"); this.setColour(45); } };
+  Blockly.Blocks['arduino_timer'] = { init: function(this: any) { this.appendDummyInput().appendField("⏳ 시작 후 흐른 시간").appendField(new Blockly.FieldDropdown([["초", "sec"],["마이크로초(micros)", "micros"]]), "UNIT"); this.setOutput(true, "Number"); this.setColour(45); } };
 
   // ==========================================
   // [C++ 제너레이터]
   // ==========================================
 
-  arduinoGenerator.forBlock['arduino_delay'] = function(block: any) { return `delay(${arduinoGenerator.valueToCode(block, 'MS', 0) || '1000'});\n`; };
- 
+  arduinoGenerator.forBlock['arduino_delay'] = function(block: any) { 
+    // 입력값이 없으면 기본값으로 '1'(1초)을 사용합니다.
+    const sec = arduinoGenerator.valueToCode(block, '초', 0) || '1'; 
+    
+    // 입력된 초(sec)에 1000을 곱해서 밀리초(ms)로 변환해줍니다.
+    return `delay((${sec}) * 1000);\n`; 
+  };
+
   arduinoGenerator.forBlock['smarty_timer'] = function (block: any) {
     const id = block.getFieldValue('TID')
     const act = block.getFieldValue('ACT')
@@ -113,11 +119,11 @@ export function initTimeBlocks(arduinoGenerator: any) {
     if (waitType === 'waitSW(SW1)') {
       // 1. 눌릴 때까지 대기 (!readSw 이면 계속 루프)
       // 2. 떼어질 때까지 대기 (readSw 이면 계속 루프)
-      return `while (!readSw(SW1)) { delay(10); }\nwhile (readSw(SW1)) { delay(10); }\n`
+      return `while (!readSw(SW1)) { delay(0.01); }\nwhile (readSw(SW1)) { delay(0.01); }\n`
     } 
     // SW2 버튼 로직
     else if (waitType === 'waitSW(SW2)') {
-      return `while (!readSw(SW2)) { delay(10); }\nwhile (readSw(SW2)) { delay(10); }\n`
+      return `while (!readSw(SW2)) { delay(0.01); }\nwhile (readSw(SW2)) { delay(0.01); }\n`
     }
     
     return `\n`
@@ -136,7 +142,7 @@ export function initTimeBlocks(arduinoGenerator: any) {
   // 복구된 대기 블록의 제너레이터 코드
   arduinoGenerator.forBlock['smarty_wait_until'] = function(block: any) { 
     const condition = arduinoGenerator.valueToCode(block, 'CONDITION', 0) || 'false'; 
-    return `while (!(${condition})) {\n  delay(1);\n}\n`; 
+    return `while (!(${condition})) {\n  delay(0.01);\n}\n`; 
   };
   
   arduinoGenerator.forBlock['smarty_wait_compare'] = function(block: any) { 
@@ -145,7 +151,7 @@ export function initTimeBlocks(arduinoGenerator: any) {
     const op = block.getFieldValue('OP'); 
     let operator = '=='; 
     if (op === 'LT') operator = '<'; else if (op === 'LTE') operator = '<='; else if (op === 'GT') operator = '>'; else if (op === 'GTE') operator = '>='; else if (op === 'EQ') operator = '=='; else if (op === 'NEQ') operator = '!='; 
-    return `while (!(${a} ${operator} ${b})) {\n  delay(1);\n}\n`; 
+    return `while (!(${a} ${operator} ${b})) {\n  delay(0.01);\n}\n`; 
   };
 
   arduinoGenerator.forBlock['arduino_timer'] = function(block: any) { return[`${block.getFieldValue('UNIT')}()`, 0]; };

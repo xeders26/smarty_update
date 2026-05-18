@@ -13,7 +13,7 @@ void waitWhite(unsigned int threshold)
 void waitSW(unsigned int no) 
 {
   while (!readSw(no))
-  	delay(10);
+  	delay(0.01);
 }
 
 void openHand(int val)
@@ -53,7 +53,7 @@ SmartyBumperPairValue initLineSensor()
      val = getBumperLineAnalog(0x30);
      sumL = sumL +  val.l;
      sumR = sumR +  val.r; 
-     delay(30); 
+     delay(0.03); 
   }
   whiteL = sumL / 100;
   whiteR = sumR / 100;
@@ -68,7 +68,7 @@ SmartyBumperPairValue initLineSensor()
      val = getBumperLineAnalog(0x30);
      sumL = sumL +  val.l;
      sumR = sumR +  val.r; 
-     delay(30); 
+     delay(0.03); 
   }
   blackL = sumL / 100;
   blackR = sumR / 100;

@@ -47,12 +47,12 @@
                           "type": "arduino_delay",
                           "id": "^(hA#tXwa}1f}R%iqQ4P",
                           "inputs": {
-                            "MS": {
+                            "초": {
                               "shadow": {
                                 "type": "math_number",
                                 "id": "z/7#m5Wa=kd@Rz}N%R|@",
                                 "fields": {
-                                  "NUM": 1000
+                                  "NUM": 1
                                 }
                               }
                             }

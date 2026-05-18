@@ -351,12 +351,12 @@
                   "type": "arduino_delay",
                   "id": "o+ebzX)bdRb%i[C7~it7",
                   "inputs": {
-                    "MS": {
+                    "초": {
                       "shadow": {
                         "type": "math_number",
                         "id": "7,kR5w{8AhAxDQj{yg|g",
                         "fields": {
-                          "NUM": 10
+                          "NUM": 0.01
                         }
                       }
                     }

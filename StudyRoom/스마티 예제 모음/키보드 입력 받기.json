@@ -59,12 +59,12 @@
                   "type": "arduino_delay",
                   "id": "g:2B-;s,JY%tZ4R(Qwcc",
                   "inputs": {
-                    "MS": {
+                    "초": {
                       "shadow": {
                         "type": "math_number",
                         "id": "pGbf~OxO8#ZHj7Qw3}qz",
                         "fields": {
-                          "NUM": 1000
+                          "NUM": 1
                         }
                       }
                     }

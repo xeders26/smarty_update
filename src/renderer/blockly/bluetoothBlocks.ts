@@ -306,13 +306,13 @@ export function initBluetoothBlocks(arduinoGenerator: any) {
   // 👑 대장(Master) 자동 설정
   arduinoGenerator.forBlock['smarty_p2p_setup_master'] = function(block: any) {
     const pin = arduinoGenerator.valueToCode(block, 'PIN', 0) || '"0000"';
-    return `setModeBt(0);\nsetMainBt();\nsetPinBt(${pin});\nsetModeBt(1);\ndelay(1000);\n`;
+    return `setModeBt(0);\nsetMainBt();\nsetPinBt(${pin});\nsetModeBt(1);\ndelay(1);\n`;
   };
 
   // 🤖 부하(Slave) 자동 설정
   arduinoGenerator.forBlock['smarty_p2p_setup_slave'] = function(block: any) {
     const pin = arduinoGenerator.valueToCode(block, 'PIN', 0) || '"0000"';
-    return `setModeBt(0);\nsetSubBt();\nsetPinBt(${pin});\nsetModeBt(1);\ndelay(1000);\n`;
+    return `setModeBt(0);\nsetSubBt();\nsetPinBt(${pin});\nsetModeBt(1);\ndelay(1);\n`;
   };
 
   // 📡 메시지 보내기 (println을 써서 뒤에 줄바꿈(\n) 기호를 붙여 전송! -> 수신 측에서 끊어 읽기 편하게 만듦)

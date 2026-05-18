@@ -1,6 +1,6 @@
 {
   "name": "Smarty",
-  "version": "2.8.6",
+  "version": "2.8.7",
   "description": "Smarty robot editor",
   "main": "./out/main/index.js",
   "author": "xeders.com",

@@ -182,7 +182,7 @@ void write8(unsigned char state)
 //Smarty 
 void initSmarty(void)
 {
-	delay(100);
+	delay(0.1);
 
 	Serial.begin(9600);
 	Serial.write("Start Xeders Smarty V20200417\n");
@@ -201,7 +201,7 @@ void initSmarty(void)
 
 void beginSmarty(void)
 {
-	delay(100);
+	delay(0.1);
 
 	Serial.begin(9600);
 	Serial.write("Start Xeders Smarty V20200417\n");
@@ -218,7 +218,7 @@ void beginSmarty(void)
 	sei();
 	turnBumperAllOff();
 	PORTK &= ~(1 << PK1);  //turn on BT
-	waitSW(1); //Wait SW1 for Start
+	waitSW(2); //Wait SW2 for Start
 }
 
 
@@ -1128,14 +1128,14 @@ void setModeBt(char mode)
 void setMainBt(void)
 {
 	char strBuf[64] = {0};
-	delay(900);
+	delay(0.9);
 	sprintf(strBuf, "AT+ROLE=M");
 	Serial1.write(strBuf);
 }
 void setSubBt(void)
 {
 	char strBuf[64] = {0};
-	delay(900);
+	delay(0.9);
 	sprintf(strBuf, "AT+ROLE=S");
 	Serial1.write(strBuf);
 }
@@ -1145,9 +1145,9 @@ void setNameBt(char* pName)
 	char strBuf[64] = {0};
 
 	// turnBt(OFF);
-	// delay(100);
+	// delay(0.1);
 	// turnBt(ON);
-	delay(900);
+	delay(0.9);
 
 	sprintf(strBuf, "AT+NAME%s", pName);
   	Serial1.write(strBuf);//데이터를 시리얼포트1로 byte로 전송한다.	
@@ -1158,9 +1158,9 @@ void setPinBt(char* pPin)
 	char strBuf[64] = {0};
 
 	// turnBt(OFF);
-	// delay(100);
+	// delay(0.1);
 	// turnBt(ON);
-	delay(900);
+	delay(0.9);
 
 	sprintf(strBuf, "AT+PIN%s", pPin);
   	Serial1.write(strBuf);	

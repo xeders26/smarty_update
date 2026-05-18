@@ -10,10 +10,10 @@ void setup() {
 void loop() {
 
   turnLed(LED1,ON);  //smarty보드의 LED1를 킵니다.
-  turnLed(LED1,ON);  //smarty보드의 LED2를 킵니다.
-  delay(1000);       //1초간 대기합니다.
+  turnLed(LED2,ON);  //smarty보드의 LED2를 킵니다.
+  delay(1.0);       //1초간 대기합니다.
   
   turnLed(LED1,OFF); //smarty보드의 LED1를 끕니다.
   turnLed(LED2,OFF); //smarty보드의 LED2를 끕니다.
-  delay(1000);       //1초간 대기합니다.
+  delay(1.0);       //1초간 대기합니다.
 }

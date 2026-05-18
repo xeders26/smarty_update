@@ -15,6 +15,6 @@ void loop()
 
   ADC = readAdc(A1); // A1에 연결된 아날로그 장치의 측정값을 알아내 ADC 변수에 저장합니다.
   Serial.println(ADC);  // ADC 측정값을 시리얼 모니터에 출력합니다.
-  delay(1000);  // 1초 동안 대기합니다.
+  delay(1.0);  // 1초 동안 대기합니다.
   
 }

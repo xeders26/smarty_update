@@ -14,6 +14,6 @@ void loop()
 
   voltage = getBattery();  // 현재 배터리 값을 알아내 voltage 변수에 저장합니다.
   Serial.println(voltage); // 배터리 상태를 시리얼 모니터에 출력합니다.
-  delay(1000);  // 1초 동안 대기합니다.
+  delay(1.0);  // 1초 동안 대기합니다.
 
 }

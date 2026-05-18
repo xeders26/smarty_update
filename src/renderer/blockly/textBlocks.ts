@@ -49,8 +49,8 @@ export function initTextBlocks(arduinoGenerator: any) {
   // =========================================================================
   arduinoGenerator.forBlock['text'] = function(b: any) { return['"' + b.getFieldValue('TEXT') + '"', 0]; };
   arduinoGenerator.forBlock['text_join'] = function(b: any) { let code = ''; for (let i = 0; i < b.itemCount_; i++) { let item = arduinoGenerator.valueToCode(b, 'ADD' + i, 0) || '""'; if (code === '') code = `String(${item})`; else code += ` + String(${item})`; } if (code === '') code = '""'; return[code, 0]; };
-  arduinoGenerator.forBlock['wait_until_text_same'] = function(b: any) { const textA = arduinoGenerator.valueToCode(b, 'TEXT_A', 0) || '""'; const textB = arduinoGenerator.valueToCode(b, 'TEXT_B', 0) || '""'; return `  while(String(${textA}) != String(${textB})) { delay(10); }\n`; };
-  arduinoGenerator.forBlock['wait_until_text_different'] = function(b: any) { const textA = arduinoGenerator.valueToCode(b, 'TEXT_A', 0) || '""'; const textB = arduinoGenerator.valueToCode(b, 'TEXT_B', 0) || '""'; return `  while(String(${textA}) == String(${textB})) { delay(10); }\n`; };
+  arduinoGenerator.forBlock['wait_until_text_same'] = function(b: any) { const textA = arduinoGenerator.valueToCode(b, 'TEXT_A', 0) || '""'; const textB = arduinoGenerator.valueToCode(b, 'TEXT_B', 0) || '""'; return `  while(String(${textA}) != String(${textB})) { delay(0.01); }\n`; };
+  arduinoGenerator.forBlock['wait_until_text_different'] = function(b: any) { const textA = arduinoGenerator.valueToCode(b, 'TEXT_A', 0) || '""'; const textB = arduinoGenerator.valueToCode(b, 'TEXT_B', 0) || '""'; return `  while(String(${textA}) == String(${textB})) { delay(0.01); }\n`; };
 
   // 🚀 [신규 추가 1 C++] 포함 여부 확인 (C++의 indexOf 활용)
   arduinoGenerator.forBlock['smarty_text_contains'] = function(b: any) { 

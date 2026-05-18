@@ -165,12 +165,12 @@
                                           "type": "arduino_delay",
                                           "id": "g%vzEA*@,Y;iR.psB[L(",
                                           "inputs": {
-                                            "MS": {
+                                            "초": {
                                               "shadow": {
                                                 "type": "math_number",
                                                 "id": "l)kc9t7,k4kzCIhiEEc~",
                                                 "fields": {
-                                                  "NUM": 1000
+                                                  "NUM": 1
                                                 }
                                               }
                                             }
@@ -239,12 +239,12 @@
                                               "type": "arduino_delay",
                                               "id": "Yq#v}UJ%*8,$MyhMqttw",
                                               "inputs": {
-                                                "MS": {
+                                                "초": {
                                                   "shadow": {
                                                     "type": "math_number",
                                                     "id": "*HEu{!LUIEZG6kAouq+/",
                                                     "fields": {
-                                                      "NUM": 1000
+                                                      "NUM": 1
                                                     }
                                                   }
                                                 }
@@ -269,12 +269,12 @@
                     "type": "arduino_delay",
                     "id": "17}zMc)-gA04W?`:jx[u",
                     "inputs": {
-                      "MS": {
+                      "초": {
                         "shadow": {
                           "type": "math_number",
                           "id": "G790v?Zf;0reEN]!)8Kv",
                           "fields": {
-                            "NUM": 10
+                            "NUM": 0.01
                           }
                         }
                       }
@@ -309,12 +309,12 @@
                   "type": "arduino_delay",
                   "id": "eAF,J-}6g+P!z9u=l2h9",
                   "inputs": {
-                    "MS": {
+                    "초": {
                       "shadow": {
                         "type": "math_number",
                         "id": "HTYG[0t4nzNMW_Vv7fN1",
                         "fields": {
-                          "NUM": 50
+                          "NUM": 0.05
                         }
                       }
                     }

@@ -6,7 +6,7 @@ void beginColorSensor(unsigned char addr, unsigned char mode)
 {	
 	beginI2C();
 	_setupColorSensorMode(addr,mode);
-	delay(10);
+	delay(0.01);
 	_setupColorSensorRate(addr,60);
 }
 
