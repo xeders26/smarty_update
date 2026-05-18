@@ -4,7 +4,7 @@
     "blocks": [
       {
         "type": "arduino_main",
-        "id": "NUM_^m/XzGUfDX+G:ys.",
+        "id": "uZncwSLRDP(|5#98/-;U",
         "x": 50,
         "y": 50,
         "deletable": false,
@@ -12,13 +12,13 @@
           "SETUP": {
             "block": {
               "type": "smarty_begin",
-              "id": "xR,%owz(M)Ev;T*VPv@?"
+              "id": "aCe#4Do8[zNvAvQ|5c=U"
             }
           },
           "LOOP": {
             "block": {
               "type": "smarty_led",
-              "id": "Z=+`A6`p0M3JD#9QLG5?",
+              "id": "xk7.0P?,0mhtwL9PjMHD",
               "fields": {
                 "ID": "LED1",
                 "ACT": "ON"
@@ -26,14 +26,14 @@
               "next": {
                 "block": {
                   "type": "arduino_delay",
-                  "id": "WqkdGI06YlqdV~H4^w^F",
+                  "id": "DLRb!`rB_Q8MX~;V0,$H",
                   "inputs": {
-                    "MS": {
+                    "초": {
                       "shadow": {
                         "type": "math_number",
-                        "id": "C:FIBepx7J}@t2d-@(1D",
+                        "id": "{Q#,,.Zk4Yzopb!ZpeAL",
                         "fields": {
-                          "NUM": 1000
+                          "NUM": 1
                         }
                       }
                     }
@@ -41,7 +41,7 @@
                   "next": {
                     "block": {
                       "type": "smarty_led",
-                      "id": "f5^d3_@zL4x8|lHE0uFV",
+                      "id": "5{Ho~o2kn#k;:1Z@;3I#",
                       "fields": {
                         "ID": "LED1",
                         "ACT": "OFF"
@@ -49,14 +49,14 @@
                       "next": {
                         "block": {
                           "type": "arduino_delay",
-                          "id": "ybak*b^nurXlb=cb*^fs",
+                          "id": "K[Ab]1jWzVyf?u5J0:3e",
                           "inputs": {
-                            "MS": {
+                            "초": {
                               "shadow": {
                                 "type": "math_number",
-                                "id": "b*,#?2-J#rD#^sOX9q*k",
+                                "id": "KTKmx$^TuoOus-Y{Iy=5",
                                 "fields": {
-                                  "NUM": 1000
+                                  "NUM": 1
                                 }
                               }
                             }
