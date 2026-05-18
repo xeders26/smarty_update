@@ -9,9 +9,9 @@
   <li style="margin-bottom: 5px;"><b>초기 설정 (setup):</b> 스마티를 시작하고, 통신을 위해 <b>블루투스 모듈을 켭니다(ON).</b></li>
   <li style="margin-bottom: 5px;"><b>글자 전송 및 저장:</b> 블루투스를 통해 <b>"PING"</b>이라는 글자를 스마트폰으로 보냅니다. 이때 전송에 성공한 데이터의 크기(바이트)를 <code style="color: #f1c40f;">sByte</code>라는 변수에 저장합니다.</li>
   <li style="margin-bottom: 5px;"><b>범퍼 LED 켜기:</b> 데이터 전송이 일어났음을 눈으로 확인하기 위해 범퍼 LED를 켭니다.</li>
-  <li style="margin-bottom: 5px;"><b>1000 밀리초(ms) 기다리기:</b> 1초 동안 대기합니다.</li>
+  <li style="margin-bottom: 5px;"><b>1 초(s) 기다리기:</b> 1초 동안 대기합니다.</li>
   <li style="margin-bottom: 5px;"><b>범퍼 LED 끄기:</b> 범퍼 LED를 다시 끕니다.</li>
-  <li><b>1000 밀리초(ms) 기다리기:</b> 1초 동안 다시 대기합니다.</li>
+  <li><b>1 초(s) 기다리기:</b> 1초 동안 다시 대기합니다.</li>
 </ol>
 
 <div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #f39c12; border-radius: 4px; margin-top: 15px;">
