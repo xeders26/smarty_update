@@ -73,12 +73,12 @@
                       "type": "arduino_delay",
                       "id": "MXh1N=n=w`)/}2SH_LGC",
                       "inputs": {
-                        "MS": {
+                        "초": {
                           "shadow": {
                             "type": "math_number",
                             "id": "EqxUfj;x?u4mA5~IXH9[",
                             "fields": {
-                              "NUM": 1000
+                              "NUM": 1
                             }
                           }
                         }
@@ -97,12 +97,12 @@
                               "type": "arduino_delay",
                               "id": "*${LD`V,}3~K]YilxF+x",
                               "inputs": {
-                                "MS": {
+                                "초": {
                                   "shadow": {
                                     "type": "math_number",
                                     "id": "[$,kuN/(sp,ww{=5bE0p",
                                     "fields": {
-                                      "NUM": 1000
+                                      "NUM": 1
                                     }
                                   }
                                 }
