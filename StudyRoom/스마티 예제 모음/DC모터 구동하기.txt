@@ -8,9 +8,9 @@ M1 모터가 1초는 앞으로, 1초는 뒤로 영원히 번갈아 가며 회전
 <ol style="line-height: 1.5; margin: 0 0 15px 25px; padding: 0;">
   <li style="margin-bottom: 5px;"><b>스마티 시작하기 (setup):</b> 전원이 켜지면 모터를 움직이기 위한 기본 준비를 마칩니다.</li>
   <li style="margin-bottom: 5px;"><b>모터 M1 정회전:</b> 1번 DC 모터(M1)의 속도를 <b>300</b>으로 설정하여 작동시킵니다. (양수(+)는 정방향 회전)</li>
-  <li style="margin-bottom: 5px;"><b>1000 밀리초(ms) 기다리기:</b> 모터가 300의 속도로 돌고 있는 상태를 1초 동안 <b>유지</b>합니다.</li>
+  <li style="margin-bottom: 5px;"><b>1 초(s) 기다리기:</b> 모터가 300의 속도로 돌고 있는 상태를 1초 동안 <b>유지</b>합니다.</li>
   <li style="margin-bottom: 5px;"><b>모터 M1 역회전:</b> 1번 DC 모터(M1)의 속도를 <b>-300</b>으로 설정합니다. (음수(-)는 반대 방향 회전)</li>
-  <li><b>1000 밀리초(ms) 기다리기:</b> 모터가 반대 방향으로 돌고 있는 상태를 다시 1초 동안 유지합니다.</li>
+  <li><b>1 초(s) 기다리기:</b> 모터가 반대 방향으로 돌고 있는 상태를 다시 1초 동안 유지합니다.</li>
 </ol>
 
 <div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #f39c12; border-radius: 4px; margin-top: 15px;">
