@@ -141,6 +141,21 @@ async function autoDeployToGit(actionText: string) {
   document.body.appendChild(progressModal);
 
   try {
+    // 🌟 [핵심 자동화] 현재 버전(예: 1.0.65)을 가져와서 맨 끝자리를 자동으로 +1 (1.0.66) 해줍니다!
+    const vParts = currentRoomVersion.split('.');
+    let lastNum = parseInt(vParts[vParts.length - 1] || '0');
+    vParts[vParts.length - 1] = (lastNum + 1).toString();
+    const newVersion = vParts.join('.');
+
+    document.getElementById('deploy-msg')!.innerText = `버전을 v${newVersion}으로 자동 업그레이드 중...`;
+
+    // 🌟 깃허브에 올리기 전에 새로운 버전 번호(newVersion)를 로컬 파일에 먼저 저장합니다!
+    if ((window as any).api && (window as any).api.updateStudyRoomInfo) {
+      await (window as any).api.updateStudyRoomInfo(visibleData, newVersion);
+      currentRoomVersion = newVersion; // UI 업데이트용 변수도 변경
+    }
+
+    // 🚀 버전이 올라간 상태로 서버에 푸시(Push)!
     if ((window as any).api && (window as any).api.pushStudyRoomToGit) {
       await (window as any).api.pushStudyRoomToGit(adminToken);
       await updateVersionDisplay(); 

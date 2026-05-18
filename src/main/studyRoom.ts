@@ -1,4 +1,8 @@
-import { app, ipcMain, dialog } from 'electron'
+/*=================================================================
+/src/main/studyRoom.ts
+
+  ================*/
+import { app, ipcMain, dialog } from 'electron'   
 import * as fs from 'fs'
 import { join, dirname, basename, relative } from 'path'
 import { exec } from 'child_process'
