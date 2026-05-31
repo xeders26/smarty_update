@@ -1,0 +1,306 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "arduino_main",
+        "id": "Oxl,nI$R-_C1{6_3RLn!",
+        "x": 50,
+        "y": 50,
+        "deletable": false,
+        "inputs": {
+          "SETUP": {
+            "block": {
+              "type": "smarty_begin",
+              "id": "gU8pNc8CFFGp+^?XXP@,",
+              "next": {
+                "block": {
+                  "type": "turnBumpLED",
+                  "id": "4v4$,I0P,g::(I5aFIyD",
+                  "fields": {
+                    "DIR": "2",
+                    "COLOR": "1",
+                    "STATE": "1"
+                  },
+                  "next": {
+                    "block": {
+                      "type": "turnBt",
+                      "id": "#b{STyH7g@J6_q(,PH8)",
+                      "fields": {
+                        "STATE": "1"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "LOOP": {
+            "block": {
+              "type": "controls_if",
+              "id": "0R)g`?,8.4(1/1d9#hml",
+              "extraState": {
+                "elseIfCount": 0,
+                "hasElse": true
+              },
+              "inputs": {
+                "IF0": {
+                  "block": {
+                    "type": "availableBt",
+                    "id": "|CSCZ9.BSKy`YCN4K2q;"
+                  }
+                },
+                "DO0": {
+                  "block": {
+                    "type": "smarty_variables_set",
+                    "id": "SQ)W/,bdnSDx]WVLKP4-",
+                    "fields": {
+                      "VAR": {
+                        "id": "h#NM{%|G`zo_(jnC9Z07"
+                      }
+                    },
+                    "inputs": {
+                      "VALUE": {
+                        "block": {
+                          "type": "smarty_bt_wait_cmd",
+                          "id": "7}v[u3iM}ju;NZnPVMc."
+                        }
+                      }
+                    },
+                    "next": {
+                      "block": {
+                        "type": "smarty_variables_set",
+                        "id": "TfrBz%GrblaP#=n9If7;",
+                        "fields": {
+                          "VAR": {
+                            "id": "`gI|c,GKu]6}2BO]PC4M"
+                          }
+                        },
+                        "inputs": {
+                          "VALUE": {
+                            "block": {
+                              "type": "smarty_bt_wait_val",
+                              "id": "LyNxKu^U5]J=w~$M}N{+"
+                            }
+                          }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "controls_if",
+                            "id": "x0!B1D])Ou(;;ZBQ61~L",
+                            "extraState": {
+                              "elseIfCount": 0,
+                              "hasElse": true
+                            },
+                            "inputs": {
+                              "IF0": {
+                                "block": {
+                                  "type": "smarty_text_equals",
+                                  "id": "43pPN77`=D#7SGAzt6gZ",
+                                  "inputs": {
+                                    "TEXT_A": {
+                                      "block": {
+                                        "type": "smarty_variables_get",
+                                        "id": "V}W:m|oQR$00/k7,dH!I",
+                                        "fields": {
+                                          "VAR": {
+                                            "id": "h#NM{%|G`zo_(jnC9Z07"
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "TEXT_B": {
+                                      "block": {
+                                        "type": "text",
+                                        "id": "53F:=={#,bHFNmxctDD}",
+                                        "fields": {
+                                          "TEXT": "F"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "DO0": {
+                                "block": {
+                                  "type": "turnBumpLED",
+                                  "id": "_99R1nYO.OKq,Mh1nH.a",
+                                  "fields": {
+                                    "DIR": "2",
+                                    "COLOR": "1",
+                                    "STATE": "0"
+                                  },
+                                  "next": {
+                                    "block": {
+                                      "type": "turnBumpLED",
+                                      "id": "joJ`~uiTw89swcV.3!3K",
+                                      "fields": {
+                                        "DIR": "2",
+                                        "COLOR": "0",
+                                        "STATE": "1"
+                                      },
+                                      "next": {
+                                        "block": {
+                                          "type": "arduino_delay",
+                                          "id": "*ZUE$n`K#|+E=wI$~2:j",
+                                          "inputs": {
+                                            "초": {
+                                              "shadow": {
+                                                "type": "math_number",
+                                                "id": "wB*}Jb)FCQj.}M|R.^F!",
+                                                "fields": {
+                                                  "NUM": 1
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "ELSE": {
+                                "block": {
+                                  "type": "smarty_variables_set",
+                                  "id": "UuH7PW=L!AGG5Y8@^b2N",
+                                  "fields": {
+                                    "VAR": {
+                                      "id": "8~-/$OKf;91QcoxVY#_."
+                                    }
+                                  },
+                                  "inputs": {
+                                    "VALUE": {
+                                      "block": {
+                                        "type": "smarty_bt_send_string",
+                                        "id": "qV:,BZwtxZ?55U4+|w=q",
+                                        "inputs": {
+                                          "TEXT": {
+                                            "shadow": {
+                                              "type": "text",
+                                              "id": "65C7WB+-]!fzY=Ha5a^L",
+                                              "fields": {
+                                                "TEXT": "???"
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "next": {
+                                    "block": {
+                                      "type": "turnBumpLED",
+                                      "id": "Tp/k4{rp@NcA2`mSaN#x",
+                                      "fields": {
+                                        "DIR": "2",
+                                        "COLOR": "3",
+                                        "STATE": "0"
+                                      },
+                                      "next": {
+                                        "block": {
+                                          "type": "smarty_bumper_red",
+                                          "id": "x/`_Rg6L3T2bfoZNRr5x",
+                                          "fields": {
+                                            "STATE": "1"
+                                          },
+                                          "next": {
+                                            "block": {
+                                              "type": "arduino_delay",
+                                              "id": "1*~sw]IV4RM5D2=ev_ER",
+                                              "inputs": {
+                                                "초": {
+                                                  "shadow": {
+                                                    "type": "math_number",
+                                                    "id": "2vEFj*dR=d+H{O~FAutS",
+                                                    "fields": {
+                                                      "NUM": 1
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "ELSE": {
+                  "block": {
+                    "type": "turnBumpLED",
+                    "id": "Ex^y3zIFb)9EO9hvO+CC",
+                    "fields": {
+                      "DIR": "2",
+                      "COLOR": "3",
+                      "STATE": "0"
+                    },
+                    "next": {
+                      "block": {
+                        "type": "arduino_delay",
+                        "id": "1s9/6(Hf0pzQ]wz,Acwp",
+                        "inputs": {
+                          "초": {
+                            "shadow": {
+                              "type": "math_number",
+                              "id": ",C]_p2OLe!a/D=tG#KT!",
+                              "fields": {
+                                "NUM": 0.1
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "next": {
+                "block": {
+                  "type": "arduino_delay",
+                  "id": "`$e4=o[$,-3{4rGo0Aoa",
+                  "inputs": {
+                    "초": {
+                      "shadow": {
+                        "type": "math_number",
+                        "id": "x%9-M$ur}$n1GqMsdTd5",
+                        "fields": {
+                          "NUM": 0.2
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "variables": [
+    {
+      "name": "command (문자)",
+      "id": "h#NM{%|G`zo_(jnC9Z07",
+      "type": "char"
+    },
+    {
+      "name": "value (정수)",
+      "id": "`gI|c,GKu]6}2BO]PC4M",
+      "type": "int"
+    },
+    {
+      "name": "byte (정수)",
+      "id": "8~-/$OKf;91QcoxVY#_.",
+      "type": "int"
+    }
+  ]
+}

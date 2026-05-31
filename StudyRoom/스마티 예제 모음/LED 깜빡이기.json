@@ -1,0 +1,76 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "arduino_main",
+        "id": "uZncwSLRDP(|5#98/-;U",
+        "x": 50,
+        "y": 50,
+        "deletable": false,
+        "inputs": {
+          "SETUP": {
+            "block": {
+              "type": "smarty_begin",
+              "id": "aCe#4Do8[zNvAvQ|5c=U"
+            }
+          },
+          "LOOP": {
+            "block": {
+              "type": "smarty_led",
+              "id": "xk7.0P?,0mhtwL9PjMHD",
+              "fields": {
+                "ID": "LED1",
+                "ACT": "ON"
+              },
+              "next": {
+                "block": {
+                  "type": "arduino_delay",
+                  "id": "DLRb!`rB_Q8MX~;V0,$H",
+                  "inputs": {
+                    "초": {
+                      "shadow": {
+                        "type": "math_number",
+                        "id": "{Q#,,.Zk4Yzopb!ZpeAL",
+                        "fields": {
+                          "NUM": 1
+                        }
+                      }
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "smarty_led",
+                      "id": "5{Ho~o2kn#k;:1Z@;3I#",
+                      "fields": {
+                        "ID": "LED1",
+                        "ACT": "OFF"
+                      },
+                      "next": {
+                        "block": {
+                          "type": "arduino_delay",
+                          "id": "K[Ab]1jWzVyf?u5J0:3e",
+                          "inputs": {
+                            "초": {
+                              "shadow": {
+                                "type": "math_number",
+                                "id": "KTKmx$^TuoOus-Y{Iy=5",
+                                "fields": {
+                                  "NUM": 1
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

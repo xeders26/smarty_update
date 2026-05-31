@@ -1,0 +1,124 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "arduino_main",
+        "id": "`eIoWO6QI@9T1zHzd4yb",
+        "x": 50,
+        "y": 50,
+        "deletable": false,
+        "inputs": {
+          "SETUP": {
+            "block": {
+              "type": "smarty_begin",
+              "id": "Mj`(k@6A[(A[zGEN_8dv",
+              "next": {
+                "block": {
+                  "type": "turnBt",
+                  "id": "KAkg|edw4OaH.;uh;@UP",
+                  "fields": {
+                    "STATE": "1"
+                  }
+                }
+              }
+            }
+          },
+          "LOOP": {
+            "block": {
+              "type": "smarty_variables_set",
+              "id": "S#n|{wU13r`LsQNc;InK",
+              "fields": {
+                "VAR": {
+                  "id": "B7?LEM,9e0WsneBFbQCv"
+                }
+              },
+              "inputs": {
+                "VALUE": {
+                  "block": {
+                    "type": "smarty_bt_send_string",
+                    "id": "0JkB8b$#0N.:dr|{io#L",
+                    "inputs": {
+                      "TEXT": {
+                        "shadow": {
+                          "type": "text",
+                          "id": "!+@}P5`0/gr*]4/5S7Cg",
+                          "fields": {
+                            "TEXT": "hello"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "next": {
+                "block": {
+                  "type": "turnBumpLED",
+                  "id": "d#D8#fU,0nIw1fp@c[dH",
+                  "fields": {
+                    "DIR": "2",
+                    "COLOR": "0",
+                    "STATE": "1"
+                  },
+                  "next": {
+                    "block": {
+                      "type": "arduino_delay",
+                      "id": "`N63Jbu:p00n!Tb-mhOK",
+                      "inputs": {
+                        "초": {
+                          "shadow": {
+                            "type": "math_number",
+                            "id": "SJb~Got9{]u;E95bTUb+",
+                            "fields": {
+                              "NUM": 1
+                            }
+                          }
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "turnBumpLED",
+                          "id": "v6C[n,HOG,8_x$E_M|Af",
+                          "fields": {
+                            "DIR": "2",
+                            "COLOR": "0",
+                            "STATE": "0"
+                          },
+                          "next": {
+                            "block": {
+                              "type": "arduino_delay",
+                              "id": "UgZU[W5c^Z63#kZ)lxTO",
+                              "inputs": {
+                                "초": {
+                                  "shadow": {
+                                    "type": "math_number",
+                                    "id": ".6I|dDg`m%fCrfFmZ..z",
+                                    "fields": {
+                                      "NUM": 1
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "variables": [
+    {
+      "name": "byte (정수)",
+      "id": "B7?LEM,9e0WsneBFbQCv",
+      "type": "int"
+    }
+  ]
+}

@@ -1,0 +1,235 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "arduino_main",
+        "id": "H1kzr[c%3{-KoyB1Iu5=",
+        "x": 50,
+        "y": 50,
+        "deletable": false,
+        "inputs": {
+          "SETUP": {
+            "block": {
+              "type": "smarty_begin",
+              "id": "B0h?DPK)PI3=;OaOn_4U",
+              "next": {
+                "block": {
+                  "type": "smarty_variables_set",
+                  "id": "uQ[%xZ3r*$S.9)D^(,.`",
+                  "fields": {
+                    "VAR": {
+                      "id": "DIvnDlYK.!(Mga^zVgac"
+                    }
+                  },
+                  "inputs": {
+                    "VALUE": {
+                      "block": {
+                        "type": "math_number",
+                        "id": "3)CqG-zqB~R7%/$2iE#D",
+                        "fields": {
+                          "NUM": 40
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "LOOP": {
+            "block": {
+              "type": "mecanumDrive",
+              "id": ")Lxx^et+EK36%)mJ?3@,",
+              "fields": {
+                "DIR": "0"
+              },
+              "inputs": {
+                "SPD": {
+                  "shadow": {
+                    "type": "math_number",
+                    "id": "qZc8QlT(f-Wf{o^4BISe",
+                    "fields": {
+                      "NUM": 30
+                    }
+                  },
+                  "block": {
+                    "type": "smarty_variables_get",
+                    "id": "zqiI;=E|[=h/[_$k.p4q",
+                    "fields": {
+                      "VAR": {
+                        "id": "DIvnDlYK.!(Mga^zVgac"
+                      }
+                    }
+                  }
+                }
+              },
+              "next": {
+                "block": {
+                  "type": "arduino_delay",
+                  "id": "}_C4#6@k}z*|/kbmcoI4",
+                  "inputs": {
+                    "초": {
+                      "shadow": {
+                        "type": "math_number",
+                        "id": "p?QJm=_:UjodUFQI2-$n",
+                        "fields": {
+                          "NUM": 2
+                        }
+                      }
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "mecanumDrive",
+                      "id": "vlvJ9ECh_Z?x$_#^c;dP",
+                      "fields": {
+                        "DIR": "2"
+                      },
+                      "inputs": {
+                        "SPD": {
+                          "shadow": {
+                            "type": "math_number",
+                            "id": "uh7w.1QMr|M8FRA9(Ma!",
+                            "fields": {
+                              "NUM": 30
+                            }
+                          },
+                          "block": {
+                            "type": "smarty_variables_get",
+                            "id": "kwWn2R(:vd`eeMq(x@F!",
+                            "fields": {
+                              "VAR": {
+                                "id": "DIvnDlYK.!(Mga^zVgac"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "next": {
+                        "block": {
+                          "type": "arduino_delay",
+                          "id": "lg^Gef)!vawAlcjwM+~`",
+                          "inputs": {
+                            "초": {
+                              "shadow": {
+                                "type": "math_number",
+                                "id": "Q4B?]T]|)k:+!qx9;Wye",
+                                "fields": {
+                                  "NUM": 2
+                                }
+                              }
+                            }
+                          },
+                          "next": {
+                            "block": {
+                              "type": "mecanumDrive",
+                              "id": "*vqj=`4=HRjfN}t!Dwlj",
+                              "fields": {
+                                "DIR": "4"
+                              },
+                              "inputs": {
+                                "SPD": {
+                                  "shadow": {
+                                    "type": "math_number",
+                                    "id": "uh7w.1QMr|M8FRA9(Ma!",
+                                    "fields": {
+                                      "NUM": 30
+                                    }
+                                  },
+                                  "block": {
+                                    "type": "smarty_variables_get",
+                                    "id": "gX?~:R-/X8%sRi7dzvfL",
+                                    "fields": {
+                                      "VAR": {
+                                        "id": "DIvnDlYK.!(Mga^zVgac"
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "next": {
+                                "block": {
+                                  "type": "arduino_delay",
+                                  "id": "^74)9T18uTh|?(=brSIl",
+                                  "inputs": {
+                                    "초": {
+                                      "shadow": {
+                                        "type": "math_number",
+                                        "id": "DumQs=lJNOmBR`4C*RFP",
+                                        "fields": {
+                                          "NUM": 2
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "next": {
+                                    "block": {
+                                      "type": "mecanumDrive",
+                                      "id": "GL{es:}{F[B_IR|bBAch",
+                                      "fields": {
+                                        "DIR": "6"
+                                      },
+                                      "inputs": {
+                                        "SPD": {
+                                          "shadow": {
+                                            "type": "math_number",
+                                            "id": "uh7w.1QMr|M8FRA9(Ma!",
+                                            "fields": {
+                                              "NUM": 30
+                                            }
+                                          },
+                                          "block": {
+                                            "type": "smarty_variables_get",
+                                            "id": "w))MuarjGrISLO4#9zp;",
+                                            "fields": {
+                                              "VAR": {
+                                                "id": "DIvnDlYK.!(Mga^zVgac"
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "next": {
+                                        "block": {
+                                          "type": "arduino_delay",
+                                          "id": "4-bTcJGoMh3:yhM[5yw|",
+                                          "inputs": {
+                                            "초": {
+                                              "shadow": {
+                                                "type": "math_number",
+                                                "id": "685FmdDWkhob!hHahkf2",
+                                                "fields": {
+                                                  "NUM": 2
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "variables": [
+    {
+      "name": "power (정수)",
+      "id": "DIvnDlYK.!(Mga^zVgac",
+      "type": "int"
+    }
+  ]
+}
