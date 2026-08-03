@@ -1,0 +1,23 @@
+<h2 style="color: #3498db; margin: 0 0 5px 0;">🎮 무선 조종 예제: 블루투스 완벽 제어 (주행, 속도, 로봇팔)</h2>
+<hr style="margin: 5px 0 15px 0; border-color: #555;">
+
+<p style="margin: 0 0 15px 0; line-height: 1.5;">스마트폰이나 PC의 앱에서 보내는 <b>블루투스 신호</b>를 해독하여 로봇을 내 마음대로 조종하는 방법을 배웁니다. 주행뿐만 아니라 실시간 속도 변경, 그리고 2개의 서보모터를 이용한 로봇 팔 제어까지 포함된 <b>종합 무선 조종 코드</b>입니다.</p>
+
+<h3 style="color: #3498db; margin: 0 0 10px 0;">🧩 블록 동작 흐름</h3>
+<ol style="line-height: 1.5; margin: 0 0 15px 25px; padding: 0;">
+  <li style="margin-bottom: 5px;"><b>초기 설정 (setup):</b> 블루투스 기능을 켜고, <code style="color: #f1c40f;">power</code> 변수를 만들어 로봇의 기본 속도를 <b>50</b>으로 맞춘 뒤 대기합니다.</li>
+  <li style="margin-bottom: 5px;"><b>데이터 수신 확인:</b> 무한 반복(loop) 안에서 블루투스로 신호가 들어왔는지 확인합니다. (신호가 없을 때는 안전을 위해 모든 LED를 끕니다.)</li>
+  <li style="margin-bottom: 5px;"><b>명령어 해독 (분류):</b> 신호가 들어오면 어떤 종류의 명령인지 문자(<code style="color: #f1c40f;">cmd</code>)로 받고, 그에 해당하는 상세 숫자(<code style="color: #f1c40f;">value</code>)를 읽어옵니다.</li>
+  <li style="margin-bottom: 5px;"><b>D, P, F 조건 분기 (동작 실행):</b>
+    <ul style="margin: 5px 0 0 0; padding-left: 20px;">
+      <li><code style="color: #e74c3c;">"D" (주행):</code> 전달받은 방향 숫자와 현재 <code style="color: #f1c40f;">power</code> 속도로 메카넘 휠을 움직입니다.</li>
+      <li><code style="color: #2ecc71;">"P" (속도):</code> 조종기의 슬라이더를 움직이면, <code style="color: #f1c40f;">power</code> 변수의 값을 전달받은 새 숫자로 바꿔치기합니다.</li>
+      <li><code style="color: #f39c12;">"F" (기능):</code> A, S, Z, X 같은 버튼 명령입니다. <b>11(누름), 10(뗌)</b> 신호로 1번 서보모터를 40도/90도로 제어하고, <b>21(누름), 20(뗌)</b> 신호로 2번 서보모터를 90도/30도로 움직여 집게나 팔을 작동시킵니다.</li>
+    </ul>
+  </li>
+</ol>
+
+<div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #f39c12; border-radius: 4px; margin-top: 15px;">
+  <b style="color: #f39c12;">💡 핵심 포인트</b>
+  <div style="margin-top: 5px; color: #e0e0e0; line-height: 1.5;">이 예제는 <b>'조건문(만약 ~라면)'의 중첩</b>을 아주 훌륭하게 보여줍니다. <br><br>먼저 <b>블루투스 연결 여부</b>를 큰 조건문으로 확인하고, 그 안에서 <b>문자(D, P, F)</b>로 명령을 3갈래로 나눈 뒤, 마지막으로 기능(F) 안에서 <b>숫자(11, 10 등)</b>로 세부 동작을 결정합니다. 복잡한 데이터를 차근차근 분석하여 기계를 통제하는 <b>'데이터 파싱(분석)'</b>의 기본 원리를 깨우칠 수 있는 최고의 예제입니다!</div>
+</div>
