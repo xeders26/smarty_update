@@ -1,0 +1,320 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "arduino_main",
+        "id": "mp1Tx82[EWa^`$EQPxV/",
+        "x": -121,
+        "y": -182,
+        "deletable": false,
+        "inputs": {
+          "SETUP": {
+            "block": {
+              "type": "smarty_begin",
+              "id": "WgV/S2fX#Bca0!Q_Qo(,",
+              "next": {
+                "block": {
+                  "type": "turnBt",
+                  "id": "T9njeb;@?7-N,7(2I.Ul",
+                  "fields": {
+                    "STATE": "1"
+                  },
+                  "next": {
+                    "block": {
+                      "type": "smarty_variables_set",
+                      "id": "WP,`1?#UvI{9=X:Q168d",
+                      "fields": {
+                        "VAR": {
+                          "id": "d^~BTZb5DMJBn3bf(/Wu"
+                        }
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "math_number",
+                            "id": "aj!^qhSFuF|3=Y7raM+/",
+                            "fields": {
+                              "NUM": 50
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "LOOP": {
+            "block": {
+              "type": "controls_if",
+              "id": "P6CSFvUVJ$bz0itzgP#1",
+              "extraState": {
+                "elseIfCount": 0,
+                "hasElse": false
+              },
+              "inputs": {
+                "IF0": {
+                  "block": {
+                    "type": "availableBt",
+                    "id": "ClXLCR4TF7iN08`s-Y=)"
+                  }
+                },
+                "DO0": {
+                  "block": {
+                    "type": "smarty_variables_set",
+                    "id": "e+DE/0cU,/b,K(RZF;N*",
+                    "fields": {
+                      "VAR": {
+                        "id": ",wXdQ$Z)B}3`|u%sT48l"
+                      }
+                    },
+                    "inputs": {
+                      "VALUE": {
+                        "block": {
+                          "type": "smarty_bt_wait_cmd",
+                          "id": "K4lzih}!rW`P,AK}NiFC"
+                        }
+                      }
+                    },
+                    "next": {
+                      "block": {
+                        "type": "smarty_variables_set",
+                        "id": "~M0Zd*9b+J([|,wU13R[",
+                        "fields": {
+                          "VAR": {
+                            "id": "3F2kuE/gl+lK+2.C{6%a"
+                          }
+                        },
+                        "inputs": {
+                          "VALUE": {
+                            "block": {
+                              "type": "smarty_bt_wait_val",
+                              "id": "YT{/_+:*a[*[~c-Q7}:g"
+                            }
+                          }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "controls_if",
+                            "id": "CuHLilzi*TZb3Jlc5Tk^",
+                            "extraState": {
+                              "elseIfCount": 1,
+                              "hasElse": false
+                            },
+                            "inputs": {
+                              "IF0": {
+                                "block": {
+                                  "type": "smarty_text_equals",
+                                  "id": "b#8d(hfWLfjTK*bi_.S#",
+                                  "inputs": {
+                                    "TEXT_A": {
+                                      "block": {
+                                        "type": "smarty_variables_get",
+                                        "id": "7tL,J=@ZC1%Bmu=EC_%.",
+                                        "fields": {
+                                          "VAR": {
+                                            "id": ",wXdQ$Z)B}3`|u%sT48l"
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "TEXT_B": {
+                                      "block": {
+                                        "type": "text",
+                                        "id": "!G.raLE%wyo9U|fs:o(V",
+                                        "fields": {
+                                          "TEXT": "D"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "DO0": {
+                                "block": {
+                                  "type": "mecanumMove",
+                                  "id": "^FD%.0ZVfq-Aa9|bR%VY",
+                                  "inputs": {
+                                    "ACT": {
+                                      "shadow": {
+                                        "type": "math_number",
+                                        "id": "?pQ[z#aMbI7M#G{X%7+Q",
+                                        "fields": {
+                                          "NUM": 0
+                                        }
+                                      },
+                                      "block": {
+                                        "type": "smarty_variables_get",
+                                        "id": "o4K%xBHmg=3j-snOSZH}",
+                                        "fields": {
+                                          "VAR": {
+                                            "id": "3F2kuE/gl+lK+2.C{6%a"
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "SPD": {
+                                      "shadow": {
+                                        "type": "math_number",
+                                        "id": "3p~f;K_nU?Caspng3o~L",
+                                        "fields": {
+                                          "NUM": 30
+                                        }
+                                      },
+                                      "block": {
+                                        "type": "smarty_variables_get",
+                                        "id": "@(vc#/nF/|T$seeuwTdY",
+                                        "fields": {
+                                          "VAR": {
+                                            "id": "d^~BTZb5DMJBn3bf(/Wu"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "IF1": {
+                                "block": {
+                                  "type": "smarty_text_equals",
+                                  "id": "XH6Oy{iP?[q5hI1i%LPD",
+                                  "inputs": {
+                                    "TEXT_A": {
+                                      "block": {
+                                        "type": "smarty_variables_get",
+                                        "id": "QT3fw^VgE)~OLksk|9Zi",
+                                        "fields": {
+                                          "VAR": {
+                                            "id": ",wXdQ$Z)B}3`|u%sT48l"
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "TEXT_B": {
+                                      "block": {
+                                        "type": "text",
+                                        "id": "~3J5YAhvoU#_LoAC7s_z",
+                                        "fields": {
+                                          "TEXT": "P"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "DO1": {
+                                "block": {
+                                  "type": "smarty_variables_set",
+                                  "id": "u53:]0/=zHvzIl4?yDv8",
+                                  "fields": {
+                                    "VAR": {
+                                      "id": "d^~BTZb5DMJBn3bf(/Wu"
+                                    }
+                                  },
+                                  "inputs": {
+                                    "VALUE": {
+                                      "block": {
+                                        "type": "smarty_variables_get",
+                                        "id": "!~1QB+K}eRwtY[]a]!fs",
+                                        "fields": {
+                                          "VAR": {
+                                            "id": "3F2kuE/gl+lK+2.C{6%a"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "next": {
+                "block": {
+                  "type": "controls_if",
+                  "id": "GN|f^AgSpr`HxKKwK+~O",
+                  "extraState": {
+                    "elseIfCount": 0,
+                    "hasElse": true
+                  },
+                  "inputs": {
+                    "IF0": {
+                      "block": {
+                        "type": "logic_compare",
+                        "id": "YQlDiO`ZTi:F|5g~yHoK",
+                        "fields": {
+                          "OP": "GT"
+                        },
+                        "inputs": {
+                          "A": {
+                            "block": {
+                              "type": "smarty_adv_sensor_read",
+                              "id": ";lc8!ohQJ!^rjqMpZBLT",
+                              "fields": {
+                                "FUNC": "getColorNumber()"
+                              }
+                            }
+                          },
+                          "B": {
+                            "block": {
+                              "type": "math_number",
+                              "id": "ZtZYgE1-4i/BY]8!k.1t",
+                              "fields": {
+                                "NUM": 0
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "next": {
+                    "block": {
+                      "type": "arduino_delay",
+                      "id": "o+ebzX)bdRb%i[C7~it7",
+                      "inputs": {
+                        "초": {
+                          "shadow": {
+                            "type": "math_number",
+                            "id": "7,kR5w{8AhAxDQj{yg|g",
+                            "fields": {
+                              "NUM": 0.001
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "variables": [
+    {
+      "name": "cmd (문자)",
+      "id": ",wXdQ$Z)B}3`|u%sT48l",
+      "type": "char"
+    },
+    {
+      "name": "value (정수)",
+      "id": "3F2kuE/gl+lK+2.C{6%a",
+      "type": "int"
+    },
+    {
+      "name": "power (정수)",
+      "id": "d^~BTZb5DMJBn3bf(/Wu",
+      "type": "int"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "arduino_main",
+        "id": ")oGvuuVL*_3|9UU4NY0X",
+        "x": -172,
+        "y": 53,
+        "deletable": false,
+        "inputs": {
+          "SETUP": {
+            "block": {
+              "type": "smarty_begin",
+              "id": "#GswZI,![lNo@(i$He@@"
+            }
+          },
+          "LOOP": {
+            "block": {
+              "type": "arduino_serial_print",
+              "id": "=d().^0~9RZn0#tqtIhu",
+              "fields": {
+                "NEWLINE": true
+              },
+              "inputs": {
+                "TEXT": {
+                  "shadow": {
+                    "type": "text",
+                    "id": "3@XBH@=1JTkyu6F9-]o.",
+                    "fields": {
+                      "TEXT": "Hello!"
+                    }
+                  },
+                  "block": {
+                    "type": "smarty_adv_sensor_read",
+                    "id": "_9r?_pVH%3M%x{{K)ce0",
+                    "fields": {
+                      "FUNC": "getColorNumber()"
+                    }
+                  }
+                }
+              },
+              "next": {
+                "block": {
+                  "type": "arduino_delay",
+                  "id": "x44uk-[xyT[oG[9:$[5t",
+                  "inputs": {
+                    "초": {
+                      "shadow": {
+                        "type": "math_number",
+                        "id": "dQ=VJuG@*|l{3Co4nj5x",
+                        "fields": {
+                          "NUM": 0.3
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
